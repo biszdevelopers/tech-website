@@ -208,6 +208,10 @@ app.get("/", async (ctx) => {
     ctx.htmlRaw(cached);
 });
 
+app.get("/favicon.ico", async (ctx) => {
+    ctx.redirect("/images/favicon.png", 301);
+});
+
 app.get("/uploads/:file", async (ctx) => {
     if (!serveUpload(ctx, ctx.params.file)) ctx.throw(404, "Not found");
 });
