@@ -206,7 +206,7 @@ export function registerAdminRoutes(app: Application): void {
                 return next;
             });
             if (file && file.data.length > 0) saveUpload(id, file.data);
-            ctx.redirect("/admin");
+            ctx.redirect("/admin", 303);
         },
         { guard: "mainAdmin" }
     );
@@ -275,7 +275,7 @@ export function registerAdminRoutes(app: Application): void {
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: `Imported ${count} rows.`, count });
             } else {
-                ctx.redirect("/admin");
+                ctx.redirect("/admin", 303);
             }
         },
         { guard: "mainAdmin" }
@@ -290,7 +290,7 @@ export function registerAdminRoutes(app: Application): void {
             if (!Number.isFinite(id) || id <= 0) throw new HttpError(400, "Missing id.");
             if (!file || file.data.length === 0) throw new HttpError(400, "Choose an image.");
             saveUpload(id, file.data);
-            ctx.redirect("/admin/edit/" + id);
+            ctx.redirect("/admin/edit/" + id, 303);
         },
         { guard: "mainAdmin" }
     );

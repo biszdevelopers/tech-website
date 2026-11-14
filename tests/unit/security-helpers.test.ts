@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { detectImage } from "../../src/lib/uploads";
 import { assertPublicTarget, buildAttackUrl, assertAllowedMethod } from "../../src/lib/targets";
 import { parseCsv, csvCell } from "../../src/lib/csv";
+import { verifyPassword } from "../../src/lib/passwords";
+import { randomBytes, scryptSync } from "node:crypto";
 
 test("uploads: accepts real PNG/JPEG/WebP signatures only", () => {
     const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
@@ -38,6 +40,15 @@ test("targets: URL template cannot change origin", () => {
     assert.equal(new URL(encoded).origin, "https://api.example.test");
     assert.equal(new URL(encoded).hash, "");
     assert.throws(() => assertAllowedMethod("NOPE", ["UDP"]));
+});
+
+test("passwords: legacy scrypt hashes verify and upgrade", async () => {
+    const salt = randomBytes(16).toString("hex");
+    const legacy = `${salt}:${scryptSync("secret-pass", salt, 64).toString("hex")}`;
+    const check = await verifyPassword("secret-pass", legacy);
+    assert.equal(check.ok, true);
+    assert.ok(check.rehashed?.startsWith("$2"));
+    assert.equal((await verifyPassword("wrong", legacy)).ok, false);
 });
 
 test("csv: quoted fields and formula neutralising", () => {

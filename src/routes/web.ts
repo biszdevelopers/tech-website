@@ -19,6 +19,7 @@ import { render } from "../core/views";
 import { randomInt } from "node:crypto";
 import { withLock } from "../lib/lock";
 import { launchAttack } from "../server/attacks";
+import { verifyPassword } from "../lib/passwords";
 import bcrypt from "bcryptjs";
 
 type Body = Record<string, unknown>;
@@ -37,28 +38,52 @@ async function currentUser(ctx: Context) {
 export function registerWebRoutes(app: Application): void {
     // ------------------------------------------------------------------ auth
     app.post("/web/api/auth/login", async (ctx) => {
+        const asHtml = !String(ctx.raw.headers.accept ?? "").includes("application/json");
         if (!rateLimit("web-login:" + ctx.ip, 10, 60_000)) {
+            if (asHtml) {
+                ctx.redirect("/web/login?error=rate", 303);
+                return;
+            }
             throw new HttpError(429, "Too many login attempts. Try again in a minute.");
         }
         const form = await ctx.body(webLoginSchema);
         if (!rateLimit("web-login-user:" + form.username.toLowerCase(), 10, 60_000)) {
+            if (asHtml) {
+                ctx.redirect("/web/login?error=rate", 303);
+                return;
+            }
             throw new HttpError(429, "Too many login attempts. Try again in a minute.");
         }
         const user = await webDb.users.findFirst({ where: { username: form.username } });
-        const valid = await bcrypt.compare(form.password, user?.password ?? DUMMY_HASH);
-        if (!user || !valid) throw new HttpError(401, "Invalid username or password.");
-        if (Number(user.status) === 1) throw new HttpError(403, "Your account has been banned.");
+        const check = await verifyPassword(form.password, user?.password ?? DUMMY_HASH);
+        if (!user || !check.ok) {
+            if (asHtml) {
+                ctx.redirect("/web/login?error=invalid", 303);
+                return;
+            }
+            throw new HttpError(401, "Invalid username or password.");
+        }
+        if (check.rehashed) {
+            await webDb.users.update({ where: { ID: user.ID }, data: { password: check.rehashed } });
+        }
+        if (Number(user.status) === 1) {
+            if (asHtml) {
+                ctx.redirect("/web/login?error=banned", 303);
+                return;
+            }
+            throw new HttpError(403, "Your account has been banned.");
+        }
         await webSessions.save(ctx, {
             userId: user.ID,
             username: user.username,
             rank: Number(user.rank),
         });
-        ctx.redirect("/web/dashboard");
+        ctx.redirect("/web/dashboard", 303);
     });
 
     app.get("/web/api/auth/logout", async (ctx) => {
         webSessions.destroy(ctx);
-        ctx.redirect("/web/login");
+        ctx.redirect("/web/login", 303);
     });
 
     app.post("/web/api/auth/register", async (ctx) => {
@@ -122,7 +147,7 @@ export function registerWebRoutes(app: Application): void {
         if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
             ctx.json({ success: "You have successfully registered! Redirecting..." });
         } else {
-            ctx.redirect("/web/dashboard");
+            ctx.redirect("/web/dashboard", 303);
         }
     });
 
@@ -299,8 +324,8 @@ export function registerWebRoutes(app: Application): void {
                 throw new HttpError(400, "New password must be at least 10 characters.");
             }
             if (newP !== repP) throw new HttpError(400, "Passwords do not match.");
-            const valid = await bcrypt.compare(oldP, user.password);
-            if (!valid) throw new HttpError(401, "Current password is incorrect.");
+            const check = await verifyPassword(oldP, user.password);
+            if (!check.ok) throw new HttpError(401, "Current password is incorrect.");
             await webDb.users.update({
                 where: { ID: user.ID },
                 data: { password: await bcrypt.hash(newP, 12) },
@@ -482,7 +507,7 @@ export function registerWebRoutes(app: Application): void {
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Ticket created successfully", id: ticket.id });
             } else {
-                ctx.redirect("/web/tickets/" + ticket.id);
+                ctx.redirect("/web/tickets/" + ticket.id, 303);
             }
         },
         { guard: "webUser" }
@@ -519,7 +544,7 @@ export function registerWebRoutes(app: Application): void {
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Reply sent successfully" });
             } else {
-                ctx.redirect("/web/tickets/" + ticket.id);
+                ctx.redirect("/web/tickets/" + ticket.id, 303);
             }
         },
         { guard: "webUser" }

@@ -79,10 +79,15 @@ export async function withErrorBoundary(
             });
         }
         if (isApi) {
-            ctx.json(
-                { error: status === 404 ? "Not found." : "Something went wrong.", ref },
-                status
-            );
+            const message =
+                status >= 500
+                    ? "Something went wrong."
+                    : err instanceof HttpError
+                      ? err.message
+                      : status === 404
+                        ? "Not found."
+                        : "Request failed.";
+            ctx.json({ error: message, ref }, status);
             return;
         }
         if (status === 404) {

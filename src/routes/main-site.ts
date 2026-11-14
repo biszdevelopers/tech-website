@@ -20,6 +20,7 @@ import { rateLimit } from "../lib/rate-limit";
 import { readMultipart } from "../lib/multipart";
 import { detectImage, saveUpload } from "../lib/uploads";
 import { withLock } from "../lib/lock";
+import { verifyPassword } from "../lib/passwords";
 import {
     createSubmission,
     createDomain,
@@ -27,39 +28,56 @@ import {
     type CreateDomainInput,
 } from "../server/queries/submissions";
 import { mainDb } from "../lib/db/main";
-import bcrypt from "bcryptjs";
 
 export function registerMainSiteRoutes(app: Application): void {
     app.get("/login", async (ctx) => {
-        ctx.htmlRaw(render("login", {}));
+        ctx.htmlRaw(render("login", { error: ctx.query.get("error") ?? "" }));
     });
 
     app.post(
         "/api/auth/login",
         async (ctx) => {
+            const asHtml = !String(ctx.raw.headers.accept ?? "").includes("application/json");
             if (!rateLimit("main-login:" + ctx.ip, 10, 60_000)) {
+                if (asHtml) {
+                    ctx.redirect("/login?error=rate", 303);
+                    return;
+                }
                 throw new HttpError(429, "Too many login attempts. Try again in a minute.");
             }
             const form = await ctx.body(loginSchema);
             if (!rateLimit("main-login-user:" + form.username.toLowerCase(), 10, 60_000)) {
+                if (asHtml) {
+                    ctx.redirect("/login?error=rate", 303);
+                    return;
+                }
                 throw new HttpError(429, "Too many login attempts. Try again in a minute.");
             }
             const user = await mainDb.login.findUnique({ where: { User: form.username } });
-            // Always run a hash comparison so unknown users take the same time.
-            const valid = await bcrypt.compare(
+            // Always run a verification so unknown users take the same time.
+            const check = await verifyPassword(
                 form.password,
                 user?.PW ?? "$2b$12$.5XkKkyMWCtIYiGjUqvHeuWjs5kNjl7nOYChlviJiHgVUgE4A.h6C"
             );
-            if (user === null || !valid) throw new HttpError(401, "Invalid username or password.");
+            if (user === null || !check.ok) {
+                if (asHtml) {
+                    ctx.redirect("/login?error=invalid", 303);
+                    return;
+                }
+                throw new HttpError(401, "Invalid username or password.");
+            }
+            if (check.rehashed) {
+                await mainDb.login.update({ where: { User: user.User }, data: { PW: check.rehashed } });
+            }
             await mainSessions.save(ctx, { islogin: true });
-            ctx.redirect("/admin");
+            ctx.redirect("/admin", 303);
         },
         { guard: undefined }
     );
 
     app.get("/api/auth/logout", async (ctx) => {
         mainSessions.destroy(ctx);
-        ctx.redirect("/");
+        ctx.redirect("/", 303);
     });
 
     app.get("/submission", async (ctx) => {
@@ -132,7 +150,7 @@ export function registerMainSiteRoutes(app: Application): void {
         if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
             ctx.json({ success: true, id: row.id, message: "Submission received." });
         } else {
-            ctx.redirect("/submission?received=1");
+            ctx.redirect("/submission?received=1", 303);
         }
     });
 }

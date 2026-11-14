@@ -144,7 +144,7 @@ export function registerWebAdminRoutes(app: Application): void {
                 await audit(ctx, "user.create", created.username);
                 if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                     ctx.json({ success: "User created." });
-                } else ctx.redirect("/web/admin/users");
+                } else ctx.redirect("/web/admin/users", 303);
                 return;
             }
 
@@ -185,7 +185,7 @@ export function registerWebAdminRoutes(app: Application): void {
                 await audit(ctx, "user.update", username);
                 if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                     ctx.json({ success: "User updated." });
-                } else ctx.redirect("/web/admin/users");
+                } else ctx.redirect("/web/admin/users", 303);
             } else if (action === "delete") {
                 if (session?.userId === id) throw new HttpError(400, "You cannot delete your own account.");
                 const target = await webDb.users.findUnique({ where: { ID: id } });
@@ -201,7 +201,7 @@ export function registerWebAdminRoutes(app: Application): void {
                 await audit(ctx, "user.delete", target.username);
                 if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                     ctx.json({ success: "User deleted." });
-                } else ctx.redirect("/web/admin/users");
+                } else ctx.redirect("/web/admin/users", 303);
             } else throw new HttpError(400, "Unknown action.");
         },
         { guard: "webAdmin", limit: [30, 60_000] }
@@ -250,7 +250,7 @@ export function registerWebAdminRoutes(app: Application): void {
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
-            } else ctx.redirect("/web/admin/plans");
+            } else ctx.redirect("/web/admin/plans", 303);
         },
         { guard: "webAdmin", limit: [30, 60_000] }
     );
@@ -297,7 +297,7 @@ export function registerWebAdminRoutes(app: Application): void {
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
-            } else ctx.redirect("/web/admin/methods");
+            } else ctx.redirect("/web/admin/methods", 303);
         },
         { guard: "webAdmin", limit: [30, 60_000] }
     );
@@ -338,7 +338,7 @@ export function registerWebAdminRoutes(app: Application): void {
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
-            } else ctx.redirect("/web/admin/news");
+            } else ctx.redirect("/web/admin/news", 303);
         },
         { guard: "webAdmin", limit: [30, 60_000] }
     );
@@ -392,7 +392,7 @@ export function registerWebAdminRoutes(app: Application): void {
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
-            } else ctx.redirect("/web/admin/servers");
+            } else ctx.redirect("/web/admin/servers", 303);
         },
         { guard: "webAdmin", limit: [30, 60_000] }
     );
@@ -453,7 +453,7 @@ export function registerWebAdminRoutes(app: Application): void {
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
-            } else ctx.redirect("/web/admin/giftcards");
+            } else ctx.redirect("/web/admin/giftcards", 303);
         },
         { guard: "webAdmin", limit: [30, 60_000] }
     );
@@ -531,10 +531,10 @@ export function registerWebAdminRoutes(app: Application): void {
                 await webDb.messages.deleteMany({ where: { ticketid: id } });
                 await webDb.tickets.delete({ where: { id } });
                 await audit(ctx, "ticket.delete", String(id));
-                ctx.redirect("/web/admin/tickets");
+                ctx.redirect("/web/admin/tickets", 303);
                 return;
             } else throw new HttpError(400, "Unknown action.");
-            ctx.redirect("/web/admin/tickets/" + id);
+            ctx.redirect("/web/admin/tickets/" + id, 303);
         },
         { guard: "webAdmin", limit: [60, 60_000] }
     );
@@ -674,7 +674,7 @@ export function registerWebAdminRoutes(app: Application): void {
             }
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Settings saved." });
-            } else ctx.redirect("/web/admin/settings");
+            } else ctx.redirect("/web/admin/settings", 303);
         },
         { guard: "webAdmin" }
     );

@@ -117,13 +117,13 @@ function initAdminPanel(): void {
     if (!nav || !nav.parentElement) return;
 
     const bar = document.createElement("div");
-    bar.style.margin = "12px 0";
+    bar.className = "admin-bulkbar";
 
     function bulkButton(label: string): HTMLButtonElement {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = label;
-        b.style.marginRight = "8px";
+        b.className = "admin-bulkbar__btn";
         b.addEventListener("click", function () {
             const ids = selectedIds();
             if (!ids) {
@@ -146,7 +146,7 @@ function initAdminPanel(): void {
     const csvLink = document.createElement("a");
     csvLink.href = "/admin/export.csv";
     csvLink.textContent = "Export CSV";
-    csvLink.style.marginLeft = "8px";
+    csvLink.className = "admin-bulkbar__link";
     bar.appendChild(csvLink);
 
     nav.parentElement.insertBefore(bar, nav.nextSibling);

@@ -26,7 +26,7 @@
             <thead>
                 <tr>
                     <th>ID</th><th>Name</th><th>Link</th><th>Display</th><th>TL1</th>
-                    <th>TL2</th><th>TL3</th><th>TL4</th><th>Status</th><th>Actions</th>
+                    <th>TL2</th><th>TL3</th><th>TL4</th><th class="AdminTable_status">Status</th><th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,7 +40,7 @@
                         <td class="AdminTable_desc__CgL_8"><%= String(sub.tl2_desc).slice(0, 90) %></td>
                         <td class="AdminTable_desc__CgL_8"><%= String(sub.tl3_desc).slice(0, 90) %></td>
                         <td class="AdminTable_desc__CgL_8"><%= String(sub.tl4_desc).slice(0, 90) %></td>
-                        <td>
+                        <td class="AdminTable_status">
                             <% if (sub.accepted) { %>
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             <% } else { %>

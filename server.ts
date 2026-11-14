@@ -285,7 +285,7 @@ app.get("/web", async (ctx) => {
     ctx.htmlRaw(body!);
 });
 app.get("/web/login", async (ctx) => {
-    ctx.htmlRaw(render("web-login", {}));
+    ctx.htmlRaw(render("web-login", { error: ctx.query.get("error") ?? "" }));
 });
 app.get("/web/register", async (ctx) => {
     ctx.htmlRaw(render("web-register", { ref: ctx.query.get("ref") ?? "" }));

@@ -568,7 +568,8 @@ footer a:hover {
     color: var(--color-ink);
 }
 .search-form input[type="text"]:focus {
-    outline: none;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
     border-color: var(--color-ink);
     box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
@@ -607,45 +608,38 @@ footer a:hover {
  * down) so they win on equal specificity via source order. We also re-state
  * the rules for `.techtip .tags .n*` and `.label span.n*` so the chips pick
  * up the right background even when nested under more specific selectors. */
+/* Chip backgrounds are chosen so every label clears WCAG AA (4.5:1) at the
+ * 12px chip size. Darker hues keep white text; the lighter cyan family uses
+ * the navy ink token instead. */
 .n1,
 .techtip .tags .n1,
 .label span.n1 {
     background: #516acb;
+    color: #fff;
 }
 .n2,
 .techtip .tags .n2,
 .label span.n2 {
-    background: #5275c4;
+    background: #4866b7;
+    color: #fff;
 }
 .n3,
 .techtip .tags .n3,
 .label span.n3 {
     background: #518bdb;
+    color: #0d1440;
 }
 .n4,
 .techtip .tags .n4,
 .label span.n4 {
     background: #4ea0d6;
+    color: #0d1440;
 }
 .n5,
 .techtip .tags .n5,
 .label span.n5 {
     background: #4ec1de;
-}
-
-/* Strand chips always use white text. This rule is written last so it beats
- * `.techtip .tags span` and `.label span` background-only rules above. */
-.techtip .tags .n1,
-.techtip .tags .n2,
-.techtip .tags .n3,
-.techtip .tags .n4,
-.techtip .tags .n5,
-.label span.n1,
-.label span.n2,
-.label span.n3,
-.label span.n4,
-.label span.n5 {
-    color: #fff;
+    color: #0d1440;
 }
 
 .techtip .tags a {
@@ -1487,14 +1481,19 @@ body {
     }
 }
 
-[data-theme="dark"] body::before,
-:root:not([data-theme="light"]) body::before {
+[data-theme="dark"] body::before {
     opacity: 0.02;
 }
-
-:root[data-theme="dark"] a,
-:root:not([data-theme="light"]) a {
+[data-theme="dark"] a {
     color: var(--color-accent-strong);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body::before {
+        opacity: 0.02;
+    }
+    :root:not([data-theme="light"]) a {
+        color: var(--color-accent-strong);
+    }
 }
 
 :root[data-theme="dark"] .techtip-wrap,
@@ -1508,15 +1507,64 @@ body {
     box-shadow: var(--shadow-1);
 }
 
+:root[data-theme="dark"] .n1 {
+    background: rgba(81, 106, 203, 0.3);
+    color: #c3ccff;
+    border: 1px solid rgba(129, 149, 255, 0.4);
+}
+:root[data-theme="dark"] .n2 {
+    background: rgba(72, 102, 183, 0.3);
+    color: #c1d0ff;
+    border: 1px solid rgba(124, 156, 255, 0.38);
+}
+:root[data-theme="dark"] .n3 {
+    background: rgba(81, 139, 219, 0.26);
+    color: #c6e2ff;
+    border: 1px solid rgba(125, 185, 255, 0.36);
+}
+:root[data-theme="dark"] .n4 {
+    background: rgba(78, 160, 214, 0.24);
+    color: #c1ebff;
+    border: 1px solid rgba(121, 205, 255, 0.34);
+}
+:root[data-theme="dark"] .n5 {
+    background: rgba(78, 193, 222, 0.22);
+    color: #bdf5ff;
+    border: 1px solid rgba(120, 225, 247, 0.34);
+}
 :root[data-theme="dark"] .n1,
 :root[data-theme="dark"] .n2,
 :root[data-theme="dark"] .n3,
 :root[data-theme="dark"] .n4,
 :root[data-theme="dark"] .n5 {
-    background: var(--color-accent-soft);
-    color: var(--color-accent-strong);
-    border: 1px solid rgba(46, 230, 166, 0.28);
     font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .n1 {
+        background: rgba(81, 106, 203, 0.3);
+        color: #c3ccff;
+        border: 1px solid rgba(129, 149, 255, 0.4);
+    }
+    :root:not([data-theme="light"]) .n2 {
+        background: rgba(72, 102, 183, 0.3);
+        color: #c1d0ff;
+        border: 1px solid rgba(124, 156, 255, 0.38);
+    }
+    :root:not([data-theme="light"]) .n3 {
+        background: rgba(81, 139, 219, 0.26);
+        color: #c6e2ff;
+        border: 1px solid rgba(125, 185, 255, 0.36);
+    }
+    :root:not([data-theme="light"]) .n4 {
+        background: rgba(78, 160, 214, 0.24);
+        color: #c1ebff;
+        border: 1px solid rgba(121, 205, 255, 0.34);
+    }
+    :root:not([data-theme="light"]) .n5 {
+        background: rgba(78, 193, 222, 0.22);
+        color: #bdf5ff;
+        border: 1px solid rgba(120, 225, 247, 0.34);
+    }
 }
 
 :root[data-theme="dark"] input,
@@ -1888,4 +1936,181 @@ footer #footer-copy a {
 }
 #adminTopbar {
     margin-top: 24px;
+}
+
+/* ==========================================================================
+   CONTRAST + FOCUS CORRECTIONS
+   Every text/background pair below is checked against WCAG AA (4.5:1 text,
+   3:1 UI). Focus rings use a darker green on light surfaces.
+   ========================================================================== */
+:root {
+    --color-focus: #067a52;
+}
+[data-theme="dark"] {
+    --color-focus: #7ef0c0;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-focus: #7ef0c0;
+    }
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* TL cards are full-card links; keep every child readable on the mint hover. */
+a.tlx,
+a.tlx:visited {
+    color: #fff;
+}
+a.tlx:hover,
+a.tlx:focus-visible,
+a.tlx:hover .tlhead,
+a.tlx:focus-visible .tlhead,
+a.tlx:hover .tlx__strands-label,
+a.tlx:focus-visible .tlx__strands-label,
+a.tlx:hover .tlx__strands li,
+a.tlx:focus-visible .tlx__strands li {
+    color: var(--color-ink-on-accent);
+}
+a.tlx:hover .tlx__strands li::before,
+a.tlx:focus-visible .tlx__strands li::before {
+    background: var(--color-ink-on-accent);
+}
+
+/* Green text on the white panel was only 2.6:1; use ink and keep green as the
+ * underline/accent instead. */
+.jump-menu a:hover,
+#adminNav a:hover {
+    color: var(--color-ink-strong);
+    text-decoration-color: var(--color-accent-strong);
+}
+
+/* Small status badges must invert in dark mode. */
+[data-theme="dark"] .AdminTable_badgeOk__o19q_ {
+    background: rgba(46, 230, 166, 0.16);
+    color: #86f3c4;
+}
+[data-theme="dark"] .AdminTable_badgePending__XpYWw {
+    background: rgba(94, 214, 255, 0.16);
+    color: #9be9ff;
+}
+
+/* Icons that used the bright mint on white. */
+.plan-yes {
+    color: #067a52;
+}
+.plan-no {
+    color: #b3261e;
+}
+
+/* Dark chips: beat `.techtip .tags .n*` / `.label span.n*` specificity. */
+[data-theme="dark"] .n1,
+[data-theme="dark"] .techtip .tags .n1,
+[data-theme="dark"] .label span.n1 {
+    background: rgba(81, 106, 203, 0.3);
+    color: #c3ccff;
+    border: 1px solid rgba(129, 149, 255, 0.4);
+}
+[data-theme="dark"] .n2,
+[data-theme="dark"] .techtip .tags .n2,
+[data-theme="dark"] .label span.n2 {
+    background: rgba(72, 102, 183, 0.3);
+    color: #c1d0ff;
+    border: 1px solid rgba(124, 156, 255, 0.38);
+}
+[data-theme="dark"] .n3,
+[data-theme="dark"] .techtip .tags .n3,
+[data-theme="dark"] .label span.n3 {
+    background: rgba(81, 139, 219, 0.26);
+    color: #c6e2ff;
+    border: 1px solid rgba(125, 185, 255, 0.36);
+}
+[data-theme="dark"] .n4,
+[data-theme="dark"] .techtip .tags .n4,
+[data-theme="dark"] .label span.n4 {
+    background: rgba(78, 160, 214, 0.24);
+    color: #c1ebff;
+    border: 1px solid rgba(121, 205, 255, 0.34);
+}
+[data-theme="dark"] .n5,
+[data-theme="dark"] .techtip .tags .n5,
+[data-theme="dark"] .label span.n5 {
+    background: rgba(78, 193, 222, 0.22);
+    color: #bdf5ff;
+    border: 1px solid rgba(120, 225, 247, 0.34);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .n1,
+    :root:not([data-theme="light"]) .techtip .tags .n1,
+    :root:not([data-theme="light"]) .label span.n1 {
+        background: rgba(81, 106, 203, 0.3);
+        color: #c3ccff;
+        border: 1px solid rgba(129, 149, 255, 0.4);
+    }
+    :root:not([data-theme="light"]) .n2,
+    :root:not([data-theme="light"]) .techtip .tags .n2,
+    :root:not([data-theme="light"]) .label span.n2 {
+        background: rgba(72, 102, 183, 0.3);
+        color: #c1d0ff;
+        border: 1px solid rgba(124, 156, 255, 0.38);
+    }
+    :root:not([data-theme="light"]) .n3,
+    :root:not([data-theme="light"]) .techtip .tags .n3,
+    :root:not([data-theme="light"]) .label span.n3 {
+        background: rgba(81, 139, 219, 0.26);
+        color: #c6e2ff;
+        border: 1px solid rgba(125, 185, 255, 0.36);
+    }
+    :root:not([data-theme="light"]) .n4,
+    :root:not([data-theme="light"]) .techtip .tags .n4,
+    :root:not([data-theme="light"]) .label span.n4 {
+        background: rgba(78, 160, 214, 0.24);
+        color: #c1ebff;
+        border: 1px solid rgba(121, 205, 255, 0.34);
+    }
+    :root:not([data-theme="light"]) .n5,
+    :root:not([data-theme="light"]) .techtip .tags .n5,
+    :root:not([data-theme="light"]) .label span.n5 {
+        background: rgba(78, 193, 222, 0.22);
+        color: #bdf5ff;
+        border: 1px solid rgba(120, 225, 247, 0.34);
+    }
+}
+
+#theme-toggle:focus-visible,
+.checkf:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+#nav li:hover {
+    background: var(--color-accent);
+    color: var(--color-ink-on-accent);
+}
+#nav li:hover a {
+    color: inherit;
+}
+
+#adminTopbar,
+#adminTopbar h1,
+#adminTopbar h1#admin-heading {
+    color: var(--color-ink-strong);
+}
+[data-theme="dark"] .AdminTable_mono__EqBH0,
+[data-theme="dark"] .AdminTable_desc__CgL_8,
+[data-theme="dark"] .admin-count {
+    color: var(--color-muted);
+}
+
+#topbutton:hover {
+    color: var(--color-ink-on-accent);
 }

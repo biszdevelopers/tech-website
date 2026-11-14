@@ -1579,7 +1579,7 @@ body a {
     background: var(--ip-accent);
     color: var(--ip-on-accent);
 }
-.theme_btn {
+.web-theme-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1591,16 +1591,16 @@ body a {
     color: var(--ip-text);
     cursor: pointer;
 }
-.theme_btn:hover,
-.theme_btn:focus-visible {
+.web-theme-toggle:hover,
+.web-theme-toggle:focus-visible {
     border-color: var(--ip-accent);
     color: var(--ip-accent-strong);
     outline: none;
 }
-.theme_btn .icon-sun { display: none; }
-.theme_btn .icon-moon { display: block; }
-[data-theme="dark"] .theme_btn .icon-sun { display: block; }
-[data-theme="dark"] .theme_btn .icon-moon { display: none; }
+.web-theme-toggle .icon-sun { display: none; }
+.web-theme-toggle .icon-moon { display: block; }
+[data-theme="dark"] .web-theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .web-theme-toggle .icon-moon { display: none; }
 
 .card {
     background: var(--ip-card);
@@ -1765,4 +1765,398 @@ body a {
     background: var(--ip-bg);
     border-color: var(--ip-border);
     color: var(--ip-text);
+}
+
+/* Light mode: dark text on the bright green buttons (white was 2.6:1). */
+[data-theme="light"] {
+    --ip-on-accent: #04121f;
+    --ip-accent: #12b979;
+    --ip-accent-strong: #067a52;
+}
+
+/* Light-theme text inside the marketing sections. */
+[data-theme="light"] .banner_area h1,
+[data-theme="light"] .banner_area h2,
+[data-theme="light"] .our_mission_area h2,
+[data-theme="light"] .our_mission_area h5,
+[data-theme="light"] .mining_invest_area h2,
+[data-theme="light"] .mining_invest_area h3,
+[data-theme="light"] .start_mining_area h3,
+[data-theme="light"] .our_roadmap_area h6,
+[data-theme="light"] .team_area h5,
+[data-theme="light"] .faq_area h5,
+[data-theme="light"] .footer_area h5,
+[data-theme="light"] .footer_area .footer_widget h5 {
+    color: var(--ip-text);
+}
+[data-theme="light"] .banner_area p,
+[data-theme="light"] .our_mission_area p,
+[data-theme="light"] .mining_invest_area p,
+[data-theme="light"] .our_roadmap_area p,
+[data-theme="light"] .team_area span,
+[data-theme="light"] .faq_area p,
+[data-theme="light"] .footer_area p {
+    color: var(--ip-muted);
+}
+[data-theme="light"] .banner_area .banner_content h1 span,
+[data-theme="light"] .our_mission_area .mission_text h5,
+[data-theme="light"] .popular_feature_area .feature_box h5,
+[data-theme="light"] .start_mining_area .mining_text h3 span {
+    color: var(--ip-accent-strong);
+}
+[data-theme="light"] .start_mining_area .mining_text {
+    background: var(--ip-card);
+    color: var(--ip-text);
+}
+[data-theme="light"] .faq_area .nav-tabs .nav-link {
+    color: var(--ip-muted);
+}
+[data-theme="light"] .faq_area .nav-tabs .nav-link.active {
+    color: var(--ip-text);
+    border-bottom-color: var(--ip-accent);
+}
+[data-theme="light"] .popular_feature_area .feature_box {
+    background: var(--ip-elevated);
+}
+
+.alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    margin-bottom: 16px;
+}
+.alert-danger {
+    background: #fdecec;
+    border-color: #f3b4b4;
+    color: #8a1c1c;
+}
+.alert-warning {
+    background: #fff6e0;
+    border-color: #f0cf8a;
+    color: #6a4a00;
+}
+[data-theme="dark"] .alert-danger {
+    background: rgba(255, 107, 107, 0.14);
+    border-color: rgba(255, 107, 107, 0.35);
+    color: #ffb4ab;
+}
+[data-theme="dark"] .alert-warning {
+    background: rgba(240, 180, 76, 0.14);
+    border-color: rgba(240, 180, 76, 0.35);
+    color: #ffd58a;
+}
+
+/* ==========================================================================
+   LOCAL GRID + UTILITIES
+   The IPstress views use Bootstrap class names, but Bootstrap itself is not
+   shipped. This is the subset the templates actually use, implemented without
+   a dependency and aligned to the 1440px page width.
+   ========================================================================== */
+.container,
+.container-lg {
+    width: min(calc(100% - 2 * var(--ip-gutter, 24px)), 1320px);
+    margin-left: auto;
+    margin-right: auto;
+}
+.container-fluid {
+    width: min(calc(100% - 2 * var(--ip-gutter, 24px)), 1440px);
+    margin-left: auto;
+    margin-right: auto;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -12px;
+    margin-right: -12px;
+}
+.row > [class*="col-"] {
+    padding-left: 12px;
+    padding-right: 12px;
+    min-width: 0;
+    width: 100%;
+}
+.col-12 { flex: 0 0 100%; max-width: 100%; }
+/* md first, lg after: an element with both classes must use the lg width. */
+.col-md-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
+.col-md-5 { flex: 0 0 41.6667%; max-width: 41.6667%; }
+.col-md-6 { flex: 0 0 50%; max-width: 50%; }
+.col-md-7 { flex: 0 0 58.3333%; max-width: 58.3333%; }
+.col-md-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+.col-lg-2 { flex: 0 0 16.6667%; max-width: 16.6667%; }
+.col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+.col-lg-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
+.col-lg-5 { flex: 0 0 41.6667%; max-width: 41.6667%; }
+.col-lg-6,
+.col-xl-6 { flex: 0 0 50%; max-width: 50%; }
+.col-lg-7 { flex: 0 0 58.3333%; max-width: 58.3333%; }
+.col-lg-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+.offset-lg-3 { margin-left: 25%; }
+.offset-lg-2 { margin-left: 16.6667%; }
+
+@media (max-width: 991px) {
+    .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8,
+    .col-xl-6, .offset-lg-2, .offset-lg-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-left: 0;
+    }
+    .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+@media (max-width: 767px) {
+    .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.align-items-center { align-items: center; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.d-flex { display: flex; }
+.d-none { display: none; }
+.d-block { display: block; }
+.position-relative { position: relative; }
+.ml-auto { margin-left: auto; }
+.mr-auto { margin-right: auto; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 14px; }
+.mt-4 { margin-top: 22px; }
+.mb-0 { margin-bottom: 0; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 14px; }
+.mb-4 { margin-bottom: 22px; }
+.mr-1 { margin-right: 6px; }
+.ml-2 { margin-left: 8px; }
+.p-3 { padding: 16px; }
+.w-100 { width: 100%; }
+.text-center { text-align: center; }
+.text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.font-weight-medium { font-weight: 500; }
+.font-weight-bold { font-weight: 700; }
+.table-responsive { overflow-x: auto; }
+.no-block { display: block; }
+
+/* Bootstrap-ish buttons used outside the dashboard. */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: 600 0.95rem/1.2 Noto Sans, sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.btn-sm { padding: 6px 10px; font-size: 0.8rem; border-radius: 7px; }
+.btn-lg { padding: 13px 24px; font-size: 1.05rem; }
+.btn-block { display: flex; width: 100%; }
+.btn-success { background: #0b8f5f; color: #fff; border-color: #0b8f5f; }
+.btn-success:hover { background: #087a51; border-color: #087a51; color: #fff; }
+.btn-danger { background: #b3261e; color: #fff; border-color: #b3261e; }
+.btn-danger:hover { background: #941d17; border-color: #941d17; color: #fff; }
+[data-theme="dark"] .btn-success { background: #2ee6a6; color: #04121f; border-color: #2ee6a6; }
+[data-theme="dark"] .btn-danger { background: #ff7b72; color: #2a0604; border-color: #ff7b72; }
+
+/* Auth screens */
+.auth-wrapper {
+    min-height: calc(100vh - 80px);
+    padding: 56px 20px;
+}
+.auth-wrapper > .row {
+    width: 100%;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.auth-wrapper .col-lg-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+.auth-wrapper .card {
+    width: 100%;
+}
+[data-theme="light"] .text-white {
+    color: var(--ip-text) !important;
+}
+[data-theme="dark"] .text-white {
+    color: #ffffff !important;
+}
+
+/* Marketing rhythm and widths (legacy template used fixed 110-300px pads). */
+.web-header__inner {
+    max-width: 1440px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+[data-theme="light"] .web-header__brand,
+[data-theme="light"] .web-header__brand:hover,
+[data-theme="light"] .web-header__name {
+    color: var(--ip-text);
+}
+.banner_area {
+    padding: clamp(80px, 9vw, 140px) 0 clamp(56px, 7vw, 96px);
+}
+.banner_area .banner_content h1 {
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    line-height: 1.08;
+    margin-bottom: 22px;
+}
+.banner_area .banner_content p {
+    font-size: clamp(1rem, 1.25vw, 1.2rem);
+    line-height: 1.6;
+    margin-bottom: 26px;
+}
+.banner_area .right-ilustrat {
+    margin-left: 0;
+    text-align: center;
+}
+.banner_area .right-ilustrat img {
+    max-width: 100%;
+    height: auto;
+}
+.banner_area .btn_list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.our_mission_area,
+.mining_invest_area,
+.start_mining_area,
+.faq_area,
+.what_say_area,
+.footer_area {
+    padding-top: clamp(56px, 7vw, 96px);
+    padding-bottom: clamp(56px, 7vw, 96px);
+}
+.title {
+    padding-bottom: clamp(28px, 4vw, 52px);
+}
+.title h2 {
+    font-size: clamp(1.7rem, 2.7vw, 2.4rem);
+    line-height: 1.2;
+}
+.footer_area {
+    padding-bottom: 0;
+}
+.footer_area .copy_right {
+    margin-top: 48px;
+}
+
+/* IPstress pages do not load globals.css, so give them a minimal reset. */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+html {
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+}
+img,
+svg {
+    max-width: 100%;
+}
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+[data-theme="light"] .theme_btn {
+    background: var(--ip-accent);
+    color: var(--ip-on-accent);
+    border-color: var(--ip-accent);
+}
+[data-theme="light"] .theme_btn:hover,
+[data-theme="light"] .theme_btn:focus {
+    background: transparent;
+    color: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+}
+[data-theme="light"] .theme_btn.b-btn {
+    background: transparent;
+    color: var(--ip-text);
+    border-color: var(--ip-accent-strong);
+}
+[data-theme="light"] .theme_btn.b-btn:hover,
+[data-theme="light"] .theme_btn.b-btn:focus {
+    background: var(--ip-elevated);
+    color: var(--ip-text);
+    border-color: var(--ip-accent-strong);
+}
+
+[data-theme="light"] .web-theme-toggle {
+    background: #ffffff;
+    border-color: #cfd7e5;
+    color: #101a3a;
+}
+[data-theme="light"] .web-theme-toggle:hover,
+[data-theme="light"] .web-theme-toggle:focus-visible {
+    border-color: var(--ip-accent-strong);
+    color: var(--ip-accent-strong);
+}
+
+/* Form primitives used by the IPstress auth and admin-facing pages. */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ip-text);
+}
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    line-height: 1.4;
+}
+.card-body {
+    padding: clamp(20px, 2.4vw, 30px);
+}
+.card-title {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ip-text);
+}
+
+.card-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+.card-group > .card {
+    flex: 1 1 240px;
+}
+
+/* Bright-green hover text is unreadable on white; use the dark brand green. */
+[data-theme="light"] .web-header__nav a:hover,
+[data-theme="light"] .web-header__brand:hover,
+[data-theme="light"] .footer_area a:hover,
+[data-theme="light"] .web-header__btn--ghost:hover {
+    color: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+}
+[data-theme="light"] .web-header__btn--ghost:hover {
+    background: transparent;
+}
+.scroll-top {
+    color: var(--ip-on-accent);
 }

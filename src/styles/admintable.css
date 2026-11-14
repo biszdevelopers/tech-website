@@ -202,3 +202,142 @@
     border-radius: 8px;
     border: 1px solid var(--color-border);
 }
+
+/* Keep long URLs from blowing the admin table off-screen. */
+.AdminTable_table__3iS2Y {
+    table-layout: fixed;
+}
+.AdminTable_link__lOs5j,
+.AdminTable_desc__CgL_8,
+.AdminTable_name__ZKSIb {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.AdminTable_actions__k8lIU {
+    flex-wrap: wrap;
+}
+.AdminTable_table__3iS2Y th,
+.AdminTable_table__3iS2Y td {
+    padding: 10px;
+}
+
+.admin-bulkbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: min(calc(100% - 2 * var(--page-pad)), var(--page-max));
+    margin: 12px auto;
+}
+.admin-bulkbar__btn {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-panel);
+    color: var(--color-ink-strong);
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-bulkbar__btn:hover {
+    border-color: var(--color-focus);
+    color: var(--color-focus);
+}
+.admin-bulkbar__link {
+    color: var(--color-ink);
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.admin-filters input::placeholder {
+    color: #6b7a99;
+}
+[data-theme="dark"] .admin-filters input::placeholder {
+    color: #9aa8d0;
+}
+.admin-filters button {
+    padding: 7px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: var(--color-deep);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-filters button:hover {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+}
+
+/* Column rhythm for the submissions table. */
+.AdminTable_mono__EqBH0 {
+    width: 4%;
+}
+.AdminTable_name__ZKSIb {
+    width: 12%;
+}
+.AdminTable_link__lOs5j {
+    width: 19%;
+    word-break: break-all;
+}
+.AdminTable_desc__CgL_8 {
+    width: 12%;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.AdminTable_actions__k8lIU {
+    width: 13%;
+}
+.AdminTable_status {
+    width: 8%;
+}
+.admin-filters input,
+.admin-filters select,
+.admin-filters button,
+.admin-count {
+    font-size: 0.95rem;
+}
+.admin-filters input[type="search"] {
+    min-width: 260px;
+}
+
+/* Action buttons: white on #ff6b6b was only 2.9:1. */
+.AdminTable_btnDelete__KFKXJ {
+    background: #b3261e;
+    color: #fff;
+}
+.AdminTable_btnDelete__KFKXJ:hover {
+    background: #941d17;
+}
+[data-theme="dark"] .AdminTable_btnDelete__KFKXJ {
+    background: #ff7b72;
+    color: #2a0604;
+}
+[data-theme="dark"] .AdminTable_btnDelete__KFKXJ:hover {
+    background: #ff9a93;
+}
+
+/* Clamp descriptions without changing the table-cell display. */
+.AdminTable_desc__CgL_8 {
+    display: table-cell;
+    width: 11%;
+    max-height: 4.2em;
+    overflow: hidden;
+    line-height: 1.45;
+}
+.AdminTable_link__lOs5j {
+    width: 17%;
+}
+.AdminTable_name__ZKSIb {
+    width: 11%;
+}
+.AdminTable_actions__k8lIU {
+    width: 12%;
+}
+.AdminTable_status {
+    width: 8%;
+}
+.AdminTable_mono__EqBH0 {
+    width: 4%;
+}

@@ -520,3 +520,136 @@ button.dropdown-toggle {
     cursor: pointer;
     font: inherit;
 }
+
+/* ==========================================================================
+   LIGHT THEME FOR THE DASHBOARD CHROME
+   The back office was authored dark-only; these overrides keep the same
+   structure and mint accent with readable navy text on light surfaces.
+   ========================================================================== */
+[data-theme="light"] body {
+    background: #f4f7fc;
+    color: #101a3a;
+}
+[data-theme="light"] .topbar {
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom-color: #d8dde7;
+}
+[data-theme="light"] .navbar-brand,
+[data-theme="light"] .navbar-brand b,
+[data-theme="light"] .nav-link,
+[data-theme="light"] .page-title,
+[data-theme="light"] .text-white {
+    color: #101a3a !important;
+}
+[data-theme="light"] .text-muted,
+[data-theme="light"] .breadcrumb-item.text-muted {
+    color: #4f6187 !important;
+}
+[data-theme="light"] .left-sidebar {
+    background: #ffffff;
+    border-right: 1px solid #d8dde7;
+}
+[data-theme="light"] .sidebar-link {
+    color: #33415c;
+}
+[data-theme="light"] .sidebar-link:hover,
+[data-theme="light"] .sidebar-item.active .sidebar-link {
+    background: #e6fbf2;
+    color: #067a52;
+}
+[data-theme="light"] .nav-small-cap {
+    color: #5a6d92;
+}
+[data-theme="light"] .page-breadcrumb {
+    background: transparent;
+}
+[data-theme="light"] .card {
+    background: #ffffff;
+    border-color: #d8dde7;
+    color: #101a3a;
+}
+[data-theme="light"] .card-title,
+[data-theme="light"] .card h4,
+[data-theme="light"] .card h5,
+[data-theme="light"] .card h6 {
+    color: #101a3a;
+}
+[data-theme="light"] .table {
+    color: #101a3a;
+}
+[data-theme="light"] .table th,
+[data-theme="light"] .table td {
+    border-color: #e3e8f1;
+}
+[data-theme="light"] .table thead th {
+    color: #101a3a;
+}
+[data-theme="light"] .form-control {
+    background: #ffffff;
+    border-color: #cfd7e5;
+    color: #101a3a;
+}
+[data-theme="light"] .form-control::placeholder {
+    color: #5a6d92;
+}
+[data-theme="light"] .dropdown-menu {
+    background: #ffffff;
+    border-color: #d8dde7;
+}
+[data-theme="light"] .dropdown-item {
+    color: #101a3a;
+}
+[data-theme="light"] .dropdown-item:hover {
+    background: #eef4ff;
+    color: #101a3a;
+}
+[data-theme="light"] .nav-toggler {
+    color: #101a3a;
+}
+[data-theme="light"] .badge-info {
+    background: #e6fbf2;
+    color: #067a52;
+    border-color: #9fe3c6;
+}
+[data-theme="light"] .btn-secondary {
+    background: #eef2fa;
+    border-color: #cfd7e5;
+    color: #101a3a;
+}
+
+[data-theme="light"] .page-wrapper a:not(.btn):not(.dropdown-item):not(.sidebar-link) {
+    color: #067a52;
+}
+
+/* The dashboard uses the gap-based grid in this file, not the negative-margin
+   grid from webtheme. */
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+.row > [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+.container-fluid {
+    width: 100%;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.page-wrapper {
+    max-width: none;
+    width: calc(100% - 250px);
+    padding: 22px 32px 48px;
+}
+.page-wrapper .container-fluid {
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.topbar .navbar {
+    max-width: 1440px;
+}
+.nav-item .web-theme-toggle {
+    margin-right: 12px;
+}

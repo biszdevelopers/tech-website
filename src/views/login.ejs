@@ -6,6 +6,11 @@
         <h1 id="login-heading">Login</h1>
         <div id="login">
             <h2 id="login-info"> You have reached an admin-only access site.<br/>If you&#39;re an admin, log in with your credentials. </h2>
+            <% if (locals.error === 'invalid') { %>
+            <p id="login-error" role="alert">Invalid username or password.</p>
+            <% } else if (locals.error === 'rate') { %>
+            <p id="login-error" role="alert">Too many attempts. Wait a minute and try again.</p>
+            <% } %>
             <form id="login-form" method="post" action="/api/auth/login">
                 <p><input type="text" placeholder="Username" required name="username"/></p>
                 <p><input type="password" placeholder="Password" required name="password"/></p>

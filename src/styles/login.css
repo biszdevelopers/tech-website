@@ -81,7 +81,8 @@ body {
 }
 
 #login-form input:focus {
-    outline: none;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
     border-color: var(--color-ink);
     box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
@@ -153,4 +154,14 @@ body {
 [data-theme="dark"] #login-form button[type="submit"] {
     background: var(--color-accent-strong);
     color: var(--color-ink-on-accent);
+}
+
+[data-theme="dark"] #login-error {
+    background: rgba(255, 107, 107, 0.14);
+    border-color: rgba(255, 107, 107, 0.35);
+    color: #ffb4ab;
+}
+[data-theme="dark"] #login h2,
+[data-theme="dark"] #login-heading {
+    color: var(--color-ink);
 }
