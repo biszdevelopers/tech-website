@@ -26,8 +26,8 @@
  * (video scrubbing)? That belongs in a TODO(roadmap), not in v1 - no media here.
  */
 
-import { createReadStream, existsSync, statSync } from "node:fs";
-import { extname, resolve, sep } from "node:path";
+import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
+import { extname, join, resolve, sep } from "node:path";
 import type { Context } from "./03-context";
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -50,9 +50,37 @@ const CONTENT_TYPES: Record<string, string> = {
     ".html": "text/html; charset=utf-8",
 };
 
-/** stat() memoization - cleared wholesale if it ever exceeds the cap. */
-const statCache = new Map<string, { size: number; mtimeMs: number } | null>();
-const STAT_CACHE_CAP = 1024;
+interface AssetInfo {
+    size: number;
+    mtimeMs: number;
+    brSize: number;
+    gzSize: number;
+}
+
+/** Built once at boot; request-time lookups are plain hash hits. */
+const manifest = new Map<string, AssetInfo>();
+
+function buildManifest(root: string): void {
+    const walk = (dir: string): void => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            const full = join(dir, entry.name);
+            if (entry.isDirectory()) {
+                walk(full);
+                continue;
+            }
+            if (entry.name.endsWith(".br") || entry.name.endsWith(".gz")) continue;
+            const stat = statSync(full);
+            const rel = "/" + full.slice(root.length + 1).split(sep).join("/");
+            manifest.set(rel, {
+                size: stat.size,
+                mtimeMs: stat.mtimeMs,
+                brSize: existsSync(`${full}.br`) ? statSync(`${full}.br`).size : 0,
+                gzSize: existsSync(`${full}.gz`) ? statSync(`${full}.gz`).size : 0,
+            });
+        }
+    };
+    walk(root);
+}
 
 export class StaticFiles {
     /** Absolute root every request path must resolve inside (traversal guard). */
@@ -68,6 +96,7 @@ export class StaticFiles {
             throw new Error(`Static assets not found at ${root}. Run "npm run build" first.`);
         }
         this.rootAbs = root;
+        buildManifest(root);
     }
 
     /**
@@ -76,25 +105,44 @@ export class StaticFiles {
      */
     serve(ctx: Context): boolean {
         if (ctx.method !== "GET" && ctx.method !== "HEAD") return false;
-        const urlPath = decodeURIComponent(ctx.path);
+        let urlPath: string;
+        try {
+            urlPath = decodeURIComponent(ctx.path);
+        } catch {
+            return false; // malformed escape -> router 404s, never a 500
+        }
         // ---- TRAVERSAL GUARD -------------------------------------------------
-        // Resolve collapses "../" BEFORE we compare against the root, so an
-        // encoded backslash or dot-dot can never escape the public folder.
         const absolute = resolve(this.rootAbs, `.${urlPath}`);
         if (!absolute.startsWith(this.rootAbs + sep)) return false;
         // ----------------------------------------------------------------------
 
-        const stat = statOf(absolute);
-        if (!stat) return false;
+        let info = manifest.get(urlPath);
+        if (!info && process.env.NODE_ENV !== "production") {
+            // Dev watchers can add files after boot; fall back to one stat.
+            try {
+                if (existsSync(absolute) && statSync(absolute).isFile()) {
+                    const stat = statSync(absolute);
+                    info = { size: stat.size, mtimeMs: stat.mtimeMs, brSize: 0, gzSize: 0 };
+                }
+            } catch {
+                info = undefined;
+            }
+        }
+        if (!info) return false;
 
-        const etag = `"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`;
+        const etag = `"${info.size.toString(16)}-${Math.floor(info.mtimeMs).toString(16)}"`;
         ctx.res.setHeader("ETag", etag);
-        // CSS/JS URLs are NOT content-hashed (stable names like globals.css),
-        // so they must revalidate on every load - otherwise a deploy's style
-        // fixes stay invisible for as long as browsers honour max-age.
-        // "no-cache" = store + conditional revalidation (304 when unchanged).
-        const revalidate = urlPath.startsWith("/js/") || urlPath.startsWith("/css/");
-        ctx.res.setHeader("Cache-Control", revalidate ? "no-cache" : "public, max-age=3600");
+        const versioned = Boolean(ctx.url.searchParams.get("v"));
+        if (urlPath.startsWith("/js/") || urlPath.startsWith("/css/")) {
+            ctx.res.setHeader(
+                "Cache-Control",
+                versioned ? "public, max-age=31536000, immutable" : "no-cache"
+            );
+        } else if (urlPath.startsWith("/fonts/")) {
+            ctx.res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else {
+            ctx.res.setHeader("Cache-Control", "public, max-age=604800");
+        }
 
         if (ctx.raw.headers["if-none-match"] === etag) {
             ctx.res.statusCode = 304;
@@ -103,24 +151,28 @@ export class StaticFiles {
         }
 
         const contentType = CONTENT_TYPES[extname(absolute).toLowerCase()];
-        if (!contentType) return false; // unknown extension: let 404 handle it
+        if (!contentType) return false;
         ctx.res.setHeader("Content-Type", contentType);
 
         const accept = String(ctx.raw.headers["accept-encoding"] ?? "");
-        const compressed = pickPrecompressed(absolute, accept);
-        if (compressed) {
-            ctx.res.setHeader("Content-Encoding", compressed.encoding);
+        if (accept.includes("br") && info.brSize > 0) {
+            ctx.res.setHeader("Content-Encoding", "br");
             ctx.res.setHeader("Vary", "Accept-Encoding");
-            ctx.res.setHeader("Content-Length", compressed.size);
-            if (ctx.method === "HEAD") {
-                ctx.res.end();
-                return true;
-            }
-            createReadStream(compressed.path).pipe(ctx.res);
+            ctx.res.setHeader("Content-Length", info.brSize);
+            if (ctx.method === "HEAD") return (ctx.res.end(), true);
+            createReadStream(`${absolute}.br`).pipe(ctx.res);
+            return true;
+        }
+        if (accept.includes("gzip") && info.gzSize > 0) {
+            ctx.res.setHeader("Content-Encoding", "gzip");
+            ctx.res.setHeader("Vary", "Accept-Encoding");
+            ctx.res.setHeader("Content-Length", info.gzSize);
+            if (ctx.method === "HEAD") return (ctx.res.end(), true);
+            createReadStream(`${absolute}.gz`).pipe(ctx.res);
             return true;
         }
 
-        ctx.res.setHeader("Content-Length", stat.size);
+        ctx.res.setHeader("Content-Length", info.size);
         if (ctx.method === "HEAD") {
             ctx.res.end();
             return true;
@@ -128,42 +180,6 @@ export class StaticFiles {
         createReadStream(absolute).pipe(ctx.res);
         return true;
     }
-}
-
-function statOf(path: string): { size: number; mtimeMs: number } | null {
-    if (statCache.has(path)) return statCache.get(path)!;
-    let result: { size: number; mtimeMs: number } | null = null;
-    try {
-        if (existsSync(path) && statSync(path).isFile()) {
-            const s = statSync(path);
-            result = { size: s.size, mtimeMs: s.mtimeMs };
-        }
-    } catch {
-        result = null; // raced delete / permission error -> treat as missing
-    }
-    if (statCache.size >= STAT_CACHE_CAP) statCache.clear();
-    statCache.set(path, result);
-    return result;
-}
-
-/**
- * Prefer Brotli (smaller), fall back to gzip, only when a pre-built sibling
- * exists AND the client advertised support. Files stay uncompressed on disk
- * for humans reading the repo; compression artifacts are build outputs.
- */
-function pickPrecompressed(
-    absolute: string,
-    accept: string
-): { path: string; size: number; encoding: string } | null {
-    const wantsBr = accept.includes("br");
-    const wantsGzip = accept.includes("gzip");
-    if (wantsBr && existsSync(`${absolute}.br`)) {
-        return { path: `${absolute}.br`, size: statSync(`${absolute}.br`).size, encoding: "br" };
-    }
-    if (wantsGzip && existsSync(`${absolute}.gz`)) {
-        return { path: `${absolute}.gz`, size: statSync(`${absolute}.gz`).size, encoding: "gzip" };
-    }
-    return null;
 }
 
 // Exported for unit tests that assert traversal attempts are refused.

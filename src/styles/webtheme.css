@@ -1480,3 +1480,289 @@ body button:hover {
         margin: 0 auto;
     }
 }
+
+/* ---- components that used inline styles -------------------------------- */
+.maintenance-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #0a0e27;
+    color: #fff;
+    text-align: center;
+}
+.maintenance-heading {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.maintenance-copy {
+    font-size: 1.2rem;
+    max-width: 600px;
+}
+.maintenance-link {
+    color: #0cf293;
+    margin-top: 2rem;
+    display: inline-block;
+}
+.plan-yes {
+    color: #22ca80;
+    font-weight: bold;
+}
+.plan-no {
+    color: #da4453;
+    font-weight: bold;
+}
+.wheel-host {
+    margin: 0 auto;
+    max-width: 400px;
+}
+
+/* ==========================================================================
+   V4 IPSTRESS THEME LAYER
+   The marketing template was hardcoded dark. These tokens keep the existing
+   dark identity and add a light counterpart used by the same theme cookie.
+   ========================================================================== */
+:root {
+    --ip-bg: #0a0e27;
+    --ip-surface: #101230;
+    --ip-card: #101230;
+    --ip-elevated: #151a3d;
+    --ip-text: #e5f4ff;
+    --ip-muted: #9aa8d0;
+    --ip-border: rgba(229, 244, 255, 0.12);
+    --ip-accent: #17d984;
+    --ip-accent-strong: #0cf293;
+    --ip-on-accent: #04121f;
+    color-scheme: dark;
+}
+
+[data-theme="light"] {
+    --ip-bg: #f6f8fc;
+    --ip-surface: #ffffff;
+    --ip-card: #ffffff;
+    --ip-elevated: #eef2fa;
+    --ip-text: #101a3a;
+    --ip-muted: #5a6d92;
+    --ip-border: #d8dde7;
+    --ip-accent: #0bb87a;
+    --ip-accent-strong: #0a7d57;
+    --ip-on-accent: #ffffff;
+    color-scheme: light;
+}
+
+body {
+    background: var(--ip-bg);
+    color: var(--ip-text);
+}
+body h1, body h2, body h3, body h4, body h5, body h6 {
+    color: var(--ip-text);
+}
+body p,
+body .text-muted {
+    color: var(--ip-muted);
+}
+body a {
+    color: var(--ip-accent-strong);
+}
+.web-header {
+    background: var(--ip-surface);
+    border-bottom: 1px solid var(--ip-border);
+}
+.web-header__nav a {
+    color: var(--ip-text);
+}
+.web-header__btn--ghost {
+    border-color: var(--ip-border);
+    color: var(--ip-text);
+}
+.web-header__btn--solid {
+    background: var(--ip-accent);
+    color: var(--ip-on-accent);
+}
+.theme_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--ip-border);
+    border-radius: 10px;
+    background: var(--ip-elevated);
+    color: var(--ip-text);
+    cursor: pointer;
+}
+.theme_btn:hover,
+.theme_btn:focus-visible {
+    border-color: var(--ip-accent);
+    color: var(--ip-accent-strong);
+    outline: none;
+}
+.theme_btn .icon-sun { display: none; }
+.theme_btn .icon-moon { display: block; }
+[data-theme="dark"] .theme_btn .icon-sun { display: block; }
+[data-theme="dark"] .theme_btn .icon-moon { display: none; }
+
+.card {
+    background: var(--ip-card);
+    border: 1px solid var(--ip-border);
+    color: var(--ip-text);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+.card .card-title,
+.card h4,
+.card h5 {
+    color: var(--ip-text);
+}
+.table {
+    color: var(--ip-text);
+}
+.table th,
+.table td {
+    border-color: var(--ip-border);
+}
+.table thead th {
+    color: var(--ip-text);
+    font-weight: 600;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background: color-mix(in srgb, var(--ip-elevated) 55%, transparent);
+}
+.table tbody tr:hover {
+    background: color-mix(in srgb, var(--ip-accent) 8%, transparent);
+}
+.form-control {
+    background: var(--ip-bg);
+    border: 1px solid var(--ip-border);
+    color: var(--ip-text);
+    border-radius: 10px;
+}
+.form-control:focus {
+    background: var(--ip-bg);
+    color: var(--ip-text);
+    border-color: var(--ip-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ip-accent) 22%, transparent);
+}
+.form-control::placeholder {
+    color: var(--ip-muted);
+}
+.btn-primary {
+    background: var(--ip-accent);
+    border-color: var(--ip-accent);
+    color: var(--ip-on-accent);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+    background: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+    color: var(--ip-on-accent);
+}
+.btn-secondary {
+    background: var(--ip-elevated);
+    border-color: var(--ip-border);
+    color: var(--ip-text);
+}
+.badge-info {
+    background: color-mix(in srgb, var(--ip-accent) 18%, transparent);
+    color: var(--ip-accent-strong);
+    border: 1px solid color-mix(in srgb, var(--ip-accent) 30%, transparent);
+}
+.page-breadcrumb {
+    background: transparent;
+    border-bottom: 1px solid var(--ip-border);
+}
+.page-title,
+.breadcrumb-item,
+.breadcrumb-item a {
+    color: var(--ip-text) !important;
+}
+.ticket-thread {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+.ticket-message {
+    padding: 12px 14px;
+    border: 1px solid var(--ip-border);
+    border-radius: 12px;
+    background: var(--ip-elevated);
+}
+.ticket-message--staff {
+    border-color: color-mix(in srgb, var(--ip-accent) 35%, var(--ip-border));
+    background: color-mix(in srgb, var(--ip-accent) 8%, var(--ip-elevated));
+}
+.ticket-message__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--ip-muted);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
+/* Light theme: keep the hero artwork, lift the chrome and content surfaces. */
+[data-theme="light"] .banner_area,
+[data-theme="light"] .our_mission_area,
+[data-theme="light"] .mining_invest_area,
+[data-theme="light"] .start_mining_area,
+[data-theme="light"] .make_bitcoin,
+[data-theme="light"] .easily_acces,
+[data-theme="light"] .popular_feature_area,
+[data-theme="light"] .our_roadmap_area,
+[data-theme="light"] .team_area,
+[data-theme="light"] .faq_area,
+[data-theme="light"] .brand_area,
+[data-theme="light"] .footer_area,
+[data-theme="light"] .footer_area .copy_right {
+    background: var(--ip-surface);
+}
+[data-theme="light"] .banner_area .banner_content h1,
+[data-theme="light"] .title h2,
+[data-theme="light"] .our_mission_area .title h2,
+[data-theme="light"] .mining_invest_area .title h2,
+[data-theme="light"] .start_mining_area h3,
+[data-theme="light"] .our_roadmap_area h6,
+[data-theme="light"] .team_area h5,
+[data-theme="light"] .faq_area h5,
+[data-theme="light"] .footer_area h5,
+[data-theme="light"] .footer_area .footer_widget h5 {
+    color: var(--ip-text);
+}
+[data-theme="light"] .banner_area .banner_content p,
+[data-theme="light"] .title p,
+[data-theme="light"] .our_roadmap_area p,
+[data-theme="light"] .faq_area p,
+[data-theme="light"] .footer_area p,
+[data-theme="light"] .footer_area .footer_widget p {
+    color: var(--ip-muted);
+}
+[data-theme="light"] .what_say_area {
+    background: var(--ip-elevated);
+}
+[data-theme="light"] .what_say_area .client_text {
+    background: var(--ip-card);
+}
+[data-theme="light"] .what_say_area .client_text p,
+[data-theme="light"] .what_say_area .client_img h6,
+[data-theme="light"] .what_say_area .client_img a {
+    color: var(--ip-text);
+}
+[data-theme="light"] .footer_area .footer_widget .cta_list li a,
+[data-theme="light"] .footer_area .fot_list li a,
+[data-theme="light"] .footer_area .copy_right a {
+    color: var(--ip-text);
+}
+[data-theme="light"] .footer_area .footer_widget .input_area .form-control {
+    background: var(--ip-bg);
+    border-color: var(--ip-border);
+    color: var(--ip-text);
+}

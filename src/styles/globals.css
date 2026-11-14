@@ -1362,3 +1362,213 @@ footer a:hover {
 [data-theme="dark"] #theme-toggle .icon-moon {
     display: none;
 }
+
+/* ---- inline-style migration + anchor offsets ---------------------------- */
+.section-anchor,
+.tl-section,
+.tlx,
+.tl-submit-cta {
+    scroll-margin-top: var(--nav-offset);
+}
+.hero-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    color: transparent;
+    z-index: 0;
+}
+.hero-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(13, 15, 45, 0.35), rgba(13, 15, 45, 0.55));
+    z-index: 1;
+}
+
+/* ==========================================================================
+   V4 THEME SYSTEM - one token vocabulary for light, dark and OS preference.
+   Component rules at the end deliberately use tokens only, so both themes
+   get the same hierarchy and contrast.
+   ========================================================================== */
+:root {
+    --color-elevated: #ffffff;
+    --color-hairline: rgba(13, 15, 45, 0.08);
+    --color-focus: #0bb87a;
+    --color-success: #0b8f5f;
+    --color-warning: #a86600;
+    --color-danger: #b3261e;
+    --radius-xl: 20px;
+    --shadow-3: 0 18px 50px rgba(13, 15, 45, 0.16);
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-bg: #080c1b;
+        --color-surface: #0f1630;
+        --color-surface-2: #141d3b;
+        --color-panel: #0f1630;
+        --color-panel-tint: #131b38;
+        --color-elevated: #172043;
+        --color-footer-bg: #060a17;
+        --color-card-inverse: #0d1430;
+        --color-nav-bg: #0b1228;
+        --color-deep: #0d1430;
+        --color-ink: #eef1ff;
+        --color-ink-strong: #ffffff;
+        --color-muted: #a7b1d1;
+        --color-border: #232d52;
+        --color-hairline: rgba(255, 255, 255, 0.08);
+        --color-accent: #2ee6a6;
+        --color-accent-soft: rgba(46, 230, 166, 0.14);
+        --color-accent-strong: #0cf293;
+        --color-ink-on-accent: #04121f;
+        --color-input-bg: #0c1329;
+        --color-input-border: #2a3560;
+        --color-success: #4be3a4;
+        --color-warning: #f0b44c;
+        --color-danger: #ff7b72;
+        --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.35);
+        --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 20px 48px rgba(0, 0, 0, 0.45);
+        --shadow-3: 0 24px 70px rgba(0, 0, 0, 0.55);
+        color-scheme: dark;
+    }
+}
+
+[data-theme="dark"] {
+    --color-bg: #080c1b;
+    --color-surface: #0f1630;
+    --color-surface-2: #141d3b;
+    --color-panel: #0f1630;
+    --color-panel-tint: #131b38;
+    --color-elevated: #172043;
+    --color-footer-bg: #060a17;
+    --color-card-inverse: #0d1430;
+    --color-nav-bg: #0b1228;
+    --color-deep: #0d1430;
+    --color-ink: #eef1ff;
+    --color-ink-strong: #ffffff;
+    --color-muted: #a7b1d1;
+    --color-border: #232d52;
+    --color-hairline: rgba(255, 255, 255, 0.08);
+    --color-accent: #2ee6a6;
+    --color-accent-soft: rgba(46, 230, 166, 0.14);
+    --color-accent-strong: #0cf293;
+    --color-ink-on-accent: #04121f;
+    --color-input-bg: #0c1329;
+    --color-input-border: #2a3560;
+    --color-success: #4be3a4;
+    --color-warning: #f0b44c;
+    --color-danger: #ff7b72;
+    --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.35);
+    --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 20px 48px rgba(0, 0, 0, 0.45);
+    --shadow-3: 0 24px 70px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-ink-strong);
+}
+
+[data-theme="dark"] body {
+    background-image:
+        radial-gradient(900px 420px at 50% -160px, rgba(46, 230, 166, 0.1), transparent 70%),
+        linear-gradient(180deg, #070b18 0%, var(--color-bg) 320px);
+    background-repeat: no-repeat;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body {
+        background-image:
+            radial-gradient(900px 420px at 50% -160px, rgba(46, 230, 166, 0.1), transparent 70%),
+            linear-gradient(180deg, #070b18 0%, var(--color-bg) 320px);
+        background-repeat: no-repeat;
+    }
+}
+
+[data-theme="dark"] body::before,
+:root:not([data-theme="light"]) body::before {
+    opacity: 0.02;
+}
+
+:root[data-theme="dark"] a,
+:root:not([data-theme="light"]) a {
+    color: var(--color-accent-strong);
+}
+
+:root[data-theme="dark"] .techtip-wrap,
+:root[data-theme="dark"] .tlx,
+:root[data-theme="dark"] #basicinfo,
+:root[data-theme="dark"] .admin-filters,
+:root[data-theme="dark"] #adminNav,
+:root[data-theme="dark"] #adminTopbar,
+:root[data-theme="dark"] .AdminTable_wrap__1AlVX {
+    border-color: var(--color-hairline);
+    box-shadow: var(--shadow-1);
+}
+
+:root[data-theme="dark"] .n1,
+:root[data-theme="dark"] .n2,
+:root[data-theme="dark"] .n3,
+:root[data-theme="dark"] .n4,
+:root[data-theme="dark"] .n5 {
+    background: var(--color-accent-soft);
+    color: var(--color-accent-strong);
+    border: 1px solid rgba(46, 230, 166, 0.28);
+    font-weight: 600;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+    background: var(--color-input-bg);
+    border-color: var(--color-input-border);
+    color: var(--color-ink-strong);
+}
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+    color: #7d88ad;
+}
+:root[data-theme="dark"] input:focus,
+:root[data-theme="dark"] textarea:focus,
+:root[data-theme="dark"] select:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent);
+}
+:root[data-theme="dark"] input:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-ink-strong);
+    box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
+}
+
+:root[data-theme="dark"] table th {
+    background: var(--color-surface-2);
+    color: var(--color-ink-strong);
+    border-color: var(--color-hairline);
+}
+:root[data-theme="dark"] table td {
+    border-color: var(--color-hairline);
+}
+:root[data-theme="dark"] table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] ::selection {
+    background: var(--color-accent);
+    color: var(--color-ink-on-accent);
+}
+:root[data-theme="dark"] * {
+    scrollbar-color: #2a3560 transparent;
+    scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

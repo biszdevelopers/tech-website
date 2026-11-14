@@ -7,15 +7,16 @@
                     <div class="d-flex align-items-center mb-3">
                         <h4 class="card-title mb-0">All Tickets (<%= tickets.length %>)</h4>
                         <div class="ml-auto">
-                            <a href="/web/admin/tickets" class="btn btn-sm btn-primary mr-1">All</a>
-                            <a href="/web/admin/tickets?status=open" class="btn btn-sm btn-secondary mr-1">Open</a>
-                            <a href="/web/admin/tickets?status=user" class="btn btn-sm btn-secondary mr-1">User Reply</a>
-                            <a href="/web/admin/tickets?status=closed" class="btn btn-sm btn-secondary">Closed</a>
+                            <a href="/web/admin/tickets" class="btn btn-sm <%= status === 'all' ? 'btn-primary' : 'btn-secondary' %> mr-1">All</a>
+                            <a href="/web/admin/tickets?status=open" class="btn btn-sm <%= status === 'open' ? 'btn-primary' : 'btn-secondary' %> mr-1">Open</a>
+                            <a href="/web/admin/tickets?status=user" class="btn btn-sm <%= status === 'user' ? 'btn-primary' : 'btn-secondary' %> mr-1">User Reply</a>
+                            <a href="/web/admin/tickets?status=closed" class="btn btn-sm <%= status === 'closed' ? 'btn-primary' : 'btn-secondary' %>">Closed</a>
                         </div>
                     </div>
                     <div class="table-responsive mt-4">
                         <table class="table">
                             <thead><tr><th>ID</th><th>Subject</th><th>User</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+
                             <tbody>
                                 <% if (tickets.length === 0) { %>
                                     <tr><td colSpan="6" class="text-center text-muted">No tickets found.</td></tr>

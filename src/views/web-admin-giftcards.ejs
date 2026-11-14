@@ -31,17 +31,42 @@
                     <h4 class="card-title">All Gift Cards</h4>
                     <div class="table-responsive mt-4">
                         <table class="table">
-                            <thead><tr><th>ID</th><th>Code</th><th>Plan</th><th>Claimed By</th><th>Created</th><th>Claimed</th></tr></thead>
+                            <thead><tr><th>ID</th><th>Code</th><th>Plan</th><th>Claimed By</th><th>Created</th><th>Actions</th></tr></thead>
                             <tbody>
                                 <% if (cards.length === 0) { %>
-                                    <tr><td colSpan="5" class="text-center text-muted">No gift cards yet.</td></tr>
+                                    <tr><td colSpan="6" class="text-center text-muted">No gift cards yet.</td></tr>
                                 <% } else { cards.forEach(function (c) { %>
                                     <tr>
                                         <td><%= c.ID %></td>
-                                        <td><%= c.code %></td>
+                                        <td><code><%= c.code %></code></td>
                                         <td><%= c.planID %></td>
-                                        <td><%= c.claimedby || '-' %></td>
-                                        <td><%= new Date(c.date * 1000).toLocaleDateString('en-US') %></td>
+                                        <td><%= c.claimedby > 0 ? c.claimedby : (c.claimedby === -1 ? 'Revoked' : '-') %></td>
+                                        <td><%= new Date(Number(c.date) * 1000).toLocaleDateString('en-US') %></td>
+                                        <td>
+                                            <details>
+                                                <summary class="btn btn-sm btn-primary">Edit</summary>
+                                                <form class="mt-2" action="/web/api/admin/giftcards" method="POST">
+                                                    <input type="hidden" name="action" value="update"/>
+                                                    <input type="hidden" name="id" value="<%= c.ID %>"/>
+                                                    <select class="form-control mb-1" name="planID">
+                                                        <% plans.forEach(function (pl) { %>
+                                                        <option value="<%= pl.ID %>"<%- Number(c.planID) === pl.ID ? ' selected' : '' %>><%= pl.name %></option>
+                                                        <% }) %>
+                                                    </select>
+                                                    <button class="btn btn-sm btn-success" type="submit">Save</button>
+                                                </form>
+                                            </details>
+                                            <form action="/web/api/admin/giftcards" method="POST" class="mt-1">
+                                                <input type="hidden" name="action" value="revoke"/>
+                                                <input type="hidden" name="id" value="<%= c.ID %>"/>
+                                                <button class="btn btn-sm btn-warning" type="submit">Revoke</button>
+                                            </form>
+                                            <form action="/web/api/admin/giftcards" method="POST" class="mt-1">
+                                                <input type="hidden" name="action" value="delete"/>
+                                                <input type="hidden" name="id" value="<%= c.ID %>"/>
+                                                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <% }) } %>
                             </tbody>

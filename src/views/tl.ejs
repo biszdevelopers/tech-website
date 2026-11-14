@@ -40,7 +40,7 @@
                 <% } }) %>
             </div>
             <div class="info">
-                <div class="img"><img src="/testuploads/<%= tool.id %>.png" alt="<%= tool.techname %>"/></div>
+                <div class="img"><img src="/uploads/<%= tool.id %>" alt="<%= tool.techname %>" loading="lazy" decoding="async"/></div>
                 <div class="desc"><% if (tool.tight) { %><%= tool.desc %><% } else { %> <%= tool.desc %> <% } %></div>
                 <div class="link">
                     <ul><li><a href="<%= tool.link %>" target="_blank" rel="noreferrer"><%= tool.displaytext %></a></li></ul>

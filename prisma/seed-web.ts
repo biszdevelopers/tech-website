@@ -1,11 +1,9 @@
-import "dotenv/config";
+try { process.loadEnvFile(); } catch { /* real environment wins */ }
 import { webDb as prisma } from "../src/lib/db/web";
-import * as crypto from "node:crypto";
+import bcrypt from "bcryptjs";
 
 function hashPassword(password: string): string {
-    const salt = crypto.randomBytes(16).toString("hex");
-    const hash = crypto.scryptSync(password, salt, 64).toString("hex");
-    return `${salt}:${hash}`;
+    return bcrypt.hashSync(password, 12);
 }
 
 async function main() {
@@ -112,16 +110,16 @@ async function main() {
         where: { ID: 1 },
         update: {
             password: hashedPassword,
-            rank: 1,
+            rank: 2,
         },
         create: {
             ID: 1,
             username: "admin",
             password: hashedPassword,
-            rank: 1,
+            rank: 2,
             membership: 0,
             expire: 9999999999,
-            status: 1,
+            status: 0,
             referral: "",
             referralbalance: 0,
             testattack: 1,

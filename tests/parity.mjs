@@ -17,7 +17,7 @@
  *   - named entities                     (&#39; vs ' - identical after decode)
  * Everything else must match EXACTLY: tags, attributes, order, classes, text.
  *
- * Usage: BASE=http://localhost:3000 npm run parity
+ * Usage: BASE=http://localhost:3000 pnpm run parity
  */
 
 import { readFileSync } from "node:fs";
@@ -39,7 +39,9 @@ const MANIFEST = [
     ["web-maintenance.html", "/web/maintenance"],
     ["web-giftcards-anon.html", "/web/giftcards"],
     ["web-affiliate-anon.html", "/web/affiliate"],
-    ["web-tickets-anon.html", "/web/tickets"],
+    // Tickets now require authentication (the legacy anonymous shell was a
+    // placeholder that never loaded data); covered by the authed page instead.
+    ["web-tickets-anon.html", "/web/tickets", "", "skip"],
     ["web-tickets-new.html", "/web/tickets/new"],
     ["web-wheel.html", "/web/wheel"],
     ["admin.html", "/admin", "main", "skip"],

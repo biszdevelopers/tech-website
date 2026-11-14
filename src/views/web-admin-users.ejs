@@ -1,25 +1,51 @@
 <%- include('partials/dash-head', { title: 'Users', crumb: 'Users' }) %>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Create User</h4>
+                    <form class="mt-4" action="/web/api/admin/users" method="POST">
+                        <input type="hidden" name="action" value="create"/>
+                        <div class="form-group"><label class="text-white">Username</label><input class="form-control" required minlength="3" maxlength="20" name="username"/></div>
+                        <div class="form-group"><label class="text-white">Password</label><input class="form-control" type="password" required minlength="10" name="password"/></div>
+                        <div class="form-group"><label class="text-white">Rank</label><select class="form-control" name="rank"><option value="0">User</option><option value="1">Admin</option><option value="2">Super Admin</option></select></div>
+                        <div class="form-group"><label class="text-white">Membership plan ID</label><input class="form-control" type="number" name="membership" value="0"/></div>
+                        <div class="form-group"><label class="text-white">Expiry (Unix timestamp)</label><input class="form-control" type="number" name="expire" value="0"/></div>
+                        <button type="submit" class="btn btn-success">Create User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">All Users (<%= users.length %>)</h4>
+                    <form method="get" action="/web/admin/users" class="form-inline mt-3">
+                        <input class="form-control mr-2" type="search" name="q" value="<%= q %>" placeholder="Search username"/>
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </form>
                     <div class="table-responsive mt-4">
                         <table class="table">
-                            <thead>
-                                <tr><th>ID</th><th>Username</th><th>Rank</th><th>Membership</th><th>Actions</th></tr>
-                            </thead>
+                            <thead><tr><th>ID</th><th>Username</th><th>Rank</th><th>Membership</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody>
                                 <% if (users.length === 0) { %>
-                                    <tr><td colSpan="5" class="text-center text-muted">No users found.</td></tr>
+                                    <tr><td colSpan="6" class="text-center text-muted">No users found.</td></tr>
                                 <% } else { users.forEach(function (u) { %>
                                     <tr>
-                                        <td class="text-center"><%= u.ID %></td>
+                                        <td><%= u.ID %></td>
                                         <td><%= u.username %></td>
-                                        <td><%= Number(u.rank) >= 1 ? 'Admin' : 'User' %></td>
+                                        <td><%= Number(u.rank) >= 2 ? 'Super Admin' : Number(u.rank) === 1 ? 'Admin' : 'User' %></td>
                                         <td><%= Number(u.membership) || 'None' %></td>
-                                        <td class="text-center"><a href="/web/admin/users/<%= u.ID %>" class="btn btn-sm btn-primary">Edit</a></td>
+                                        <td><%= Number(u.status) === 1 ? 'Banned' : 'Active' %></td>
+                                        <td>
+                                            <a href="/web/admin/users/<%= u.ID %>" class="btn btn-sm btn-primary">Edit</a>
+                                            <form action="/web/api/admin/users" method="POST" class="mt-1">
+                                                <input type="hidden" name="action" value="delete"/>
+                                                <input type="hidden" name="id" value="<%= u.ID %>"/>
+                                                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <% }) } %>
                             </tbody>

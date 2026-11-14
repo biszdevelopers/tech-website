@@ -12,7 +12,7 @@
  */
 
 import { brotliCompressSync, constants as zlibConstants, gzipSync } from "node:zlib";
-import { readFileSync, readdirSync, writeFileSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const COMPRESSIBLE = new Set([".css", ".js", ".svg", ".json", ".txt", ".html"]);

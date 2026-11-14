@@ -28,7 +28,17 @@
                                 <tr><th>ID</th><th>Subject</th><th>Status</th><th>Date</th><th>Action</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td colSpan="5" class="text-center text-muted"> Loading tickets... </td></tr>
+                                <% if (!tickets || tickets.length === 0) { %>
+                                <tr><td colSpan="5" class="text-center text-muted">No tickets yet.</td></tr>
+                                <% } else { tickets.forEach(function (tk) { %>
+                                <tr>
+                                    <td><%= tk.id %></td>
+                                    <td><a href="/web/tickets/<%= tk.id %>"><%= tk.subject %></a></td>
+                                    <td><%= tk.status %></td>
+                                    <td><%= new Date(Number(tk.date) * 1000).toLocaleDateString('en-US') %></td>
+                                    <td><a class="btn btn-sm btn-primary" href="/web/tickets/<%= tk.id %>">Open</a></td>
+                                </tr>
+                                <% }) } %>
                             </tbody>
                         </table>
                     </div>

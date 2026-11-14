@@ -35,6 +35,13 @@
                             <label class="text-white">Test Boots</label>
                             <input class="form-control" type="number" name="testboots" value="<%= s.testboots %>"/>
                         </div>
+                        <div class="form-group">
+                            <label class="text-white">Maintenance mode</label>
+                            <select class="form-control" name="maintaince">
+                                <option value="0"<%- s.maintaince !== '1' ? ' selected' : '' %>>Off</option>
+                                <option value="1"<%- s.maintaince === '1' ? ' selected' : '' %>>On</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Save General Settings</button>
                     </form>
                 </div>
@@ -48,11 +55,15 @@
                         <input type="hidden" name="action" value="update"/>
                         <div class="form-group">
                             <label class="text-white">PayPal Email</label>
-                            <input class="form-control" name="paypal" value=""/>
+                            <input class="form-control" name="paypal" value=""
+                                   placeholder="<%= s.hasPaypal ? 'Configured - leave blank to keep' : 'Not configured' %>"/>
+                            <label class="text-muted"><input type="checkbox" name="clear_paypal"/> Clear</label>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Bitcoin Address</label>
-                            <input class="form-control" name="bitcoin" value=""/>
+                            <input class="form-control" name="bitcoin" value=""
+                                   placeholder="<%= s.hasBitcoin ? 'Configured - leave blank to keep' : 'Not configured' %>"/>
+                            <label class="text-muted"><input type="checkbox" name="clear_bitcoin"/> Clear</label>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Stripe Public Key</label>
@@ -60,7 +71,9 @@
                         </div>
                         <div class="form-group">
                             <label class="text-white">Stripe Secret Key</label>
-                            <input class="form-control" type="password" name="stripeSecretKey" value=""/>
+                            <input class="form-control" type="password" name="stripeSecretKey" value=""
+                                   placeholder="<%= s.hasStripeSecret ? 'Configured - leave blank to keep' : 'Not configured' %>"/>
+                            <label class="text-muted"><input type="checkbox" name="clear_stripeSecretKey"/> Clear</label>
                         </div>
                         <button type="submit" class="btn btn-primary">Save Payment Settings</button>
                     </form>

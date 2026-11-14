@@ -1,10 +1,10 @@
-import "dotenv/config";
+try { process.loadEnvFile(); } catch { /* real environment wins */ }
 import bcrypt from "bcryptjs";
 import { mainDb } from "../src/lib/db/main";
 import { webDb } from "../src/lib/db/web";
 
 // Rotates or creates admin credentials for BOTH subprojects.
-// Usage: ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 8 chars> npm run setup
+// Usage: ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 10 chars> pnpm run setup
 
 async function main(): Promise<void> {
     const username = process.env.ADMIN_USERNAME;
@@ -14,12 +14,12 @@ async function main(): Promise<void> {
         console.error("ADMIN_USERNAME and ADMIN_PASSWORD env vars are required.");
         process.exit(1);
     }
-    if (password.length < 8) {
-        console.error("ADMIN_PASSWORD must be at least 8 characters.");
+    if (password.length < 10) {
+        console.error("ADMIN_PASSWORD must be at least 10 characters.");
         process.exit(1);
     }
 
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 12);
 
     await mainDb.login.upsert({
         where: { User: username },
@@ -38,7 +38,7 @@ async function main(): Promise<void> {
             data: {
                 username,
                 password: hash,
-                rank: 1,
+                rank: 2,
                 membership: 0,
                 expire: 9999999999,
                 status: 0,

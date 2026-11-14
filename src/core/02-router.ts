@@ -62,8 +62,9 @@ export interface RouteMatch {
 export class Router {
     /** Fast lane: exact "GET /health" style lookups. */
     private readonly staticRoutes = new Map<string, CompiledRoute>();
-    /** Slow lane: dynamic patterns in registration order. */
+    /** Dynamic lane, bucketed by method + first path segment. */
     private readonly dynamicRoutes: CompiledRoute[] = [];
+    private readonly buckets = new Map<string, CompiledRoute[]>();
 
     get(path: string, handler: Handler, options: RouteOptions = {}): void {
         this.register("GET", path, handler, options);
@@ -82,6 +83,11 @@ export class Router {
         const route: CompiledRoute = { method, segments: compilePattern(path), handler, options };
         if (route.segments.some((s) => s.startsWith(":"))) {
             this.dynamicRoutes.push(route);
+            const first = route.segments[0];
+            const key = `${method} ${first && !first.startsWith(":") ? first : "*"}`;
+            const bucket = this.buckets.get(key);
+            if (bucket) bucket.push(route);
+            else this.buckets.set(key, [route]);
         } else {
             // Normalize trailing slash so "/web/tickets" and "/web/tickets/" hit
             // the same fast-lane entry instead of silently 404ing one of them.
@@ -98,13 +104,20 @@ export class Router {
         if (staticHit) return { handler: staticHit.handler, options: staticHit.options };
 
         const parts = pathname.split("/").filter(Boolean);
-        for (const route of this.dynamicRoutes) {
+        for (const route of this.candidates(method, parts[0])) {
             if (route.method !== method) continue;
             if (tryMatch(route.segments, parts)) {
                 return { handler: route.handler, options: route.options };
             }
         }
         return null;
+    }
+
+    /** O(1) bucket lookup independent of the total number of routes. */
+    private candidates(method: string, first?: string): CompiledRoute[] {
+        const specific = first ? this.buckets.get(`${method} ${first}`) ?? [] : [];
+        const any = this.buckets.get(`${method} *`) ?? [];
+        return specific.length === 0 ? any : specific.concat(any);
     }
 
     /**
@@ -117,7 +130,7 @@ export class Router {
         if (staticHit) return { handler: staticHit.handler, options: staticHit.options };
 
         const parts = pathname.split("/").filter(Boolean);
-        for (const route of this.dynamicRoutes) {
+        for (const route of this.candidates(method, parts[0])) {
             if (route.method !== method) continue;
             const params = tryMatch(route.segments, parts);
             if (params) {

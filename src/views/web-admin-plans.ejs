@@ -7,33 +7,13 @@
                     <h4 class="card-title">Create Plan</h4>
                     <form class="mt-4" action="/web/api/admin/plans" method="POST">
                         <input type="hidden" name="action" value="create"/>
-                        <div class="form-group">
-                            <label class="text-white">Name</label>
-                            <input class="form-control" placeholder="Gold" required name="name"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">Price (&yen;)</label>
-                            <input class="form-control" type="number" step="0.01" required name="price"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">Duration (days)</label>
-                            <input class="form-control" type="number" required name="length"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">Max Attack Time (s)</label>
-                            <input class="form-control" type="number" required name="mbt"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">Concurrents</label>
-                            <input class="form-control" type="number" required name="concurrents"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">VIP</label>
-                            <select class="form-control" name="vip">
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </div>
+                        <div class="form-group"><label class="text-white">Name</label><input class="form-control" required name="name"/></div>
+                        <div class="form-group"><label class="text-white">Price (&yen;)</label><input class="form-control" type="number" step="0.01" min="0" required name="price"/></div>
+                        <div class="form-group"><label class="text-white">Duration</label><input class="form-control" type="number" min="1" required name="length"/><select class="form-control" name="unit"><option value="days">Days</option><option value="hours">Hours</option></select></div>
+                        <div class="form-group"><label class="text-white">Max Attack Time (s)</label><input class="form-control" type="number" min="1" required name="mbt"/></div>
+                        <div class="form-group"><label class="text-white">Concurrents</label><input class="form-control" type="number" min="1" required name="concurrents"/></div>
+                        <div class="form-group"><label class="text-white">VIP</label><select class="form-control" name="vip"><option value="0">No</option><option value="1">Yes</option></select></div>
+                        <div class="form-group"><label class="text-white">Private</label><select class="form-control" name="private"><option value="0">No</option><option value="1">Yes</option></select></div>
                         <button type="submit" class="btn btn-success">Create Plan</button>
                     </form>
                 </div>
@@ -54,8 +34,33 @@
                                         <td><%= pl.ID %></td>
                                         <td><%= pl.name %></td>
                                         <td><%= pl.price %>&yen;</td>
-                                        <td><%= pl.length %>d</td>
-                                        <td class="text-center"><button type="button" data-action="/web/api/admin/plans" data-id="<%= pl.ID %>" class="btn btn-sm btn-danger">Delete</button></td>
+                                        <td><%= pl.length %> <%= pl.unit %></td>
+                                        <td>
+                                            <details>
+                                                <summary class="btn btn-sm btn-primary">Edit</summary>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST">
+                                                    <input type="hidden" name="action" value="update"/>
+                                                    <input type="hidden" name="id" value="<%= pl.ID %>"/>
+                                                    <input class="form-control mb-1" name="name" value="<%= pl.name %>" required/>
+                                                    <input class="form-control mb-1" type="number" step="0.01" name="price" value="<%= pl.price %>"/>
+                                                    <input class="form-control mb-1" type="number" name="length" value="<%= pl.length %>"/>
+                                                    <select class="form-control mb-1" name="unit">
+                                                        <option value="days"<%- pl.unit === 'days' ? ' selected' : '' %>>Days</option>
+                                                        <option value="hours"<%- pl.unit === 'hours' ? ' selected' : '' %>>Hours</option>
+                                                    </select>
+                                                    <input class="form-control mb-1" type="number" name="mbt" value="<%= pl.mbt %>"/>
+                                                    <input class="form-control mb-1" type="number" name="concurrents" value="<%= pl.concurrents %>"/>
+                                                    <select class="form-control mb-1" name="vip"><option value="0"<%- !pl.vip ? ' selected' : '' %>>No VIP</option><option value="1"<%- pl.vip ? ' selected' : '' %>>VIP</option></select>
+                                                    <select class="form-control mb-1" name="private"><option value="0"<%- !pl.private ? ' selected' : '' %>>Public</option><option value="1"<%- pl.private ? ' selected' : '' %>>Private</option></select>
+                                                    <button class="btn btn-sm btn-success" type="submit">Save</button>
+                                                </form>
+                                            </details>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1">
+                                                <input type="hidden" name="action" value="delete"/>
+                                                <input type="hidden" name="id" value="<%= pl.ID %>"/>
+                                                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 <% }) } %>
                             </tbody>

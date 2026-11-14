@@ -1,93 +1,128 @@
 /**
  * ============================================================================
  * CORE MODULE 08 - SECURITY MIDDLEWARE
- * READING ORDER: 02-router -> 08-security (used on every single request).
  * ============================================================================
  *
- * PURPOSE
- * Three small, independent guards installed by Application BEFORE any route
- * runs. Each one is a pure function of the request, which makes them trivial
- * to reason about - and to unit-test.
- *
- *   securityHeaders()  - adds the site's defensive HTTP headers to every reply
- *   csrfOriginCheck()  - blocks cross-site state-changing requests
- *   rateLimit()        - throttles abusive request rates per client
- *
- * LEARN: DEFENSE IN DEPTH ON THE CHEAP
- * None of these guards know about your database or your routes. They sit in
- * front of everything and cost microseconds. When a new vulnerability class
- * makes headlines, this file is usually the first place a countermeasure fits.
+ * Headers, CSRF and rate limiting. These run before every route, so a new
+ * endpoint cannot forget them.
  */
 
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Context } from "./03-context";
 import type { Middleware } from "./01-application";
 import { rateLimit } from "../lib/rate-limit";
+import { env } from "../config/env";
 
-/**
- * The exact header set the previous framework served (parity constraint C1 -
- * invisible changes only). CSP notes:
- * - `script-src 'self'`: after the rewrite there is exactly ONE external JS
- *   file and ZERO inline scripts, so inline script execution is banned outright.
- * - `style-src 'unsafe-inline'`: some legacy markup uses style="" attributes;
- *   banning them would BE a visual change, which is out of scope.
- */
+const CSRF_COOKIE = "csrf";
+const CSRF_HEADER = "x-csrf-token";
+const CSRF_EXEMPT = new Set(["/web/api/payments/stripe/webhook"]);
+
 export function applySecurityHeaders(ctx: Context): void {
     const h = ctx.res.setHeader.bind(ctx.res);
     h("X-Content-Type-Options", "nosniff");
     h("Referrer-Policy", "strict-origin-when-cross-origin");
     h("X-Frame-Options", "DENY");
-    h("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    h("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    h("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    h("Cross-Origin-Opener-Policy", "same-origin");
+    h("Cross-Origin-Resource-Policy", "same-origin");
+    if (env.isProd) {
+        h("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    }
     h(
         "Content-Security-Policy",
         [
             "default-src 'self'",
             "script-src 'self'",
-            "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: https:",
+            "style-src 'self'",
+            "img-src 'self' data:",
             "font-src 'self' data:",
             "connect-src 'self'",
+            "object-src 'none'",
+            "frame-src 'none'",
+            "media-src 'self'",
+            "form-action 'self'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
-        ].join("; ")
+            env.isProd ? "upgrade-insecure-requests" : "",
+        ]
+            .filter(Boolean)
+            .join("; ")
     );
 }
 
 /**
- * CSRF guard: browsers attach an Origin header to cross-site state-changing
- * requests. If Origin is present and names ANOTHER host, refuse.
+ * Origin + double-submit CSRF protection.
  *
- * Requests WITHOUT Origin (curl, server-to-server webhooks like Stripe's,
- * genuinely ancient browsers) pass through by design: session cookies are
- * HttpOnly+SameSite=Lax, so a forged cross-site POST cannot carry them anyway.
- * Two independent defenses, each covering the other's blind spot.
+ * - Every cross-site state-changing request is refused by Origin comparison
+ *   against the canonical SITE_ORIGIN (not the attacker-controlled Host).
+ * - Requests carrying a session cookie must also echo the per-request token
+ *   from the `csrf` cookie in `_csrf` or `x-csrf-token`.
+ * - Multipart uploads are exempt from the token echo because the token cannot
+ *   be read without consuming the stream; Origin + SameSite still apply.
  */
-export async function csrfOriginCheck(ctx: Context, next: () => Promise<void>): Promise<void> {
+const ASSET_PREFIXES = ["/js/", "/css/", "/fonts/", "/images/", "/uploads/", "/testuploads/"];
+
+export async function csrfProtection(ctx: Context, next: () => Promise<void>): Promise<void> {
+    // Static responses must stay cacheable and must not grow a Set-Cookie.
+    if (ASSET_PREFIXES.some((prefix) => ctx.path.startsWith(prefix))) {
+        await next();
+        return;
+    }
+    let token = ctx.cookie(CSRF_COOKIE) ?? "";
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+        token = randomBytes(32).toString("hex");
+        ctx.setCookie(CSRF_COOKIE, token, {
+            httpOnly: true,
+            secure: env.isProd,
+            sameSite: "Lax",
+            maxAge: 60 * 60 * 24,
+        });
+    }
+    ctx.csrfToken = token;
+
     const safe = ctx.method === "GET" || ctx.method === "HEAD" || ctx.method === "OPTIONS";
-    if (!safe) {
-        const origin = ctx.raw.headers.origin;
-        if (origin) {
-            try {
-                if (new URL(origin).host !== ctx.raw.headers.host) {
-                    ctx.text("Cross-origin request blocked", 403);
-                    return;
-                }
-            } catch {
-                ctx.text("Invalid Origin header", 403);
+    if (safe || CSRF_EXEMPT.has(ctx.path)) {
+        await next();
+        return;
+    }
+
+    const origin = ctx.raw.headers.origin ?? ctx.raw.headers.referer;
+    if (origin) {
+        try {
+            if (new URL(origin).origin !== env.siteOrigin) {
+                ctx.text("Cross-origin request blocked", 403);
                 return;
             }
+        } catch {
+            ctx.text("Invalid Origin header", 403);
+            return;
         }
     }
+
+    if (ctx.hasAuthCookie()) {
+        const contentType = String(ctx.raw.headers["content-type"] ?? "");
+        let provided = String(ctx.raw.headers[CSRF_HEADER] ?? "");
+        if (!provided && !contentType.includes("multipart/form-data")) {
+            const body = await ctx.body();
+            if (body && typeof body === "object") {
+                provided = String((body as Record<string, unknown>)._csrf ?? "");
+            }
+        }
+        if (!safeEqual(provided, token)) {
+            ctx.text("Invalid CSRF token", 403);
+            return;
+        }
+    }
+
     await next();
 }
 
-/**
- * Rate-limit factory. Bucket key = "name:clientIp" (call sites that authenticate
- * an API key use a different bucket name containing the key instead).
- *
- * Returns a middleware; when the limit trips it replies 429 and STOPS the chain
- * by simply not calling next() - see how the one-response rule keeps this safe.
- */
+function safeEqual(a: string, b: string): boolean {
+    const left = Buffer.from(a);
+    const right = Buffer.from(b);
+    return left.length === right.length && timingSafeEqual(left, right);
+}
+
 export function limitRequests(bucketName: string, max: number, windowMs: number): Middleware {
     return async (ctx, next) => {
         if (!rateLimit(`${bucketName}:${ctx.ip}`, max, windowMs)) {

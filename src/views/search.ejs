@@ -45,7 +45,7 @@
                 <% } %>
             </div>
             <div class="info">
-                <div class="img"><img src="/testuploads/<%= item.id %>.png" alt="<%= item.techname %>"/></div>
+                <div class="img"><img src="/uploads/<%= item.id %>" alt="<%= item.techname %>" loading="lazy" decoding="async"/></div>
                 <div class="desc">
                     <% function hilite(text, label) { var t = String(text); var i = t.toLowerCase().indexOf(q.toLowerCase()); if (q && i >= 0) { %><p><b><%= label %>:</b> <%= t.slice(0, i) %><mark><%= t.slice(i, i + q.length) %></mark><%= t.slice(i + q.length) %></p><% } else if (t) { %><p><b><%= label %>:</b> <%= t %></p><% } } %>
                     <% hilite(item.tl1_desc, 'TL1'); %>

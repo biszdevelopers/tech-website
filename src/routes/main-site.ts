@@ -18,8 +18,8 @@ import { loginSchema } from "../lib/validations/admin-auth";
 import { submissionSchema } from "../lib/validations/submission";
 import { rateLimit } from "../lib/rate-limit";
 import { readMultipart } from "../lib/multipart";
-import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
+import { detectImage, saveUpload } from "../lib/uploads";
+import { withLock } from "../lib/lock";
 import {
     createSubmission,
     createDomain,
@@ -41,11 +41,16 @@ export function registerMainSiteRoutes(app: Application): void {
                 throw new HttpError(429, "Too many login attempts. Try again in a minute.");
             }
             const form = await ctx.body(loginSchema);
+            if (!rateLimit("main-login-user:" + form.username.toLowerCase(), 10, 60_000)) {
+                throw new HttpError(429, "Too many login attempts. Try again in a minute.");
+            }
             const user = await mainDb.login.findUnique({ where: { User: form.username } });
-            const valid = user !== null && (await bcrypt.compare(form.password, user.PW));
-            // Same generic error for unknown-user and bad-password: never hint
-            // which half was wrong (credential-stuffing resistance).
-            if (!valid) throw new HttpError(401, "Invalid username or password.");
+            // Always run a hash comparison so unknown users take the same time.
+            const valid = await bcrypt.compare(
+                form.password,
+                user?.PW ?? "$2b$12$.5XkKkyMWCtIYiGjUqvHeuWjs5kNjl7nOYChlviJiHgVUgE4A.h6C"
+            );
+            if (user === null || !valid) throw new HttpError(401, "Invalid username or password.");
             await mainSessions.save(ctx, { islogin: true });
             ctx.redirect("/admin");
         },
@@ -58,7 +63,7 @@ export function registerMainSiteRoutes(app: Application): void {
     });
 
     app.get("/submission", async (ctx) => {
-        ctx.htmlRaw(render("submission", {}));
+        ctx.htmlRaw(render("submission", { received: ctx.query.get("received") === "1" }));
     });
 
     app.post("/api/submission", async (ctx: Context) => {
@@ -71,23 +76,16 @@ export function registerMainSiteRoutes(app: Application): void {
         if (!parsed.success) {
             throw new HttpError(400, parsed.error.issues[0]?.message ?? "Validation failed.");
         }
+        if (fields.website || fields.url) {
+            // Honeypot: real users never fill this hidden field.
+            ctx.json({ success: true, message: "Submission received." });
+            return;
+        }
+        if (file && file.data.length > 0 && !detectImage(file.data)) {
+            throw new HttpError(400, "Screenshot must be a PNG, JPEG or WebP image.");
+        }
 
-        const id = await getNextSubmissionId();
         const d = parsed.data;
-        const row = await createSubmission({
-            id,
-            techname: d.techname,
-            link: d.link,
-            displaytext: d.displaytext,
-            tl1_desc: d.tl1_desc ?? "",
-            tl2_desc: d.tl2_desc ?? "",
-            tl3_desc: d.tl3_desc ?? "",
-            tl4_desc: d.tl4_desc ?? "",
-            username: d.username ?? "",
-            contact: d.contact ?? "",
-            accepted: false,
-        });
-
         const domainFlags = (
             [
                 "R",
@@ -107,15 +105,34 @@ export function registerMainSiteRoutes(app: Application): void {
                 "RaAoC",
             ] as const
         ).map((col) => [col, fields[col] === "true"]) as Array<[keyof CreateDomainInput, boolean]>;
-        await createDomain({ id, ...Object.fromEntries(domainFlags) } as CreateDomainInput);
+
+        const row = await withLock("submission-id", async () => {
+            const id = await getNextSubmissionId();
+            const created = await createSubmission({
+                id,
+                techname: d.techname,
+                link: d.link,
+                displaytext: d.displaytext,
+                tl1_desc: d.tl1_desc ?? "",
+                tl2_desc: d.tl2_desc ?? "",
+                tl3_desc: d.tl3_desc ?? "",
+                tl4_desc: d.tl4_desc ?? "",
+                username: d.username ?? "",
+                contact: d.contact ?? "",
+                accepted: false,
+            });
+            await createDomain({ id, ...Object.fromEntries(domainFlags) } as CreateDomainInput);
+            return created;
+        });
 
         if (file && file.data.length > 0) {
-            const dir = path.join(process.cwd(), "public", "testuploads");
-            await mkdir(dir, { recursive: true });
-            const ext = path.extname(file.filename || "") || ".png";
-            await writeFile(path.join(dir, `${id}${ext}`), file.data);
+            saveUpload(row.id, file.data);
         }
 
-        ctx.json({ success: true, id: row.id, message: "Submission received." });
+        if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+            ctx.json({ success: true, id: row.id, message: "Submission received." });
+        } else {
+            ctx.redirect("/submission?received=1");
+        }
     });
 }

@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text, real, index } from "drizzle-orm/sqlite-core";
 
 // Mirrors prisma/schema-web.prisma. Property/column names match Prisma fields
 // exactly. IDs that were `@default(autoincrement())` use primaryKey({autoIncrement:true}).
@@ -12,7 +12,9 @@ export const actions = sqliteTable("actions", {
     client: text("client").notNull().default(""),
     action: text("action").notNull().default(""),
     date: integer("date").notNull().default(0),
-});
+},
+    (t) => [index("actions_client_action_date").on(t.client, t.action, t.date)]
+);
 
 export const affiliateWithdraws = sqliteTable("affiliateWithdraws", {
     ID: integer("ID").primaryKey({ autoIncrement: true }),
@@ -65,7 +67,7 @@ export const fe = sqliteTable("fe", {
 
 export const giftcards = sqliteTable("giftcards", {
     ID: integer("ID").primaryKey({ autoIncrement: true }),
-    code: text("code").notNull().default(""),
+    code: text("code").notNull().default("").unique(),
     planID: integer("planID").notNull().default(0),
     claimedby: integer("claimedby").notNull().default(0),
     dateClaimed: integer("dateClaimed").notNull().default(0),
@@ -88,7 +90,9 @@ export const loginlogs = sqliteTable("loginlogs", {
     country: text("country").notNull().default(""),
 });
 
-export const logs = sqliteTable("logs", {
+export const logs = sqliteTable(
+    "logs",
+    {
     id: integer("id").primaryKey({ autoIncrement: true }),
     user: text("user").notNull().default(""),
     ip: text("ip").notNull().default(""),
@@ -103,7 +107,13 @@ export const logs = sqliteTable("logs", {
     stopped: integer("stopped").notNull().default(0),
     handler: text("handler").notNull().default(""),
     origin: text("origin").notNull().default(""),
-});
+},
+    (t) => [
+        index("logs_handler_stopped").on(t.handler, t.stopped),
+        index("logs_user_stopped").on(t.user, t.stopped),
+        index("logs_date").on(t.date),
+    ]
+);
 
 export const messages = sqliteTable("messages", {
     messageid: integer("messageid").primaryKey({ autoIncrement: true }),
@@ -111,7 +121,9 @@ export const messages = sqliteTable("messages", {
     content: text("content").notNull().default(""),
     sender: text("sender").notNull().default(""),
     date: integer("date").notNull().default(0),
-});
+},
+    (t) => [index("messages_ticket_date").on(t.ticketid, t.date)]
+);
 
 export const methods = sqliteTable("methods", {
     id: integer("id").primaryKey({ autoIncrement: true }),
@@ -221,11 +233,13 @@ export const tickets = sqliteTable("tickets", {
     status: text("status").notNull().default(""),
     username: text("username").notNull().default(""),
     date: integer("date").notNull().default(0),
-});
+},
+    (t) => [index("tickets_username_date").on(t.username, t.date)]
+);
 
 export const users = sqliteTable("users", {
     ID: integer("ID").primaryKey({ autoIncrement: true }),
-    username: text("username").notNull().default(""),
+    username: text("username").notNull().default("").unique(),
     password: text("password").notNull().default(""),
     rank: integer("rank").notNull().default(0),
     membership: integer("membership").notNull().default(0),

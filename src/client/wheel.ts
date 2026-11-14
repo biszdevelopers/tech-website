@@ -81,6 +81,8 @@ function initWheel(): void {
         // XHR instead of fetch: IE11 compatibility.
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/web/api/wheel/spin", true);
+        const meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
+        if (meta) xhr.setRequestHeader("x-csrf-token", meta.content);
         xhr.onreadystatechange = function () {
             if (xhr.readyState !== 4) return;
             if (xhr.status < 200 || xhr.status >= 300) {

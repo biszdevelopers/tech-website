@@ -60,6 +60,11 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     login: {},
     submission: {},
     admin: {
+        q: "",
+        status: "all",
+        page: 1,
+        total: 1,
+        perPage: 50,
         subs: [
             {
                 id: 3,
@@ -92,7 +97,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     },
     "web-landing": {},
     "web-login": {},
-    "web-register": {},
+    "web-register": { ref: "" },
     "web-maintenance": { description: "Back soon." },
     "web-hub": { methods: [], servers: [] },
     "web-profile": {
@@ -118,7 +123,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     "web-plan": {
         plans: [{ ID: 1, name: "Gold", price: 10, length: 30, mbt: 3600, concurrents: 3, vip: 1 }],
     },
-    "web-tickets": {},
+    "web-tickets": { tickets: [] },
     "web-tickets-new": {},
     "web-giftcards": {},
     "web-affiliate": {},
@@ -128,20 +133,21 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     },
     "web-admin-users": {
         users: [{ ID: 7, username: "tester", rank: 0, membership: 0 }],
+        q: "",
     },
     "web-admin-user-edit": {
-        user: { ID: 7, username: "tester", rank: 0, membership: 0, expire: 1800000000 },
+        user: { ID: 7, username: "tester", rank: 0, status: 0, membership: 0, expire: 1800000000 },
         plans: [{ ID: 1, name: "Gold" }],
     },
     "web-admin-plans": {
-        plans: [{ ID: 1, name: "Gold", price: 10, length: 30 }],
+        plans: [{ ID: 1, name: "Gold", price: 10, length: 30, mbt: 3600, concurrents: 3, vip: 0, unit: "days", private: 0 }],
     },
     "web-admin-methods": {
         methods: [{ id: 1, name: "UDP", fullname: "UDP Flood", type: "layer4", command: "./udp" }],
     },
-    "web-admin-news": { news: [{ ID: 1, title: "Hi", date: "2026-01-01" }] },
+    "web-admin-news": { news: [{ ID: 1, title: "Hi", content: "Body", date: "2026-01-01" }] },
     "web-admin-servers": {
-        servers: [{ id: 1, name: "srv1", ip: "1.2.3.4", slots: 10, methods: "UDP" }],
+        servers: [{ id: 1, name: "srv1", api: "https://api.example.test/attack?host=[host]", slots: 10, methods: "UDP", vip: 0 }],
     },
     "web-admin-giftcards": {
         cards: [{ ID: 1, code: "GC-AAA-BBB", planID: 1, claimedby: 0, date: 1800000000 }],
@@ -157,7 +163,12 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                 date: 1800000000,
             },
         ],
+        status: "all",
     },
+    "web-ticket": { ticket: { id: 1, subject: "Help", username: "tester", status: "Waiting for admin response", date: 1800000000, content: "Need help" }, messages: [] },
+    "web-admin-ticket": { ticket: { id: 1, subject: "Help", username: "tester", status: "Waiting for admin response", date: 1800000000, content: "Need help" }, messages: [] },
+    "admin-new": { strands: [{ name: "R", label: "Relationship", checked: false }] },
+    "admin-import": {},
     "web-admin-attacklogs": {
         logs: [
             {
@@ -185,6 +196,10 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             cooldownTime: 300,
             maxattacks: 5,
             testboots: 1,
+            maintaince: "0",
+            hasStripeSecret: false,
+            hasPaypal: false,
+            hasBitcoin: false,
         },
     },
     docs: {},

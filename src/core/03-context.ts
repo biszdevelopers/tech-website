@@ -30,9 +30,12 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { createHash } from "node:crypto";
+import { brotliCompressSync, constants as zlibConstants, gzipSync } from "node:zlib";
 import type { ZodType } from "zod";
 import { renderToString, type Html } from "./04-html";
 import { HttpError } from "./09-errors";
+import { env } from "../config/env";
 
 /** Hard ceiling on any request body. Blocks memory-exhaustion DoS attempts. */
 const MAX_BODY_BYTES = 1_000_000; // 1 MB - forms here are tiny; uploads use /api/submission's own path
@@ -42,6 +45,8 @@ export class Context {
     public readonly params: Record<string, string> = {};
 
     readonly url: URL;
+    /** Per-request CSRF token, filled by the security middleware. */
+    csrfToken = "";
     private readonly cookieBag = new Map<string, string>();
     private finished = false;
     private cachedBody: unknown;
@@ -50,9 +55,9 @@ export class Context {
         public readonly raw: IncomingMessage,
         public readonly res: ServerResponse
     ) {
-        // Host comes from our own trusted proxy front (nginx); pathname+query
-        // are parsed once here and reused by every accessor below.
-        this.url = new URL(this.raw.url ?? "/", `http://${this.raw.headers.host ?? "localhost"}`);
+        // Canonical origin: the Host header is attacker-controlled, so it is
+        // never used to build absolute URLs or CSRF checks.
+        this.url = new URL(this.raw.url ?? "/", env.siteOrigin);
         const rawCookie = this.raw.headers.cookie;
         if (rawCookie) {
             for (const pair of rawCookie.split(";")) {
@@ -77,12 +82,25 @@ export class Context {
         return this.url.searchParams;
     }
 
-    /** Best-effort client IP: nginx sets X-Forwarded-For; fall back to the socket. */
+    /**
+     * Client IP. X-Forwarded-For is only read when TRUST_PROXY=true; otherwise
+     * it is spoofable and would let anyone bypass rate limits.
+     */
     get ip(): string {
-        return (
-            (this.raw.headers["x-forwarded-for"] as string | undefined)?.split(",")[0].trim() ||
-            this.raw.socket.remoteAddress ||
-            "unknown"
+        if (env.trustProxy) {
+            const forwarded = String(this.raw.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
+            if (forwarded) return forwarded;
+        }
+        return this.raw.socket.remoteAddress || "unknown";
+    }
+
+    /** True when the request carries one of our session cookies. */
+    hasAuthCookie(): boolean {
+        return Boolean(
+            this.cookie("main-session") ||
+                this.cookie("web-session") ||
+                this.cookie("__Host-main-session") ||
+                this.cookie("__Host-web-session")
         );
     }
 
@@ -104,7 +122,7 @@ export class Context {
         let c = `${name}=${value}; Path=/`;
         if (opts.httpOnly) c += "; HttpOnly";
         if (opts.secure) c += "; Secure";
-        if (opts.sameSite) c += `; SameSite=${opts.sameSite}`;
+        c += `; SameSite=${opts.sameSite ?? "Lax"}`;
         if (opts.maxAge !== undefined) c += `; Max-Age=${Math.floor(opts.maxAge)}`;
         this.res.setHeader("Set-Cookie", [...normalize(this.res.getHeader("Set-Cookie")), c]);
     }
@@ -170,9 +188,10 @@ export class Context {
      * disabled. The toggle button keeps the cookie fresh client-side.
      */
     private withServerTheme(html: string): string {
-        if (this.cookie("theme") !== "dark") return html;
+        const theme = this.cookie("theme");
+        if (theme !== "dark" && theme !== "light") return html;
         return html.replace(/<html(\s[^>]*)?>/i, (m) =>
-            m.includes("data-theme") ? m : `<html$1 data-theme="dark">`
+            m.includes("data-theme") ? m : `<html$1 data-theme="${theme}">`
         );
     }
 
@@ -226,10 +245,61 @@ export class Context {
 
     private send(text: string, status: number, contentType: string): void {
         if (this.finished) return; // one-response rule: see class docs
+        let payload = text;
+        if (contentType.startsWith("text/html")) payload = this.injectCsrf(payload);
+
+        const etag = `"${createHash("sha1").update(payload).digest("base64url")}"`;
+        this.res.setHeader("ETag", etag);
+        if (this.raw.headers["if-none-match"] === etag) {
+            this.finished = true;
+            this.res.statusCode = 304;
+            this.res.end();
+            return;
+        }
+
         this.finished = true;
         this.res.statusCode = status;
         this.res.setHeader("Content-Type", contentType);
-        this.res.end(text);
+
+        const bytes = Buffer.from(payload);
+        const accept = String(this.raw.headers["accept-encoding"] ?? "");
+        let body: Buffer = bytes;
+        if (status !== 204 && bytes.length >= 1024 && accept) {
+            if (accept.includes("br")) {
+                body = brotliCompressSync(bytes, {
+                    // Quality 4 keeps request-time compression cheap.
+                    params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 4 },
+                });
+                this.res.setHeader("Content-Encoding", "br");
+            } else if (accept.includes("gzip")) {
+                body = gzipSync(bytes, { level: 6 });
+                this.res.setHeader("Content-Encoding", "gzip");
+            }
+            if (body !== bytes) this.res.setHeader("Vary", "Accept-Encoding");
+        }
+        this.res.setHeader("Content-Length", body.length);
+        this.res.end(body);
+    }
+
+    /**
+     * Double-submit CSRF support without editing every template: the token is
+     * a cookie set by the middleware, injected into forms and exposed in a meta
+     * tag for the XHR client. Hidden inputs are ignored by the parity checker.
+     */
+    private injectCsrf(html: string): string {
+        if (!this.csrfToken) return html;
+        const token = this.csrfToken.replace(/"/g, "&quot;");
+        let out = html;
+        if (out.includes("</head>") && !out.includes('name="csrf-token"')) {
+            out = out.replace(
+                "</head>",
+                `<meta name="csrf-token" content="${token}"/></head>`
+            );
+        }
+        return out.replace(/<form\b[^>]*>/gi, (tag) => {
+            if (tag.includes('name="_csrf"')) return tag;
+            return `${tag}<input type="hidden" name="_csrf" value="${token}"/>`;
+        });
     }
 }
 

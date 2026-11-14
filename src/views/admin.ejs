@@ -5,11 +5,22 @@
     <ul>
         <li><b>Admin Panel</b></li>
         <li><a href="/admin#submissions">All Submissions</a></li>
-        <li><a href="/api/import">Import Excel Data</a></li>
+        <li><a href="/admin/new">New Tool</a></li>
+        <li><a href="/admin/import">Import CSV</a></li>
         <li><a href="/api/auth/logout">Logout</a></li>
     </ul>
 </div>
-<section id="submissions" style="scroll-margin-top:var(--nav-offset)">
+<section id="submissions" class="section-anchor">
+    <form method="get" action="/admin" class="admin-filters">
+        <input type="search" name="q" value="<%= q %>" placeholder="Search name, link, display"/>
+        <select name="status">
+            <option value="all"<%- status === 'all' ? ' selected' : '' %>>All</option>
+            <option value="pending"<%- status === 'pending' ? ' selected' : '' %>>Pending</option>
+            <option value="accepted"<%- status === 'accepted' ? ' selected' : '' %>>Accepted</option>
+        </select>
+        <button type="submit">Filter</button>
+        <span class="admin-count"><%= total %> result(s)</span>
+    </form>
     <div class="AdminTable_wrap__1AlVX">
         <table class="AdminTable_table__3iS2Y">
             <thead>
@@ -50,6 +61,15 @@
             </tbody>
         </table>
     </div>
+    <% var pages = Math.max(1, Math.ceil(total / perPage)); %>
+    <% if (pages > 1) { %>
+    <nav class="admin-pager" aria-label="Pagination">
+        <% for (var p = 1; p <= pages; p += 1) { %>
+        <a class="<%= p === page ? 'is-current' : '' %>"
+           href="/admin?q=<%= encodeURIComponent(q) %>&status=<%= status %>&page=<%= p %>"><%= p %></a>
+        <% } %>
+    </nav>
+    <% } %>
 </section>
 </body>
 </html>

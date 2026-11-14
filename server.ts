@@ -30,6 +30,8 @@ import { registerWebRoutes } from "./src/routes/web";
 import { registerWebAdminRoutes } from "./src/routes/web-admin";
 import { registerPaymentRoutes } from "./src/routes/payments";
 import { getAcceptedSubmissions, getDomainsByColumns } from "./src/server/queries/submissions";
+import { serveUpload } from "./src/lib/uploads";
+import { getWebSettings } from "./src/lib/web-settings";
 import { mainDb } from "./src/lib/db/main";
 import { webDb } from "./src/lib/db/web";
 
@@ -206,6 +208,38 @@ app.get("/", async (ctx) => {
     ctx.htmlRaw(cached);
 });
 
+app.get("/uploads/:file", async (ctx) => {
+    if (!serveUpload(ctx, ctx.params.file)) ctx.throw(404, "Not found");
+});
+
+// Maintenance gate for the IPstress subproject. Admin, auth and the webhook
+// stay reachable so the site can be recovered and payments reconciled.
+app.use(async (ctx, next) => {
+    if (!ctx.path.startsWith("/web")) {
+        await next();
+        return;
+    }
+    const exempt =
+        ctx.path.startsWith("/web/maintenance") ||
+        ctx.path.startsWith("/web/admin") ||
+        ctx.path.startsWith("/web/login") ||
+        ctx.path.startsWith("/web/images/") ||
+        ctx.path.startsWith("/web/api/auth/") ||
+        ctx.path.startsWith("/web/api/payments/stripe/webhook") ||
+        ctx.path.startsWith("/web/api/admin/");
+    if (exempt) {
+        await next();
+        return;
+    }
+    const settings = await getWebSettings();
+    if (settings.maintaince === "1") {
+        if (ctx.path.startsWith("/web/api/")) ctx.json({ error: "Maintenance mode." }, 503);
+        else ctx.redirect("/web/maintenance");
+        return;
+    }
+    await next();
+});
+
 registerMainSiteRoutes(app);
 registerAdminRoutes(app);
 registerWebRoutes(app);
@@ -218,9 +252,6 @@ registerPaymentRoutes(app);
 app.get("/web/plan", async (ctx) => {
     const plans = await webDb.plans.findMany({ orderBy: { price: "asc" } });
     ctx.htmlRaw(render("web-plan", { plans }));
-});
-app.get("/web/tickets", async (ctx) => {
-    ctx.htmlRaw(render("web-tickets", {}));
 });
 app.get("/web/tickets/new", async (ctx) => {
     ctx.htmlRaw(render("web-tickets-new", {}));
@@ -235,10 +266,10 @@ app.get("/web/wheel", async (ctx) => {
     ctx.htmlRaw(render("web-wheel", {}));
 });
 app.get("/web/maintenance", async (ctx) => {
-    const settings = await webDb.settings.findFirst({ select: { description: true } });
+    const settings = await getWebSettings();
     ctx.htmlRaw(
         render("web-maintenance", {
-            description: settings?.description ?? "Premium IP stress testing service",
+            description: settings.description || "Premium IP stress testing service",
         })
     );
 });
@@ -253,7 +284,7 @@ app.get("/web/login", async (ctx) => {
     ctx.htmlRaw(render("web-login", {}));
 });
 app.get("/web/register", async (ctx) => {
-    ctx.htmlRaw(render("web-register", {}));
+    ctx.htmlRaw(render("web-register", { ref: ctx.query.get("ref") ?? "" }));
 });
 
 // Tool detail page: every TL strategy description for one tool, stacked.

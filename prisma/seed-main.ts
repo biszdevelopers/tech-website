@@ -1,4 +1,4 @@
-﻿import "dotenv/config";
+try { process.loadEnvFile(); } catch { /* real environment wins */ }
 import { mainDb as prisma } from "../src/lib/db/main";
 import * as bcrypt from "bcryptjs";
 import { readFileSync } from "node:fs";

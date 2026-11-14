@@ -21,16 +21,13 @@
  * to every call site that needs them.
  */
 
-// Development convenience: tsx watch doesn't support --env-file, so we load
-// .env here when the variables aren't already set (production uses
-// node --env-file=.env which populates process.env BEFORE this module runs).
+// Node 20.12+/24 can load .env without a dependency. Production may also use
+// `node --env-file-if-exists=.env`, in which case this is a no-op.
 if (!process.env.SESSION_SECRET) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require("dotenv").config();
+        process.loadEnvFile();
     } catch {
-        // dotenv not installed in production; --env-file handles it there.
+        // no .env file - rely on the real environment
     }
 }
 
@@ -58,12 +55,43 @@ function optionalNumber(name: string, fallback: number): number {
  * because a developer testing with forgeable cookies builds habits that
  * ship. The old code threw only when NODE_ENV=production; that gap is closed.
  */
+const isProd = process.env.NODE_ENV === "production";
+const port = optionalNumber("PORT", 3000);
+
+function requiredInProd(name: string): string {
+    const value = process.env[name]?.trim() ?? "";
+    if (value) return value;
+    if (isProd) {
+        throw new Error(`Missing environment variable ${name}. Set it to the public origin, e.g. https://example.com`);
+    }
+    return `http://localhost:${port}`;
+}
+
 export const env = Object.freeze({
-    isProd: process.env.NODE_ENV === "production",
-    port: optionalNumber("PORT", 3000),
+    isProd,
+    port,
+    host: process.env.HOST?.trim() || "0.0.0.0",
+
+    /**
+     * Canonical public origin. Redirects, Stripe URLs and CSRF checks use this
+     * instead of the attacker-controlled Host header.
+     */
+    siteOrigin: requiredInProd("SITE_ORIGIN").replace(/\/$/, ""),
+    /** Trust X-Forwarded-For only when explicitly deployed behind a proxy. */
+    trustProxy: process.env.TRUST_PROXY === "true",
 
     sessionSecretMain: requiredString("SESSION_SECRET", 32),
     sessionSecretWeb: requiredString("SESSION_SECRET_WEB", 32),
     /** Cookie lifetime in seconds - parity with the previous site (30 min). */
     sessionTtlSeconds: optionalNumber("SESSION_TTL_SECONDS", 1800),
+
+    /** Runtime uploads live OUTSIDE dist/ so a build never deletes user data. */
+    uploadsDir: process.env.UPLOADS_DIR?.trim() || "var/uploads",
+
+    /** Optional in-process TLS. Leave both empty when a proxy terminates TLS. */
+    tlsCert: process.env.TLS_CERT?.trim() || "",
+    tlsKey: process.env.TLS_KEY?.trim() || "",
+
+    /** Optional 32-byte base64 key for encrypting secrets stored in SQLite. */
+    settingsKey: process.env.SETTINGS_KEY?.trim() || "",
 });

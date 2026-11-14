@@ -2,17 +2,15 @@
 <%- include('partials/navbar') %>
 
 <div id="front" data-built-by="richie-rich90454">
-    <img alt="Abstract hand-drawn welcome illustration" fetchpriority="high" decoding="async" data-nimg="fill"
-         style=" position: absolute; height: 100%; width: 100%; left: 0; top: 0; right: 0; bottom: 0; object-fit: cover; color: transparent; z-index: 0; "
-         src="/images/hero.svg"/>
-    <div aria-hidden="true"
-         style=" position: absolute; inset: 0; background: linear-gradient( 180deg, rgba(13, 15, 45, 0.35) 0%, rgba(13, 15, 45, 0.55) 100% ); z-index: 1; "></div>
+    <img alt="Abstract hand-drawn welcome illustration" fetchpriority="high" decoding="async"
+         class="hero-media" src="/images/hero.svg"/>
+    <div aria-hidden="true" class="hero-shade"></div>
     <h1>Welcome to BASIS International and Bilingual Schools·China Tech Tools</h1>
 </div>
 
 <div id="bar">&nbsp;</div>
 
-<div id="all" style="padding: 0px 0px">
+<div id="all">
     <div id="basicinfo">
         <h2 id="about" class="section-anchor">About this site</h2>
         <p> Before you start using this site, you&#39;ll want to take a moment to understand how it is organized. </p>
@@ -28,7 +26,7 @@
     </div>
 </div>
 
-<div class="tl-section" id="domains" style="scroll-margin-top: var(--nav-offset)">
+<div class="tl-section" id="domains">
     <% [
         { id: 'tl1', href: '/tl1', title: 'TL1: Knowing Our Students',
           strands: ['Relationships', 'Teacher planning', 'Modify their teaching', 'Achieve readiness'] },
@@ -39,7 +37,7 @@
         { id: 'tl4', href: '/tl4', title: 'TL4: Crafting the Curriculum',
           strands: ['Risk-taking environment', 'Deepening lines of inquiry', 'Responsibility and aspects of citizenship'] },
     ].forEach(function (card) { %>
-    <a class="tlx" id="<%= card.id %>" style="scroll-margin-top: var(--nav-offset)" href="<%= card.href %>">
+    <a class="tlx" id="<%= card.id %>" href="<%= card.href %>">
         <div class="tlhead"><%= card.title %></div>
         <div class="tlx__strands-label">Includes the strands</div>
         <ul class="tlx__strands">
@@ -51,7 +49,7 @@
     <% }) %>
 </div>
 
-<p class="tl-submit-cta" id="submit-cta" style="scroll-margin-top: var(--nav-offset)">
+<p class="tl-submit-cta" id="submit-cta">
     In addition, if you know of any tech tools not already on this site, you may submit them here:
     <a href="/submission"><button class="submit-link">Submit New Tech Tool</button></a> </p>
 

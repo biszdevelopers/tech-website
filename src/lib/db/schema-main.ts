@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
 
 // Mirrors prisma/schema-main.prisma. Column/property names match the Prisma
 // fields exactly so the Prisma-compatible query layer (prisma-shim) and all
@@ -15,7 +15,9 @@ export const submission = sqliteTable("submission", {
     accepted: integer("", { mode: "boolean" }).notNull().default(false),
     username: text("username").notNull().default(""),
     contact: text("contact").notNull().default(""),
-});
+},
+    (t) => [index("submission_accepted_id").on(t.accepted, t.id)]
+);
 
 export const domains = sqliteTable("domains", {
     id: integer("id").primaryKey(),

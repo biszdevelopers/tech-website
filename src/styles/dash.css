@@ -506,3 +506,17 @@ select.form-control optgroup {
         display: inline-block;
     }
 }
+
+/* ---- classes that replaced inline styles ------------------------------- */
+.brand-title {
+    padding-top: 3px;
+    padding-right: 50px;
+}
+
+button.nav-toggler,
+button.dropdown-toggle {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+}

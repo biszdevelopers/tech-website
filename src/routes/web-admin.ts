@@ -8,9 +8,46 @@ import { Application } from "../core/01-application";
 import { HttpError } from "../core/09-errors";
 import { webDb } from "../lib/db/web";
 import { render } from "../core/views";
+import { webSessions } from "./guards";
+import { launchAttack } from "../server/attacks";
+import { features } from "../config/features";
+import { withLock } from "../lib/lock";
+import { sealSecret } from "../lib/secrets";
+import { invalidateWebSettings } from "../lib/web-settings";
+import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 
 type Body = Record<string, unknown>;
+
+function actor(ctx: { cookie: (name: string) => string | undefined }): string {
+    return webSessions.load(ctx as never)?.username ?? "admin";
+}
+
+async function audit(ctx: Parameters<typeof actor>[0], action: string, target: string): Promise<void> {
+    await webDb.actions.create({
+        data: {
+            admin: actor(ctx),
+            client: target,
+            action,
+            date: Math.floor(Date.now() / 1000),
+        },
+    });
+}
+
+function money(value: unknown): number {
+    const n = Number(value);
+    return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+async function actorIsSuper(ctx: Parameters<typeof actor>[0]): Promise<boolean> {
+    const session = webSessions.load(ctx as never);
+    if (!session?.userId) return false;
+    const row = await webDb.users.findUnique({
+        where: { ID: session.userId },
+        select: { rank: true },
+    });
+    return Number(row?.rank ?? 0) >= 2;
+}
 
 function str(body: Body, key: string, fallback = ""): string {
     return String(body[key] ?? fallback);
@@ -43,8 +80,10 @@ export function registerWebAdminRoutes(app: Application): void {
     app.get(
         "/web/admin/users",
         async (ctx) => {
-            const users = await webDb.users.findMany();
-            ctx.htmlRaw(render("web-admin-users", { users }));
+            const q = (ctx.query.get("q") ?? "").trim().toLowerCase();
+            let users = await webDb.users.findMany({ orderBy: { ID: "asc" } });
+            if (q) users = users.filter((u) => String(u.username).toLowerCase().includes(q));
+            ctx.htmlRaw(render("web-admin-users", { users, q }));
         },
         { guard: "webAdmin" }
     );
@@ -67,25 +106,105 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/users",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
+            const action = str(body, "action");
+            const session = webSessions.load(ctx);
+            if (action === "create") {
+                const username = str(body, "username").trim();
+                const password = str(body, "password");
+                if (username.length < 3 || username.length > 20) {
+                    throw new HttpError(400, "Username must be 3-20 characters.");
+                }
+                if (password.length < 10) {
+                    throw new HttpError(400, "Password must be at least 10 characters.");
+                }
+                const rank = Math.min(Math.max(num(body, "rank"), 0), 2);
+                if (rank >= 2 && !(await actorIsSuper(ctx))) {
+                    throw new HttpError(403, "Only a super admin can create another super admin.");
+                }
+                const created = await withLock("user:" + username.toLowerCase(), async () => {
+                    const exists = await webDb.users.findFirst({ where: { username } });
+                    if (exists) throw new HttpError(409, "Username is already taken.");
+                    return webDb.users.create({
+                        data: {
+                            username,
+                            password: await bcrypt.hash(password, 12),
+                            rank,
+                            membership: num(body, "membership"),
+                            expire: num(body, "expire"),
+                            status: 0,
+                            referral: "0",
+                            referralbalance: 0,
+                            testattack: 0,
+                            activity: 0,
+                            twoauth: 0,
+                            referedBy: 0,
+                        },
+                    });
+                });
+                await audit(ctx, "user.create", created.username);
+                if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                    ctx.json({ success: "User created." });
+                } else ctx.redirect("/web/admin/users");
+                return;
+            }
+
             const id = num(body, "id");
             if (!id) throw new HttpError(400, "Missing user id.");
-            if (str(body, "action") === "update") {
+            if (action === "update") {
+                const target = await webDb.users.findUnique({ where: { ID: id } });
+                if (!target) throw new HttpError(404, "User not found.");
+                const username = str(body, "username").trim();
+                if (username.length < 3 || username.length > 20) {
+                    throw new HttpError(400, "Username must be 3-20 characters.");
+                }
+                const duplicate = await webDb.users.findFirst({ where: { username } });
+                if (duplicate && duplicate.ID !== id) {
+                    throw new HttpError(409, "Username is already taken.");
+                }
+                const rank = Math.min(Math.max(num(body, "rank"), 0), 2);
+                if ((rank >= 2 || Number(target.rank) >= 2) && !(await actorIsSuper(ctx))) {
+                    throw new HttpError(403, "Only a super admin can modify a super admin.");
+                }
+                if (Number(target.rank) >= 2 && rank < 2) {
+                    const supers = await webDb.users.count({ where: { rank: 2 } });
+                    if (supers <= 1) throw new HttpError(400, "Cannot demote the last super admin.");
+                }
                 const data: Record<string, string | number> = {
-                    username: str(body, "username"),
-                    rank: num(body, "rank"),
+                    username,
+                    rank,
+                    status: num(body, "status") === 1 ? 1 : 0,
                     membership: num(body, "membership"),
                     expire: num(body, "expire"),
                 };
                 const pw = str(body, "password");
-                if (pw) data.password = await bcrypt.hash(pw, 12);
+                if (pw) {
+                    if (pw.length < 10) throw new HttpError(400, "Password must be at least 10 characters.");
+                    data.password = await bcrypt.hash(pw, 12);
+                }
                 await webDb.users.update({ where: { ID: id }, data });
-                ctx.json({ success: "User updated." });
-            } else if (str(body, "action") === "delete") {
+                await audit(ctx, "user.update", username);
+                if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                    ctx.json({ success: "User updated." });
+                } else ctx.redirect("/web/admin/users");
+            } else if (action === "delete") {
+                if (session?.userId === id) throw new HttpError(400, "You cannot delete your own account.");
+                const target = await webDb.users.findUnique({ where: { ID: id } });
+                if (!target) throw new HttpError(404, "User not found.");
+                if (Number(target.rank) >= 2) {
+                    if (!(await actorIsSuper(ctx))) {
+                        throw new HttpError(403, "Only a super admin can delete a super admin.");
+                    }
+                    const supers = await webDb.users.count({ where: { rank: 2 } });
+                    if (supers <= 1) throw new HttpError(400, "Cannot delete the last super admin.");
+                }
                 await webDb.users.delete({ where: { ID: id } });
-                ctx.json({ success: "User deleted." });
+                await audit(ctx, "user.delete", target.username);
+                if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                    ctx.json({ success: "User deleted." });
+                } else ctx.redirect("/web/admin/users");
             } else throw new HttpError(400, "Unknown action.");
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [30, 60_000] }
     );
 
     app.get(
@@ -101,26 +220,39 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/plans",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
-            if (str(body, "action") === "create") {
-                await webDb.plans.create({
-                    data: {
-                        name: str(body, "name"),
-                        price: num(body, "price"),
-                        length: num(body, "length"),
-                        mbt: num(body, "mbt"),
-                        concurrents: num(body, "concurrents"),
-                        vip: num(body, "vip"),
-                        unit: "days",
-                        private: 0,
-                    },
-                });
-                ctx.json({ success: "Plan created." });
-            } else if (str(body, "action") === "delete") {
-                await webDb.plans.delete({ where: { ID: num(body, "id") } });
-                ctx.json({ success: "Plan deleted." });
+            const action = str(body, "action");
+            const payload = {
+                name: str(body, "name").trim(),
+                price: money(body.price),
+                length: num(body, "length"),
+                mbt: num(body, "mbt"),
+                concurrents: num(body, "concurrents"),
+                vip: num(body, "vip") ? 1 : 0,
+                unit: str(body, "unit", "days") || "days",
+                private: num(body, "private") ? 1 : 0,
+            };
+            if (action === "create") {
+                if (!payload.name) throw new HttpError(400, "Plan name is required.");
+                const created = await webDb.plans.create({ data: payload });
+                await audit(ctx, "plan.create", String(created.ID));
+            } else if (action === "update") {
+                const id = num(body, "id");
+                if (!id) throw new HttpError(400, "Missing plan id.");
+                if (!payload.name) throw new HttpError(400, "Plan name is required.");
+                await webDb.plans.update({ where: { ID: id }, data: payload });
+                await audit(ctx, "plan.update", String(id));
+            } else if (action === "delete") {
+                const id = num(body, "id");
+                const inUse = await webDb.users.count({ where: { membership: id } });
+                if (inUse > 0) throw new HttpError(400, "Plan is assigned to users; reassign them first.");
+                await webDb.plans.delete({ where: { ID: id } });
+                await audit(ctx, "plan.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: "Saved." });
+            } else ctx.redirect("/web/admin/plans");
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [30, 60_000] }
     );
 
     app.get(
@@ -136,22 +268,38 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/methods",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
-            if (str(body, "action") === "create") {
-                await webDb.methods.create({
-                    data: {
-                        name: str(body, "name"),
-                        fullname: str(body, "fullname"),
-                        type: str(body, "type"),
-                        command: str(body, "command"),
-                    },
-                });
-                ctx.json({ success: "Method added." });
-            } else if (str(body, "action") === "delete") {
-                await webDb.methods.delete({ where: { id: num(body, "id") } });
-                ctx.json({ success: "Method deleted." });
+            const action = str(body, "action");
+            const payload = {
+                name: str(body, "name").trim(),
+                fullname: str(body, "fullname").trim(),
+                type: str(body, "type") === "layer7" ? "layer7" : "layer4",
+                command: str(body, "command").trim(),
+            };
+            if (action === "create") {
+                if (!payload.name || !payload.fullname) throw new HttpError(400, "Name and full name are required.");
+                await webDb.methods.create({ data: payload });
+                await audit(ctx, "method.create", payload.name);
+            } else if (action === "update") {
+                const id = num(body, "id");
+                if (!id) throw new HttpError(400, "Missing method id.");
+                if (!payload.name || !payload.fullname) throw new HttpError(400, "Name and full name are required.");
+                await webDb.methods.update({ where: { id }, data: payload });
+                await audit(ctx, "method.update", String(id));
+            } else if (action === "delete") {
+                const id = num(body, "id");
+                const servers = await webDb.api.findMany({ select: { methods: true, name: true } });
+                const method = await webDb.methods.findUnique({ where: { id } });
+                if (method && servers.some((s) => String(s.methods).toUpperCase().split(",").map((m) => m.trim()).includes(method.name.toUpperCase()))) {
+                    throw new HttpError(400, "Method is used by an API server; remove it there first.");
+                }
+                await webDb.methods.delete({ where: { id } });
+                await audit(ctx, "method.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: "Saved." });
+            } else ctx.redirect("/web/admin/methods");
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [30, 60_000] }
     );
 
     app.get(
@@ -167,21 +315,32 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/news",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
-            if (str(body, "action") === "create") {
+            const action = str(body, "action");
+            const payload = {
+                title: str(body, "title").trim(),
+                content: str(body, "content").trim(),
+            };
+            if (action === "create") {
+                if (!payload.title || !payload.content) throw new HttpError(400, "Title and content are required.");
                 await webDb.news.create({
-                    data: {
-                        title: str(body, "title"),
-                        content: str(body, "content"),
-                        date: new Date().toISOString().slice(0, 10),
-                    },
+                    data: { ...payload, date: new Date().toISOString().slice(0, 10) },
                 });
-                ctx.json({ success: "Announcement published." });
-            } else if (str(body, "action") === "delete") {
+                await audit(ctx, "news.create", payload.title);
+            } else if (action === "update") {
+                const id = num(body, "id");
+                if (!id) throw new HttpError(400, "Missing announcement id.");
+                if (!payload.title || !payload.content) throw new HttpError(400, "Title and content are required.");
+                await webDb.news.update({ where: { ID: id }, data: payload });
+                await audit(ctx, "news.update", String(id));
+            } else if (action === "delete") {
                 await webDb.news.delete({ where: { ID: num(body, "id") } });
-                ctx.json({ success: "Announcement deleted." });
+                await audit(ctx, "news.delete", String(body.id));
             } else throw new HttpError(400, "Unknown action.");
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: "Saved." });
+            } else ctx.redirect("/web/admin/news");
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [30, 60_000] }
     );
 
     app.get(
@@ -197,25 +356,45 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/servers",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
-            if (str(body, "action") === "create") {
-                await webDb.api.create({
-                    data: {
-                        name: str(body, "name"),
-                        ip: str(body, "ip"),
-                        api: "",
-                        password: str(body, "password"),
-                        slots: num(body, "slots", 10),
-                        methods: str(body, "methods", ""),
-                        vip: 0,
-                    },
-                });
-                ctx.json({ success: "Server added." });
-            } else if (str(body, "action") === "delete") {
-                await webDb.api.delete({ where: { id: num(body, "id") } });
-                ctx.json({ success: "Server deleted." });
+            const action = str(body, "action");
+            const apiUrl = str(body, "api").trim();
+            if (apiUrl && !/^https?:\/\//i.test(apiUrl)) {
+                throw new HttpError(400, "API URL must start with http:// or https://.");
+            }
+            if (apiUrl) {
+                try {
+                    new URL(apiUrl);
+                } catch {
+                    throw new HttpError(400, "API URL is invalid.");
+                }
+            }
+            const payload = {
+                name: str(body, "name").trim(),
+                api: apiUrl,
+                slots: num(body, "slots", 10),
+                methods: str(body, "methods", "").trim(),
+                vip: num(body, "vip") ? 1 : 0,
+            };
+            if (action === "create") {
+                if (!payload.name) throw new HttpError(400, "Server name is required.");
+                await webDb.api.create({ data: payload });
+                await audit(ctx, "server.create", payload.name);
+            } else if (action === "update") {
+                const id = num(body, "id");
+                if (!id) throw new HttpError(400, "Missing server id.");
+                if (!payload.name) throw new HttpError(400, "Server name is required.");
+                await webDb.api.update({ where: { id }, data: payload });
+                await audit(ctx, "server.update", String(id));
+            } else if (action === "delete") {
+                const id = num(body, "id");
+                await webDb.api.delete({ where: { id } });
+                await audit(ctx, "server.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: "Saved." });
+            } else ctx.redirect("/web/admin/servers");
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [30, 60_000] }
     );
 
     app.get(
@@ -234,43 +413,137 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/giftcards",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
-            if (str(body, "action") === "generate") {
+            const action = str(body, "action");
+            if (action === "generate") {
                 const planID = num(body, "planID");
-                const count = Math.min(num(body, "count", 1), 100);
+                if (!planID) throw new HttpError(400, "Choose a plan.");
+                const count = Math.min(Math.max(num(body, "count", 1), 1), 100);
                 const now = Math.floor(Date.now() / 1000);
-                for (let i = 0; i < count; i++) {
-                    const code =
-                        "GC-" +
-                        Math.random().toString(36).substring(2, 8).toUpperCase() +
-                        "-" +
-                        Math.random().toString(36).substring(2, 8).toUpperCase();
-                    await webDb.giftcards.create({
-                        data: { code, planID, claimedby: 0, dateClaimed: 0, date: now },
-                    });
-                }
-                ctx.json({ success: `${count} gift card(s) generated.` });
-            } else if (str(body, "action") === "delete") {
+                await withLock("giftcards", async () => {
+                    for (let i = 0; i < count; i += 1) {
+                        let code = "";
+                        for (let attempt = 0; attempt < 5; attempt += 1) {
+                            code = `GC-${randomBytes(4).toString("hex").toUpperCase()}-${randomBytes(4).toString("hex").toUpperCase()}`;
+                            const exists = await webDb.giftcards.findFirst({ where: { code } });
+                            if (!exists) break;
+                            code = "";
+                        }
+                        if (!code) throw new HttpError(500, "Could not generate a unique gift card code.");
+                        await webDb.giftcards.create({
+                            data: { code, planID, claimedby: 0, dateClaimed: 0, date: now },
+                        });
+                    }
+                });
+                await audit(ctx, "giftcard.generate", String(count));
+            } else if (action === "update") {
+                const id = num(body, "id");
+                const planID = num(body, "planID");
+                if (!id || !planID) throw new HttpError(400, "Gift card and plan are required.");
+                await webDb.giftcards.update({ where: { ID: id }, data: { planID } });
+                await audit(ctx, "giftcard.update", String(id));
+            } else if (action === "revoke") {
+                await webDb.giftcards.update({
+                    where: { ID: num(body, "id") },
+                    data: { claimedby: -1 },
+                });
+                await audit(ctx, "giftcard.revoke", String(body.id));
+            } else if (action === "delete") {
                 await webDb.giftcards.delete({ where: { ID: num(body, "id") } });
-                ctx.json({ success: "Gift card deleted." });
+                await audit(ctx, "giftcard.delete", String(body.id));
             } else throw new HttpError(400, "Unknown action.");
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: "Saved." });
+            } else ctx.redirect("/web/admin/giftcards");
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [30, 60_000] }
     );
 
     app.get(
         "/web/admin/tickets",
         async (ctx) => {
-            const tickets = await webDb.tickets.findMany({ orderBy: { date: "desc" } });
-            ctx.htmlRaw(render("web-admin-tickets", { tickets }));
+            const status = ctx.query.get("status");
+            const where =
+                status === "open"
+                    ? { status: "Waiting for admin response" }
+                    : status === "user"
+                      ? { status: "Waiting for user response" }
+                      : status === "closed"
+                        ? { status: "Closed" }
+                        : undefined;
+            const tickets = await webDb.tickets.findMany({
+                where,
+                orderBy: { date: "desc" },
+            });
+            ctx.htmlRaw(render("web-admin-tickets", { tickets, status: status ?? "all" }));
         },
         { guard: "webAdmin" }
     );
 
     app.get(
+        "/web/admin/tickets/:id",
+        async (ctx) => {
+            const id = Number(ctx.params.id);
+            const ticket = await webDb.tickets.findUnique({ where: { id } });
+            if (!ticket) ctx.throw(404, "Ticket not found");
+            const messages = await webDb.messages.findMany({
+                where: { ticketid: id },
+                orderBy: { date: "asc" },
+            });
+            ctx.htmlRaw(render("web-admin-ticket", { ticket, messages }));
+        },
+        { guard: "webAdmin" }
+    );
+
+    app.post(
+        "/web/api/admin/tickets",
+        async (ctx) => {
+            const body = (await ctx.body()) as Body;
+            const id = num(body, "id");
+            const action = str(body, "action");
+            const ticket = await webDb.tickets.findUnique({ where: { id } });
+            if (!ticket) throw new HttpError(404, "Ticket not found.");
+            if (action === "reply") {
+                const content = str(body, "content").trim();
+                if (!content) throw new HttpError(400, "Reply content is required.");
+                await webDb.messages.create({
+                    data: {
+                        ticketid: id,
+                        content,
+                        sender: actor(ctx),
+                        date: Math.floor(Date.now() / 1000),
+                    },
+                });
+                await webDb.tickets.update({
+                    where: { id },
+                    data: { status: "Waiting for user response" },
+                });
+                await audit(ctx, "ticket.reply", String(id));
+            } else if (action === "close") {
+                await webDb.tickets.update({ where: { id }, data: { status: "Closed" } });
+                await audit(ctx, "ticket.close", String(id));
+            } else if (action === "reopen") {
+                await webDb.tickets.update({
+                    where: { id },
+                    data: { status: "Waiting for admin response" },
+                });
+                await audit(ctx, "ticket.reopen", String(id));
+            } else if (action === "delete") {
+                await webDb.messages.deleteMany({ where: { ticketid: id } });
+                await webDb.tickets.delete({ where: { id } });
+                await audit(ctx, "ticket.delete", String(id));
+                ctx.redirect("/web/admin/tickets");
+                return;
+            } else throw new HttpError(400, "Unknown action.");
+            ctx.redirect("/web/admin/tickets/" + id);
+        },
+        { guard: "webAdmin", limit: [60, 60_000] }
+    );
+
+    app.get(
         "/web/admin/attacklogs",
         async (ctx) => {
-            const logs = await webDb.logs.findMany({ orderBy: { date: "desc" } });
-            ctx.htmlRaw(render("web-admin-attacklogs", { logs: logs.slice(0, 200) }));
+            const logs = await webDb.logs.findMany({ orderBy: { date: "desc" }, take: 200 });
+            ctx.htmlRaw(render("web-admin-attacklogs", { logs }));
         },
         { guard: "webAdmin" }
     );
@@ -278,8 +551,8 @@ export function registerWebAdminRoutes(app: Application): void {
     app.get(
         "/web/admin/loginlogs",
         async (ctx) => {
-            const logs = await webDb.loginlogs.findMany({ orderBy: { date: "desc" } });
-            ctx.htmlRaw(render("web-admin-loginlogs", { logs: logs.slice(0, 200) }));
+            const logs = await webDb.loginlogs.findMany({ orderBy: { date: "desc" }, take: 200 });
+            ctx.htmlRaw(render("web-admin-loginlogs", { logs }));
         },
         { guard: "webAdmin" }
     );
@@ -303,95 +576,40 @@ export function registerWebAdminRoutes(app: Application): void {
     app.post(
         "/web/api/admin/hub",
         async (ctx) => {
+            if (!features.ipstress) {
+                ctx.json({ error: "This feature is disabled." }, 403);
+                return;
+            }
             const f = await ctx.form();
-            const host = f.host?.trim();
-            const port = f.port?.trim() || "80";
-            const timeStr = f.time?.trim();
-            const methodName = f.method?.trim();
-            if (!host || !timeStr || !methodName) {
+            if (!f.host || !f.time || !f.method) {
                 throw new HttpError(400, "Host, time, and method are required.");
             }
-            const attackTime = parseInt(timeStr, 10);
-            if (isNaN(attackTime) || attackTime <= 0 || attackTime > 3600) {
-                throw new HttpError(400, "Invalid attack time.");
-            }
-            const portNum = parseInt(port, 10);
-            if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
-                throw new HttpError(400, "Invalid port. Must be between 1 and 65535.");
-            }
-            const now = Math.floor(Date.now() / 1000);
-            const apiServers = await webDb.api.findMany();
-            const matching = (
-                apiServers as Array<{ name: string; api: string; methods: string; slots: number }>
-            ).filter((s) =>
-                s.methods
-                    .split(",")
-                    .map((m) => m.trim().toUpperCase())
-                    .includes(methodName.toUpperCase())
-            );
-            if (matching.length === 0) {
-                throw new HttpError(400, "No API server supports the selected method.");
-            }
-            let best = matching[0];
-            let lowest = Infinity;
-            for (const s of matching) {
-                const activeOnServer = await webDb.logs.count({
-                    where: { stopped: 0, handler: s.name, time: { gt: 0 } },
-                });
-                const available = s.slots - activeOnServer;
-                if (available > 0 && activeOnServer < lowest) {
-                    lowest = activeOnServer;
-                    best = s;
-                }
-            }
-            if (lowest === Infinity) {
-                ctx.json({ error: "All API servers are at full capacity." }, 429);
-                return;
-            }
-            const attackUrl = best.api
-                .replace(/\[host\]/gi, host)
-                .replace(/\[port\]/gi, port)
-                .replace(/\[time\]/gi, String(attackTime))
-                .replace(/\[method\]/gi, methodName);
-            let ok = false;
             try {
-                const res = await fetch(attackUrl, {
-                    method: "GET",
-                    signal: AbortSignal.timeout(10000),
-                });
-                ok = res.ok;
-            } catch {
-                /* logged regardless */
-            }
-            await webDb.logs.create({
-                data: {
-                    user: "admin",
-                    ip: host,
-                    time: attackTime,
-                    method: methodName,
-                    postdata: port,
-                    mode: "api",
-                    ratelimit: "0",
-                    cookie: "0",
-                    date: now,
-                    chart: new Date(now * 1000).toISOString().slice(0, 19).replace("T", " "),
-                    stopped: 0,
-                    handler: best.name,
+                const result = await launchAttack({
+                    username: actor(ctx),
+                    input: {
+                        host: f.host,
+                        port: f.port || "80",
+                        time: f.time,
+                        method: f.method,
+                        serverName: f.server,
+                    },
+                    admin: true,
                     origin: "admin",
-                },
-            });
-            if (!ok) {
-                ctx.json(
-                    { error: "Attack was logged but the API server may be unreachable." },
-                    500
-                );
-                return;
+                });
+                await audit(ctx, "hub.launch", result.host);
+                ctx.json({
+                    success: `Attack launched on ${result.host}:${result.port} for ${result.seconds}s using ${result.method}.`,
+                });
+            } catch (error) {
+                if (error instanceof HttpError && error.status < 500) {
+                    ctx.json({ error: error.message }, error.status);
+                    return;
+                }
+                throw error;
             }
-            ctx.json({
-                success: `Attack launched on ${host}:${port} for ${attackTime}s using ${methodName}.`,
-            });
         },
-        { guard: "webAdmin" }
+        { guard: "webAdmin", limit: [20, 60_000] }
     );
 
     app.get(
@@ -408,6 +626,10 @@ export function registerWebAdminRoutes(app: Application): void {
                         cooldownTime: s?.cooldownTime ?? 300,
                         maxattacks: s?.maxattacks ?? 5,
                         testboots: s?.testboots ?? 1,
+                        maintaince: String(s?.maintaince ?? "0"),
+                        hasStripeSecret: Boolean(s?.stripeSecretKey),
+                        hasPaypal: Boolean(s?.paypal),
+                        hasBitcoin: Boolean(s?.bitcoin),
                     },
                 })
             );
@@ -421,7 +643,7 @@ export function registerWebAdminRoutes(app: Application): void {
             const body = (await ctx.body()) as Record<string, string>;
             const existing = await webDb.settings.findFirst();
             if (!existing) throw new HttpError(404, "Settings row not found.");
-            const updatable = [
+            const general = [
                 "sitename",
                 "url",
                 "description",
@@ -429,22 +651,30 @@ export function registerWebAdminRoutes(app: Application): void {
                 "cooldownTime",
                 "maxattacks",
                 "testboots",
-                "paypal",
-                "bitcoin",
+                "maintaince",
                 "stripePubKey",
-                "stripeSecretKey",
             ] as const;
+            const secrets = ["paypal", "bitcoin", "stripeSecretKey"] as const;
             const update: Record<string, string | number> = {};
-            for (const key of updatable) {
+            for (const key of general) {
                 if (body[key] !== undefined) update[key] = body[key];
+            }
+            for (const key of secrets) {
+                const value = str(body, key).trim();
+                if (value) update[key] = sealSecret(value);
+                if (body["clear_" + key] === "on") update[key] = "";
             }
             if (Object.keys(update).length > 0) {
                 await webDb.settings.update({
                     where: { sitename: existing.sitename },
                     data: update,
                 });
+                invalidateWebSettings();
+                await audit(ctx, "settings.update", Object.keys(update).join(","));
             }
-            ctx.json({ success: "Settings saved." });
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: "Settings saved." });
+            } else ctx.redirect("/web/admin/settings");
         },
         { guard: "webAdmin" }
     );

@@ -26,7 +26,8 @@ export const mainSessions = new SessionManager(
     "main-session",
     env.sessionSecretMain,
     env.sessionTtlSeconds,
-    env.isProd
+    env.isProd,
+    "Strict"
 );
 
 export const webSessions = new SessionManager(

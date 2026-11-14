@@ -12,10 +12,16 @@ function initAdminPanel(): void {
     if (!table) return;
 
     // ---- XHR transport (fetch does not exist in IE11) --------------------
+    function csrf(): string {
+        const meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
+        return meta ? meta.content : "";
+    }
+
     function post(url: string, idList: string): void {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("x-csrf-token", csrf());
         xhr.onreadystatechange = function () {
             if (xhr.readyState !== 4) return;
             if (xhr.status >= 200 && xhr.status < 300) {

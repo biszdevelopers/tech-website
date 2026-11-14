@@ -39,5 +39,12 @@
     </ul>
     <button type="submit">Submit</button>
 </form>
+<h3>Screenshot</h3>
+<p><img class="admin-shot" src="/uploads/<%= id %>" alt="Current screenshot"/></p>
+<form method="post" action="/api/admin/screenshot" enctype="multipart/form-data">
+    <input type="hidden" name="id" value="<%= id %>"/>
+    <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp" required/>
+    <button type="submit">Replace screenshot</button>
+</form>
 </body>
 </html>

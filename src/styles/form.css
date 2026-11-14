@@ -199,3 +199,12 @@ body {
     color: var(--color-ink-on-accent);
     border-color: transparent;
 }
+
+.submit-success {
+    margin: 0 auto 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-accent-strong);
+    background: var(--color-accent-soft);
+    border-radius: var(--radius-md);
+    color: var(--color-ink-strong);
+}

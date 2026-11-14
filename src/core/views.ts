@@ -93,7 +93,18 @@ function escapeHtml(value: unknown): string {
  * server start, forcing fresh fetches; combined with the no-cache policy this
  * makes staleness impossible.
  */
-const BUST = Date.now().toString(36);
+const BUST = readBuildId();
+
+function readBuildId(): string {
+    try {
+        const raw = readFileSync(resolve(process.cwd(), "dist", "build-id.json"), "utf8");
+        const parsed = JSON.parse(raw) as { id?: unknown };
+        if (typeof parsed.id === "string" && parsed.id) return parsed.id;
+    } catch {
+        // dev / first run: a per-boot value is fine because assets are no-cache
+    }
+    return Date.now().toString(36);
+}
 
 /**
  * Render a named view with data. Returns a safe HTML string ready for ctx.html().

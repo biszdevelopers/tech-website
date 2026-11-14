@@ -11,7 +11,11 @@
 <div id="bar">&nbsp;</div>
 
 <div id="all">
+    <% if (locals.received) { %>
+    <p class="submit-success" role="status">Thanks! Your submission was received and is waiting for review.</p>
+    <% } %>
     <form id="form" action="/api/submission" enctype="multipart/form-data" method="post">
+        <input type="hidden" name="website" value=""/>
         <h2 id="tool-name">Tool Name:</h2>
         <input type="text" class="l" placeholder="Name of Tool" name="techname"/>
 

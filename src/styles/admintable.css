@@ -150,3 +150,55 @@
 [data-theme="dark"] .AdminTable_btnEdit__zHqfB:hover {
     background: #4d84ff;
 }
+
+/* ---- admin filters + pagination ---------------------------------------- */
+.admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 14px 0;
+}
+.admin-filters input[type="search"],
+.admin-filters select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.admin-count {
+    color: #5a6d92;
+    margin-left: auto;
+}
+.admin-pager {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+}
+.admin-pager a {
+    padding: 4px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-decoration: none;
+}
+.admin-pager a.is-current {
+    background: #1a237e;
+    color: #fff;
+    border-color: #1a237e;
+}
+[data-theme="dark"] .admin-filters input[type="search"],
+[data-theme="dark"] .admin-filters select {
+    background: var(--color-input-bg);
+    border-color: var(--color-input-border);
+    color: var(--color-ink-strong);
+}
+[data-theme="dark"] .admin-pager a {
+    border-color: var(--color-border);
+    color: var(--color-ink);
+}
+
+.admin-shot {
+    max-width: 320px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}

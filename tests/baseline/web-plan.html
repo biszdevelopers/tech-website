@@ -1,269 +1,214 @@
 <!doctype html>
-<html>
-    <body>
-        <!--$-->
-        <header class="web-header">
-            <div class="web-header__inner">
-                <a class="web-header__brand" aria-label="IPstress — home" href="/web"
-                    ><span class="web-header__mark" aria-hidden="true"
-                        ><svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"></path></svg></span
-                    ><span class="web-header__name">IPstress</span></a
-                >
-                <nav class="web-header__nav" aria-label="Primary">
-                    <ul>
-                        <li><a href="/web">Home</a></li>
-                        <li><a href="/web#about">About</a></li>
-                        <li><a href="/web#plans">Plans</a></li>
-                        <li><a href="/web#faq">FAQ</a></li>
-                    </ul>
-                </nav>
-                <div class="web-header__cta">
-                    <a class="web-header__btn web-header__btn--ghost" href="/web/register"
-                        >Register</a
-                    ><a class="web-header__btn web-header__btn--solid" href="/web/login">Log in</a>
-                </div>
-            </div>
-        </header>
-        <!--$-->
-        <div class="page-breadcrumb">
-            <div class="d-flex align-items-center">
-                <h4 class="page-title text-truncate text-white font-weight-medium mb-0">Plans</h4>
-                <div class="ml-auto">
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb m-0 p-0">
-                            <li class="breadcrumb-item text-sql" aria-current="page">IPstress</li>
-                            <li class="breadcrumb-item text-muted" aria-current="page">Plans</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plans · IPstress</title>
+    
+    <link rel="icon" href="/images/favicon.png?v=601084eb97578362" />
+    
+    <link rel="stylesheet" href="/css/webtheme.css?v=601084eb97578362" />
+    
+    
+    <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script src="/js/legacy/theme-boot.js?v=601084eb97578362"></script>
+    <!--[if IE]>
+    <script src="/js/vendor/ie11-custom-properties.js?v=601084eb97578362"></script>
+    <script src="/js/legacy/ie11.js?v=601084eb97578362"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=601084eb97578362" />
+    <![endif]-->
+    
+    <script type="module" src="/js/modern/theme.js?v=601084eb97578362"></script>
+    <script nomodule src="/js/legacy/theme.js?v=601084eb97578362" defer></script>
+    
+    <script type="module" src="/js/modern/img-fallback.js?v=601084eb97578362"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=601084eb97578362" defer></script>
+    
+    <script type="module" src="/js/modern/scroll-top.js?v=601084eb97578362"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=601084eb97578362" defer></script>
+    
+<meta name="csrf-token" content="6460e975784349797581804aad3d266a10f2b44fe88ec213056611a355ae2d00"/></head>
+<body>
+
+<header class="web-header">
+    <div class="web-header__inner">
+        <a class="web-header__brand" aria-label="IPstress — home" href="/web">
+            <span class="web-header__mark" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"></path>
+                </svg>
+            </span>
+            <span class="web-header__name">IPstress</span>
+        </a>
+        <nav class="web-header__nav" aria-label="Primary">
+            <ul>
+                <li><a href="/web">Home</a></li>
+                <li><a href="/web#about">About</a></li>
+                <li><a href="/web#plans">Plans</a></li>
+                <li><a href="/web#faq">FAQ</a></li>
+            </ul>
+        </nav>
+        <div class="web-header__cta">
+            <button id="theme-toggle" class="theme_btn" type="button" aria-label="Toggle dark mode"
+                    aria-pressed="false" title="Toggle dark mode (Alt+T)">
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <line x1="12" y1="2" x2="12" y2="5"></line>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                    <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"></line>
+                    <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"></line>
+                    <line x1="2" y1="12" x2="5" y2="12"></line>
+                    <line x1="19" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"></line>
+                    <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"></line>
+                </svg>
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+                </svg>
+            </button>
+            <a class="web-header__btn web-header__btn--ghost" href="/web/register">Register</a>
+            <a class="web-header__btn web-header__btn--solid" href="/web/login">Log in</a>
         </div>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-4 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="text-center text-uppercase mt-3 mb-4">Bronze</h5>
-                            <h3 class="text-center font-weight-light">5.99<!-- -->¥</h3>
-                            <p class="text-muted text-center mb-4 font-weight-light">
-                                Duration:
-                                <!-- -->7<!-- -->
-                                day<!-- -->s
-                            </p>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Max Attack Time: <b>1<!-- -->s</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Concurrents: <b>1</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <b>Unlimited Attacks</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->VIP:<!-- -->
-                                    <span
-                                        style="color: #da4453; font-weight: bold"
-                                        class="fa fa-times"
-                                    ></span>
-                                </p>
-                            </div>
-                            <a
-                                class="link-effect"
-                                href="https://t.me/UsdtNL_bot"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                ><button
-                                    class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3"
-                                    type="button"
-                                >
-                                    Buy Now
-                                </button></a
-                            >
+    </div>
+</header>
+
+<div class="page-breadcrumb">
+    <div class="d-flex align-items-center">
+        <h4 class="page-title text-truncate text-white font-weight-medium mb-0">Plans</h4>
+        <div class="ml-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0 p-0">
+                    <li class="breadcrumb-item text-sql" aria-current="page">IPstress</li>
+                    <li class="breadcrumb-item text-muted" aria-current="page">Plans</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="text-center text-uppercase mt-3 mb-4">Bronze</h5>
+                        <h3 class="text-center font-weight-light">5.99¥</h3>
+                        <p class="text-muted text-center mb-4 font-weight-light"> Duration: 7 days </p>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Max Attack Time: <b>1s</b> </p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="text-center text-uppercase mt-3 mb-4">Silver</h5>
-                            <h3 class="text-center font-weight-light">14.99<!-- -->¥</h3>
-                            <p class="text-muted text-center mb-4 font-weight-light">
-                                Duration:
-                                <!-- -->30<!-- -->
-                                day<!-- -->s
-                            </p>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Max Attack Time: <b>1<!-- -->s</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Concurrents: <b>3</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <b>Unlimited Attacks</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->VIP:<!-- -->
-                                    <span
-                                        style="color: #da4453; font-weight: bold"
-                                        class="fa fa-times"
-                                    ></span>
-                                </p>
-                            </div>
-                            <a
-                                class="link-effect"
-                                href="https://t.me/UsdtNL_bot"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                ><button
-                                    class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3"
-                                    type="button"
-                                >
-                                    Buy Now
-                                </button></a
-                            >
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Concurrents: <b>1</b> </p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="text-center text-uppercase mt-3 mb-4">Gold</h5>
-                            <h3 class="text-center font-weight-light">29.99<!-- -->¥</h3>
-                            <p class="text-muted text-center mb-4 font-weight-light">
-                                Duration:
-                                <!-- -->30<!-- -->
-                                day<!-- -->s
-                            </p>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Max Attack Time: <b>1<!-- -->s</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Concurrents: <b>5</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <b>Unlimited Attacks</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->VIP:<!-- -->
-                                    <span
-                                        style="color: #22ca80; font-weight: bold"
-                                        class="fa fa-check"
-                                    ></span>
-                                </p>
-                            </div>
-                            <a
-                                class="link-effect"
-                                href="https://t.me/UsdtNL_bot"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                ><button
-                                    class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3"
-                                    type="button"
-                                >
-                                    Buy Now
-                                </button></a
-                            >
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> <b>Unlimited Attacks</b> </p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="text-center text-uppercase mt-3 mb-4">Diamond</h5>
-                            <h3 class="text-center font-weight-light">74.99<!-- -->¥</h3>
-                            <p class="text-muted text-center mb-4 font-weight-light">
-                                Duration:
-                                <!-- -->90<!-- -->
-                                day<!-- -->s
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> VIP:
+                                
+                                    <span class="plan-no fa fa-times"></span>
+                                
                             </p>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Max Attack Time: <b>1<!-- -->s</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->Concurrents: <b>10</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <b>Unlimited Attacks</b>
-                                </p>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <p>
-                                    <i class="fa fa-minus" aria-hidden="true"></i>
-                                    <!-- -->VIP:<!-- -->
-                                    <span
-                                        style="color: #22ca80; font-weight: bold"
-                                        class="fa fa-check"
-                                    ></span>
-                                </p>
-                            </div>
-                            <a
-                                class="link-effect"
-                                href="https://t.me/UsdtNL_bot"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                ><button
-                                    class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3"
-                                    type="button"
-                                >
-                                    Buy Now
-                                </button></a
-                            >
                         </div>
+                        <a class="link-effect" href="https://t.me/UsdtNL_bot" target="_blank" rel="noopener noreferrer">
+                            <button class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3" type="button"> Buy Now </button>
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
-        <!--/$--><!--/$-->
-    </body>
+        
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="text-center text-uppercase mt-3 mb-4">Silver</h5>
+                        <h3 class="text-center font-weight-light">14.99¥</h3>
+                        <p class="text-muted text-center mb-4 font-weight-light"> Duration: 30 days </p>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Max Attack Time: <b>1s</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Concurrents: <b>3</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> <b>Unlimited Attacks</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> VIP:
+                                
+                                    <span class="plan-no fa fa-times"></span>
+                                
+                            </p>
+                        </div>
+                        <a class="link-effect" href="https://t.me/UsdtNL_bot" target="_blank" rel="noopener noreferrer">
+                            <button class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3" type="button"> Buy Now </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="text-center text-uppercase mt-3 mb-4">Gold</h5>
+                        <h3 class="text-center font-weight-light">29.99¥</h3>
+                        <p class="text-muted text-center mb-4 font-weight-light"> Duration: 30 days </p>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Max Attack Time: <b>1s</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Concurrents: <b>5</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> <b>Unlimited Attacks</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> VIP:
+                                
+                                    <span class="plan-yes fa fa-check"></span>
+                                
+                            </p>
+                        </div>
+                        <a class="link-effect" href="https://t.me/UsdtNL_bot" target="_blank" rel="noopener noreferrer">
+                            <button class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3" type="button"> Buy Now </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-md-4 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="text-center text-uppercase mt-3 mb-4">Diamond</h5>
+                        <h3 class="text-center font-weight-light">74.99¥</h3>
+                        <p class="text-muted text-center mb-4 font-weight-light"> Duration: 90 days </p>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Max Attack Time: <b>1s</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Concurrents: <b>10</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> <b>Unlimited Attacks</b> </p>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <p> <i class="fa fa-minus" aria-hidden="true"></i> VIP:
+                                
+                                    <span class="plan-yes fa fa-check"></span>
+                                
+                            </p>
+                        </div>
+                        <a class="link-effect" href="https://t.me/UsdtNL_bot" target="_blank" rel="noopener noreferrer">
+                            <button class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3" type="button"> Buy Now </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        
+    </div>
+</div>
+</body>
 </html>

@@ -34,6 +34,13 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label class="text-white">Status</label>
+                            <select class="form-control" name="status">
+                                <option value="0"<%- Number(user.status) !== 1 ? ' selected' : '' %>>Active</option>
+                                <option value="1"<%- Number(user.status) === 1 ? ' selected' : '' %>>Banned</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label class="text-white">Expire (Unix timestamp)</label>
                             <input class="form-control" type="number" name="expire" value="<%= user.expire %>"/>
                         </div>

@@ -1,0 +1,18 @@
+<%- include('partials/head', { title: 'Import CSV · BIBS·C Tech Tools' }) %>
+<%- include('partials/navbar') %>
+<div id="adminTopbar"><h1>Import CSV</h1></div>
+<div id="adminNav">
+    <ul>
+        <li><a href="/admin">&#8592; Back to Admin</a></li>
+    </ul>
+</div>
+<form method="post" action="/api/admin/import">
+    <p>Paste CSV with a header row. Required columns: <code>name,link,display</code>.
+        Optional: <code>id,tl1,tl2,tl3,tl4,username,contact,accepted</code> plus the
+        strand columns (<code>r,tp,mt,ar,u,mdl,ra,rotech,ls,roththink,eost,ef,rte,dloi,raaoc</code>).
+        Use <code>1</code> for true flags. Rows with an existing <code>id</code> are updated.</p>
+    <textarea name="csv" rows="20" cols="120" required placeholder="name,link,display,tl1,tl2,tl3,tl4,accepted"></textarea>
+    <p><button type="submit">Import</button></p>
+</form>
+</body>
+</html>
