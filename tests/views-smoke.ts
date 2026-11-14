@@ -119,6 +119,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         expiry: "1/1/2027",
         runningAttacks: 1,
         totalAttacks: 9,
+        isAdmin: false,
     },
     "web-plan": {
         plans: [{ ID: 1, name: "Gold", price: 10, length: 30, mbt: 3600, concurrents: 3, vip: 1 }],

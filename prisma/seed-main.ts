@@ -136,7 +136,7 @@ function splitSection(block: string): ParsedTool[] {
 async function main(): Promise<void> {
     console.log("Seeding main database...");
 
-    const hashedPW = await bcrypt.hash("admin123", 10);
+    const hashedPW = await bcrypt.hash("admin123", 12);
     await prisma.login.upsert({
         where: { User: "admin" },
         update: { PW: hashedPW },

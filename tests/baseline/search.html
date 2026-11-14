@@ -1,81 +1,116 @@
 <!doctype html>
-<html>
-    <body>
-        <!--$-->
-        <div id="cover">
-            <div id="topbar"><h1>BIBS·C Tech Tools</h1></div>
-            <nav id="navbar" aria-label="Primary">
-                <ul id="nav">
-                    <li>
-                        <a href="/#front"
-                            ><span>Home</span><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl1"
-                            ><span>Knowing (TL1)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl2"
-                            ><span>Strategies (TL2)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl3"
-                            ><span>Evidence (TL3)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl4"
-                            ><span>Crafting (TL4)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/search"
-                            ><span>Search</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <div id="search"></div>
-        <div id="subhead">
-            <h1 id="search-results">Search Tech Tools</h1>
-            <form id="search-form" class="search-form" action="/search" method="get">
-                <input
-                    type="text"
-                    id="search-input"
-                    placeholder="Search tech tools by name, description, or tag…"
-                    aria-label="Search tech tools"
-                    name="query"
-                    value=""
-                /><button type="submit" id="search-submit">Search</button>
-            </form>
-            <p class="jump-menu">
-                Jump to: <a href="#search-results">Results</a> · <a href="/#front">Home</a>
-            </p>
-        </div>
-        <div id="bar"> </div>
-        <div id="all">
-            <div class="techtip-wrap" id="results">
-                <div><h4>Type a search term above to look up a tool.</h4></div>
-            </div>
-        </div>
-        <button id="topbutton" title="Go to top">Top</button>
-        <footer id="footer" data-built-by="richie-rich90454">
-            <p id="footer-nav">
-                <a href="/tl1">Knowing (TL1)</a> · <a href="/tl2">Strategies (TL2)</a> ·
-                <a href="/tl3">Evidence (TL3)</a> · <a href="/tl4">Crafting (TL4)</a> ·
-                <a href="/search">Search</a>
-            </p>
-            <p id="footer-copy"><b>© 2026 BIBS·C Tech Tips</b></p>
-        </footer>
-        <!--/$-->
-    </body>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search Tech Tools · BIBS·C Tech Tools</title>
+    
+    <meta name="description" content="Search tech tools by name, description, or strand tag." />
+    
+    <link rel="icon" href="/images/favicon.png?v=5466fb059e6a0abd" />
+    
+    <link rel="stylesheet" href="/css/globals.css?v=5466fb059e6a0abd" />
+    
+    
+    <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script src="/js/legacy/theme-boot.js?v=5466fb059e6a0abd"></script>
+    <!--[if IE]>
+    <script src="/js/vendor/ie11-custom-properties.js?v=5466fb059e6a0abd"></script>
+    <script src="/js/legacy/ie11.js?v=5466fb059e6a0abd"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=5466fb059e6a0abd" />
+    <![endif]-->
+    
+    <script type="module" src="/js/modern/theme.js?v=5466fb059e6a0abd"></script>
+    <script nomodule src="/js/legacy/theme.js?v=5466fb059e6a0abd" defer></script>
+    
+    <script type="module" src="/js/modern/img-fallback.js?v=5466fb059e6a0abd"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=5466fb059e6a0abd" defer></script>
+    
+    <script type="module" src="/js/modern/scroll-top.js?v=5466fb059e6a0abd"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=5466fb059e6a0abd" defer></script>
+    
+<meta name="csrf-token" content="99ff2fbfe7b9ba878f4d5b505bee0bbde1da1184900d7ad9433337788262e39d"/></head>
+<body>
+
+<div id="cover">
+    <div id="topbar">
+        <h1>BIBS·C Tech Tools</h1>
+        <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
+                aria-pressed="false" title="Toggle dark mode (Alt+T)">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"></line>
+                <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="22" y2="12"></line>
+                <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"></line>
+                <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"></line>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+            </svg>
+        </button>
+    </div>
+    <nav id="navbar" aria-label="Primary">
+        <ul id="nav">
+            <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+        </ul>
+    </nav>
+</div>
+
+
+<div id="search"></div>
+
+<div id="subhead">
+    <h1 id="search-results">Search Tech Tools</h1>
+    <form id="search-form" class="search-form" action="/search" method="get"><input type="hidden" name="_csrf" value="99ff2fbfe7b9ba878f4d5b505bee0bbde1da1184900d7ad9433337788262e39d"/>
+        <input type="text" id="search-input" placeholder="Search tech tools by name, description, or tag…"
+               aria-label="Search tech tools" name="query" value=""/>
+        <button type="submit" id="search-submit">Search</button>
+    </form>
+    
+    <p class="jump-menu">
+        Jump to: <a href="#search-results">Results</a>
+        · <a href="/#front">Home</a>
+    </p>
+</div>
+
+<div id="bar">&nbsp;</div>
+
+<div id="all">
+    <div class="techtip-wrap" id="results">
+        
+        <div><h4>Type a search term above to look up a tool.</h4></div>
+        
+    </div>
+</div>
+
+<button id="topbutton" title="Go to top">Top</button>
+
+<footer id="footer" data-built-by="richie-rich90454">
+    <p id="footer-nav">
+        <a href="/tl1">Knowing (TL1)</a>
+        <a href="/tl2">Strategies (TL2)</a>
+        <a href="/tl3">Evidence (TL3)</a>
+        <a href="/tl4">Crafting (TL4)</a>
+        <a href="/search">Search</a>
+        <a href="/submission">Submit a Tool</a>
+        <a href="/docs">Docs</a>
+    </p>
+    <p id="footer-copy">
+        <b>&copy; 2026 BIBS&middot;C Tech Tools</b>
+        <a href="/login">Admin</a>
+    </p>
+</footer>
+
+</body>
 </html>

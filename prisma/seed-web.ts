@@ -109,8 +109,10 @@ async function main() {
     await prisma.users.upsert({
         where: { ID: 1 },
         update: {
+            username: "admin",
             password: hashedPassword,
             rank: 2,
+            status: 0,
         },
         create: {
             ID: 1,

@@ -150,6 +150,7 @@ export function registerWebRoutes(app: Application): void {
                     expiry: exp,
                     runningAttacks,
                     totalAttacks,
+                    isAdmin: Number(user.rank) >= 1,
                 })
             );
         },

@@ -1,74 +1,86 @@
 <!doctype html>
-<html>
-    <body>
-        <!--$-->
-        <div id="cover">
-            <div id="topbar"><h1>BIBS·C Tech Tools</h1></div>
-            <nav id="navbar" aria-label="Primary">
-                <ul id="nav">
-                    <li>
-                        <a href="/#front"
-                            ><span>Home</span><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl1"
-                            ><span>Knowing (TL1)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl2"
-                            ><span>Strategies (TL2)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl3"
-                            ><span>Evidence (TL3)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/tl4"
-                            ><span>Crafting (TL4)</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                    <li>
-                        <a href="/search"
-                            ><span>Search</span
-                            ><span class="nav-underline" aria-hidden="true"></span
-                        ></a>
-                    </li>
-                </ul>
-            </nav>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login · BIBS·C Tech Tools</title>
+    
+    <link rel="icon" href="/images/favicon.png?v=5466fb059e6a0abd" />
+    
+    <link rel="stylesheet" href="/css/globals.css?v=5466fb059e6a0abd" />
+    
+    <link rel="stylesheet" href="/css/login.css?v=5466fb059e6a0abd" />
+    
+    
+    <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script src="/js/legacy/theme-boot.js?v=5466fb059e6a0abd"></script>
+    <!--[if IE]>
+    <script src="/js/vendor/ie11-custom-properties.js?v=5466fb059e6a0abd"></script>
+    <script src="/js/legacy/ie11.js?v=5466fb059e6a0abd"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=5466fb059e6a0abd" />
+    <![endif]-->
+    
+    <script type="module" src="/js/modern/theme.js?v=5466fb059e6a0abd"></script>
+    <script nomodule src="/js/legacy/theme.js?v=5466fb059e6a0abd" defer></script>
+    
+    <script type="module" src="/js/modern/img-fallback.js?v=5466fb059e6a0abd"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=5466fb059e6a0abd" defer></script>
+    
+    <script type="module" src="/js/modern/scroll-top.js?v=5466fb059e6a0abd"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=5466fb059e6a0abd" defer></script>
+    
+<meta name="csrf-token" content="bb312eaec1b2660979f74388a338f3ee3460c8da3ba65665480d2b690a3c2a66"/></head>
+<body>
+
+<div id="cover">
+    <div id="topbar">
+        <h1>BIBS·C Tech Tools</h1>
+        <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
+                aria-pressed="false" title="Toggle dark mode (Alt+T)">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"></line>
+                <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="22" y2="12"></line>
+                <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"></line>
+                <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"></line>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+            </svg>
+        </button>
+    </div>
+    <nav id="navbar" aria-label="Primary">
+        <ul id="nav">
+            <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+        </ul>
+    </nav>
+</div>
+
+
+<div id="main">
+    <div id="big">
+        <h1 id="login-heading">Login</h1>
+        <div id="login">
+            <h2 id="login-info"> You have reached an admin-only access site.<br/>If you&#39;re an admin, log in with your credentials. </h2>
+            <form id="login-form" method="post" action="/api/auth/login"><input type="hidden" name="_csrf" value="bb312eaec1b2660979f74388a338f3ee3460c8da3ba65665480d2b690a3c2a66"/>
+                <p><input type="text" placeholder="Username" required name="username"/></p>
+                <p><input type="password" placeholder="Password" required name="password"/></p>
+                <button type="submit">Login</button>
+            </form>
         </div>
-        <div id="main">
-            <div id="big">
-                <h1 id="login-heading">Login</h1>
-                <div id="login">
-                    <h2 id="login-info">
-                        You have reached an admin-only access site.<br />If you&#x27;re an admin,
-                        log in with your credentials.
-                    </h2>
-                    <form id="login-form" method="post">
-                        <p>
-                            <input type="text" placeholder="Username" required="" name="username" />
-                        </p>
-                        <p>
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                required=""
-                                name="password"
-                            />
-                        </p>
-                        <button type="submit">Login</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!--/$-->
-    </body>
+    </div>
+</div>
+
+</body>
 </html>
