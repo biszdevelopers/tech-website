@@ -13,7 +13,7 @@ import { webSessions, requireWebUser } from "./guards";
 import { features } from "../config/features";
 import { env } from "../config/env";
 import { rateLimit } from "../lib/rate-limit";
-import { webDb } from "../lib/db/web";
+import { webDb, expireFinishedAttacks } from "../lib/db/web";
 import { webLoginSchema, webRegisterSchema } from "../lib/validations/web-auth";
 import { render } from "../core/views";
 import { randomInt } from "node:crypto";
@@ -81,6 +81,16 @@ export function registerWebRoutes(app: Application): void {
             username: user.username,
             rank: Number(user.rank),
         });
+        await webDb.loginlogs
+            .create({
+                data: {
+                    username: user.username,
+                    ip: ctx.ip,
+                    date: Math.floor(Date.now() / 1000),
+                    country: "",
+                },
+            })
+            .catch(() => undefined);
         ctx.redirect("/web/dashboard", 303);
     });
 
@@ -159,6 +169,7 @@ export function registerWebRoutes(app: Application): void {
         "/web/dashboard",
         async (ctx) => {
             const user = await currentUser(ctx);
+            expireFinishedAttacks();
             const plan = user.membership
                 ? await webDb.plans.findUnique({ where: { ID: user.membership } })
                 : null;
@@ -173,6 +184,7 @@ export function registerWebRoutes(app: Application): void {
             ctx.htmlRaw(
                 render("web-dashboard", {
                     signedIn: true,
+                    purchased: ctx.query.get("purchased") === "1",
                     planName,
                     maxTime,
                     maxConcurrents: maxConc,
@@ -206,6 +218,8 @@ export function registerWebRoutes(app: Application): void {
                     signedIn: true,
                     methods: methods as never[],
                     servers: servers as never[],
+                    error: ctx.query.get("error") ?? "",
+                    launched: ctx.query.get("launched") === "1",
                 })
             );
         },
@@ -215,22 +229,33 @@ export function registerWebRoutes(app: Application): void {
     app.post(
         "/web/api/hub",
         async (ctx) => {
+            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            const back = (error?: string): void => {
+                ctx.redirect(
+                    "/web/hub?" + (error ? "error=" + encodeURIComponent(error) : "launched=1"),
+                    303
+                );
+            };
+            const fail = (status: number, message: string): void => {
+                if (acceptJson) ctx.json({ error: message }, status);
+                else back(message);
+            };
             if (!features.ipstress) {
-                ctx.json({ error: "This feature is disabled." }, 403);
+                fail(403, "This feature is disabled.");
                 return;
             }
             if (!rateLimit("hub:" + ctx.ip, 20, 60_000)) {
-                ctx.json({ error: "Rate limit exceeded." }, 429);
+                fail(429, "Rate limit exceeded.");
                 return;
             }
             const user = await currentUser(ctx);
             if (Number(user.membership) === 0) {
-                ctx.json({ error: "You need an active membership to launch attacks." }, 403);
+                fail(403, "You need an active membership to launch attacks.");
                 return;
             }
             const now = Math.floor(Date.now() / 1000);
             if (user.expire && user.expire < now) {
-                ctx.json({ error: "Your membership has expired." }, 403);
+                fail(403, "Your membership has expired.");
                 return;
             }
             const plan = await webDb.plans.findUnique({ where: { ID: user.membership } });
@@ -238,7 +263,8 @@ export function registerWebRoutes(app: Application): void {
 
             const form = await ctx.form();
             if (!form.host || !form.time || !form.method) {
-                throw new HttpError(400, "Host, time, and method are required.");
+                fail(400, "Host, time, and method are required.");
+                return;
             }
             try {
                 const result = await launchAttack({
@@ -254,12 +280,12 @@ export function registerWebRoutes(app: Application): void {
                     admin: false,
                     origin: "web",
                 });
-                ctx.json({
-                    success: `Attack launched on ${result.host}:${result.port} for ${result.seconds}s using ${result.method}.`,
-                });
+                const message = `Attack launched on ${result.host}:${result.port} for ${result.seconds}s using ${result.method}.`;
+                if (acceptJson) ctx.json({ success: message });
+                else back();
             } catch (error) {
                 if (error instanceof HttpError && error.status < 500) {
-                    ctx.json({ error: error.message }, error.status);
+                    fail(error.status, error.message);
                     return;
                 }
                 throw error;
@@ -272,6 +298,7 @@ export function registerWebRoutes(app: Application): void {
         "/web/api/hub/stats",
         async (ctx) => {
             const user = await requireWebUser(ctx);
+            expireFinishedAttacks();
             const runningAttacks = await webDb.logs.findMany({
                 where: { stopped: 0, time: { gt: 0 }, user: user.username },
                 select: {
@@ -306,9 +333,9 @@ export function registerWebRoutes(app: Application): void {
                     user,
                     plan,
                     expiry: new Date(user.expire * 1000).toLocaleDateString("en-US"),
-                    refLink: user.referral
-                        ? `${env.siteOrigin}/web/register?ref=${user.referral}`
-                        : "N/A",
+                    refLink: user.ID > 0 ? `${env.siteOrigin}/web/register?ref=${user.ID}` : "N/A",
+                    updated: ctx.query.get("updated") === "1",
+                    error: ctx.query.get("error") ?? "",
                 })
             );
         },
@@ -319,27 +346,40 @@ export function registerWebRoutes(app: Application): void {
         "/web/api/profile/password",
         async (ctx) => {
             const user = await currentUser(ctx);
-            const f = await ctx.form();
-            const oldP = f.old?.trim();
-            const newP = f.new?.trim();
-            const repP = f.rnew?.trim();
-            if (!oldP || !newP || !repP) {
-                throw new HttpError(400, "All fields are required.");
+            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            try {
+                const f = await ctx.form();
+                const oldP = f.old?.trim();
+                const newP = f.new?.trim();
+                const repP = f.rnew?.trim();
+                if (!oldP || !newP || !repP) {
+                    throw new HttpError(400, "All fields are required.");
+                }
+                if (!rateLimit("password:" + user.ID, 5, 3_600_000)) {
+                    throw new HttpError(429, "Too many password changes. Try again later.");
+                }
+                if (newP.length < 10) {
+                    throw new HttpError(400, "New password must be at least 10 characters.");
+                }
+                if (newP !== repP) throw new HttpError(400, "Passwords do not match.");
+                const check = await verifyPassword(oldP, user.password);
+                if (!check.ok) throw new HttpError(401, "Current password is incorrect.");
+                await webDb.users.update({
+                    where: { ID: user.ID },
+                    data: { password: await bcrypt.hash(newP, 12) },
+                });
+                if (acceptJson) {
+                    ctx.json({ success: "Password changed successfully." });
+                } else {
+                    ctx.redirect("/web/profile?updated=1", 303);
+                }
+            } catch (error) {
+                if (!acceptJson && error instanceof HttpError && error.status < 500) {
+                    ctx.redirect("/web/profile?error=" + encodeURIComponent(error.message), 303);
+                    return;
+                }
+                throw error;
             }
-            if (!rateLimit("password:" + user.ID, 5, 3_600_000)) {
-                throw new HttpError(429, "Too many password changes. Try again later.");
-            }
-            if (newP.length < 10) {
-                throw new HttpError(400, "New password must be at least 10 characters.");
-            }
-            if (newP !== repP) throw new HttpError(400, "Passwords do not match.");
-            const check = await verifyPassword(oldP, user.password);
-            if (!check.ok) throw new HttpError(401, "Current password is incorrect.");
-            await webDb.users.update({
-                where: { ID: user.ID },
-                data: { password: await bcrypt.hash(newP, 12) },
-            });
-            ctx.json({ success: "Password changed successfully." });
         },
         { guard: "webUser" }
     );
@@ -354,29 +394,46 @@ export function registerWebRoutes(app: Application): void {
             }
             const f = await ctx.form();
             const code = f.code?.trim().toUpperCase();
-            if (!code) throw new HttpError(400, "Gift card code is required.");
-            const result = await withLock("gift:" + code, async () => {
-                const card = await webDb.giftcards.findFirst({ where: { code, claimedby: 0 } });
-                if (!card) throw new HttpError(400, "Invalid or already claimed gift card code.");
-                const plan = await webDb.plans.findUnique({ where: { ID: card.planID } });
-                if (!plan) {
-                    throw new HttpError(
-                        400,
-                        "Plan associated with this gift card no longer exists."
-                    );
+            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            try {
+                if (!code) throw new HttpError(400, "Gift card code is required.");
+                const result = await withLock("gift:" + code, async () => {
+                    const card = await webDb.giftcards.findFirst({ where: { code, claimedby: 0 } });
+                    if (!card)
+                        throw new HttpError(400, "Invalid or already claimed gift card code.");
+                    const plan = await webDb.plans.findUnique({ where: { ID: card.planID } });
+                    if (!plan) {
+                        throw new HttpError(
+                            400,
+                            "Plan associated with this gift card no longer exists."
+                        );
+                    }
+                    const now = Math.floor(Date.now() / 1000);
+                    await webDb.giftcards.update({
+                        where: { ID: card.ID },
+                        data: { claimedby: user.ID, dateClaimed: now },
+                    });
+                    await webDb.users.update({
+                        where: { ID: user.ID },
+                        data: {
+                            membership: plan.ID,
+                            expire: now + plan.length * (plan.unit === "hours" ? 3600 : 86400),
+                        },
+                    });
+                    return plan.name;
+                });
+                if (acceptJson) {
+                    ctx.json({ success: `Gift card redeemed! You now have the ${result} plan.` });
+                } else {
+                    ctx.redirect("/web/giftcards?redeemed=" + encodeURIComponent(result), 303);
                 }
-                const now = Math.floor(Date.now() / 1000);
-                await webDb.giftcards.update({
-                    where: { ID: card.ID },
-                    data: { claimedby: user.ID, dateClaimed: now },
-                });
-                await webDb.users.update({
-                    where: { ID: user.ID },
-                    data: { membership: plan.ID, expire: now + plan.length * 86400 },
-                });
-                return plan.name;
-            });
-            ctx.json({ success: `Gift card redeemed! You now have the ${result} plan.` });
+            } catch (error) {
+                if (error instanceof HttpError && error.status < 500 && !acceptJson) {
+                    ctx.redirect("/web/giftcards?error=" + encodeURIComponent(error.message), 303);
+                    return;
+                }
+                throw error;
+            }
         },
         { guard: "webUser" }
     );
@@ -386,9 +443,8 @@ export function registerWebRoutes(app: Application): void {
         "/web/api/affiliate",
         async (ctx) => {
             const user = await currentUser(ctx);
-            const referralLink = user.referral
-                ? `${env.siteOrigin}/web/register?ref=${user.referral}`
-                : "N/A";
+            const referralLink =
+                user.ID > 0 ? `${env.siteOrigin}/web/register?ref=${user.ID}` : "N/A";
             const referralCount = await webDb.users.count({
                 where: { referedBy: user.ID },
             });
@@ -408,11 +464,11 @@ export function registerWebRoutes(app: Application): void {
             const user = await currentUser(ctx);
             const PRIZES = [
                 { id: 0, name: "10\u00a5 Balance", points: 10 },
-                { id: 1, name: "5 Extra Attack Seconds", points: 0 },
+                { id: 1, name: "5\u00a5 Balance", points: 5 },
                 { id: 2, name: "50\u00a5 Balance", points: 50 },
                 { id: 3, name: "No Prize", points: 0 },
                 { id: 4, name: "20\u00a5 Balance", points: 20 },
-                { id: 5, name: "1 Hour VIP", points: 0 },
+                { id: 5, name: "15\u00a5 Balance", points: 15 },
                 { id: 6, name: "100\u00a5 Balance", points: 100 },
                 { id: 7, name: "No Prize", points: 0 },
             ];

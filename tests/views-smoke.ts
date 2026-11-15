@@ -239,6 +239,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             maxattacks: 5,
             testboots: 1,
             maintaince: "0",
+            stripePubKey: "",
             hasStripeSecret: false,
             hasPaypal: false,
             hasBitcoin: false,

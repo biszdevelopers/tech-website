@@ -261,13 +261,25 @@ registerPaymentRoutes(app);
 // Web user pages.
 app.get("/web/plan", async (ctx) => {
     const plans = await webDb.plans.findMany({ orderBy: { price: "asc" } });
-    ctx.htmlRaw(render("web-plan", { plans, signedIn: isWebSignedIn(ctx) }));
+    ctx.htmlRaw(
+        render("web-plan", {
+            plans,
+            signedIn: isWebSignedIn(ctx),
+            error: ctx.query.get("error") ?? "",
+        })
+    );
 });
 app.get("/web/tickets/new", async (ctx) => {
     ctx.htmlRaw(render("web-tickets-new", { signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/giftcards", async (ctx) => {
-    ctx.htmlRaw(render("web-giftcards", { signedIn: isWebSignedIn(ctx) }));
+    ctx.htmlRaw(
+        render("web-giftcards", {
+            signedIn: isWebSignedIn(ctx),
+            redeemed: ctx.query.get("redeemed") ?? "",
+            error: ctx.query.get("error") ?? "",
+        })
+    );
 });
 app.get("/web/affiliate", async (ctx) => {
     const session = webSessions.load(ctx);
@@ -278,9 +290,8 @@ app.get("/web/affiliate", async (ctx) => {
         user === null
             ? null
             : {
-                  referralLink: user.referral
-                      ? `${env.siteOrigin}/web/register?ref=${user.referral}`
-                      : "N/A",
+                  referralLink:
+                      user.ID > 0 ? `${env.siteOrigin}/web/register?ref=${user.ID}` : "N/A",
                   referralCount: await webDb.users.count({ where: { referedBy: user.ID } }),
                   referralBalance: user.referralbalance,
               };

@@ -88,15 +88,31 @@ function initWheel(): void {
             if (xhr.status < 200 || xhr.status >= 300) {
                 wheelSpinning = false;
                 spinButton.removeAttribute("disabled");
+                const result = document.getElementById("wheel-result");
+                if (result) {
+                    let msg = "Could not spin right now.";
+                    try {
+                        const data = JSON.parse(xhr.responseText) as { error?: string };
+                        if (data.error) msg = data.error;
+                    } catch (e) {
+                        /* keep the generic message */
+                    }
+                    result.textContent = msg;
+                }
                 return;
             }
             let prizeIndex = 0;
+            let prizeName = "";
             try {
-                const data = JSON.parse(xhr.responseText) as { prize?: number };
+                const data = JSON.parse(xhr.responseText) as { prize?: number; prizeName?: string };
                 prizeIndex = data.prize || 0;
+                prizeName = data.prizeName || "";
             } catch (e) {
                 /* treat as prize 0 */
             }
+            const result = document.getElementById("wheel-result");
+            if (result)
+                result.textContent = prizeName ? "You won: " + prizeName : "Better luck next time.";
             const segments = WHEEL_PRIZES.length;
             const arc = (Math.PI * 2) / segments;
             const targetRotation = Math.PI * 2 * 5 + (segments - prizeIndex) * arc + arc / 2;

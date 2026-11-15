@@ -20,6 +20,12 @@
                 <div class="card-body">
                     <h4 class="card-title">Redeem Gift Card</h4>
                     <div class="mt-4 activity">
+                        <% if (locals.error) { %>
+                        <p class="alert alert-warning" role="alert"><%= locals.error %></p>
+                        <% } else if (locals.redeemed) { %>
+                        <p class="alert alert-success" role="status">Gift card redeemed. Your <%= locals.redeemed %> plan is active.</p>
+                        <% } %>
+                        <% if (locals.signedIn) { %>
                         <form action="/web/api/giftcards/redeem" method="post">
                             <div class="form-group">
                                 <label class="text-white" for="code">Gift Card Code</label>
@@ -28,6 +34,10 @@
                             </div>
                             <button type="submit" class="btn btn-primary btn-block"> Redeem </button>
                         </form>
+                        <% } else { %>
+                        <p class="text-muted">Log in to redeem a gift card.</p>
+                        <a class="btn btn-primary" href="/web/login">Log in</a>
+                        <% } %>
                     </div>
                 </div>
             </div>

@@ -43,3 +43,14 @@ export const webDb = {
 };
 
 export type WebDb = typeof webDb;
+
+/**
+ * Mark attacks whose duration has elapsed as stopped. Nothing else advances the
+ * `stopped` flag, so without this every old attack keeps counting against the
+ * user's concurrency limit and the API server slots forever.
+ */
+export function expireFinishedAttacks(now = Math.floor(Date.now() / 1000)): number {
+    return sqlite
+        .prepare("UPDATE logs SET stopped = 1 WHERE stopped = 0 AND time > 0 AND date + time <= ?")
+        .run(now).changes;
+}

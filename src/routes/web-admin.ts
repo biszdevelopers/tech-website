@@ -6,7 +6,7 @@
 
 import { Application } from "../core/01-application";
 import { HttpError } from "../core/09-errors";
-import { webDb } from "../lib/db/web";
+import { webDb, expireFinishedAttacks } from "../lib/db/web";
 import { render } from "../core/views";
 import { webSessions } from "./guards";
 import { launchAttack } from "../server/attacks";
@@ -64,10 +64,16 @@ export function registerWebAdminRoutes(app: Application): void {
     app.get(
         "/web/admin/dashboard",
         async (ctx) => {
+            expireFinishedAttacks();
             const [totalUsers, activeUsers, totalAttacks, runningAttacks, waitingTickets] =
                 await Promise.all([
                     webDb.users.count(),
-                    webDb.users.count({ where: { membership: { not: 0 } } }),
+                    webDb.users.count({
+                        where: {
+                            membership: { not: 0 },
+                            expire: { gt: Math.floor(Date.now() / 1000) },
+                        },
+                    }),
                     webDb.logs.count(),
                     webDb.logs.count({ where: { stopped: 0, time: { gt: 0 } } }),
                     webDb.tickets.count({ where: { status: "Waiting for admin response" } }),
@@ -568,6 +574,7 @@ export function registerWebAdminRoutes(app: Application): void {
     app.get(
         "/web/admin/attacklogs",
         async (ctx) => {
+            expireFinishedAttacks();
             const logs = await webDb.logs.findMany({ orderBy: { date: "desc" }, take: 200 });
             ctx.htmlRaw(render("web-admin-attacklogs", { logs }));
         },
@@ -593,6 +600,8 @@ export function registerWebAdminRoutes(app: Application): void {
                     layer4: typed.filter((m) => m.type === "layer4"),
                     layer7: typed.filter((m) => m.type === "layer7"),
                     servers: await webDb.api.findMany({ select: { name: true, slots: true } }),
+                    error: ctx.query.get("error") ?? "",
+                    launched: ctx.query.get("launched") === "1",
                 })
             );
         },
@@ -603,7 +612,9 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/hub",
         async (ctx) => {
             if (!features.ipstress) {
-                ctx.json({ error: "This feature is disabled." }, 403);
+                if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                    ctx.json({ error: "This feature is disabled." }, 403);
+                } else ctx.redirect("/web/admin/hub?error=disabled", 303);
                 return;
             }
             const f = await ctx.form();
@@ -624,12 +635,23 @@ export function registerWebAdminRoutes(app: Application): void {
                     origin: "admin",
                 });
                 await audit(ctx, "hub.launch", result.host);
-                ctx.json({
-                    success: `Attack launched on ${result.host}:${result.port} for ${result.seconds}s using ${result.method}.`,
-                });
+                if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                    ctx.json({
+                        success: `Attack launched on ${result.host}:${result.port} for ${result.seconds}s using ${result.method}.`,
+                    });
+                } else {
+                    ctx.redirect("/web/admin/hub?launched=1", 303);
+                }
             } catch (error) {
                 if (error instanceof HttpError && error.status < 500) {
-                    ctx.json({ error: error.message }, error.status);
+                    if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                        ctx.json({ error: error.message }, error.status);
+                    } else {
+                        ctx.redirect(
+                            "/web/admin/hub?error=" + encodeURIComponent(error.message),
+                            303
+                        );
+                    }
                     return;
                 }
                 throw error;
@@ -653,6 +675,7 @@ export function registerWebAdminRoutes(app: Application): void {
                         maxattacks: s?.maxattacks ?? 5,
                         testboots: s?.testboots ?? 1,
                         maintaince: String(s?.maintaince ?? "0"),
+                        stripePubKey: s?.stripePubKey ?? "",
                         hasStripeSecret: Boolean(s?.stripeSecretKey),
                         hasPaypal: Boolean(s?.paypal),
                         hasBitcoin: Boolean(s?.bitcoin),

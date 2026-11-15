@@ -20,6 +20,11 @@
                 <div class="card-body">
                     <h4 class="card-title">Launch Attack</h4>
                     <div class="mt-4 activity">
+                        <% if (locals.error) { %>
+                        <p class="alert alert-warning" role="alert"><%= locals.error %></p>
+                        <% } else if (locals.launched) { %>
+                        <p class="alert alert-success" role="status">Attack launched.</p>
+                        <% } %>
                         <form action="/web/api/hub" method="POST">
                             <div class="form-group">
                                 <label class="text-white" for="host">Host</label>

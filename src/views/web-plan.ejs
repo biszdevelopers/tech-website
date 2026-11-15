@@ -14,35 +14,46 @@
     </div>
 </div>
 <div class="container-fluid">
+    <% if (locals.error) { %>
+    <p class="alert alert-warning" role="alert">Checkout is temporarily unavailable. Please try again later.</p>
+    <% } %>
     <div class="row">
         <% plans.forEach(function (p) { %>
             <div class="col-md-4 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="text-center text-uppercase mt-3 mb-4"><%= p.name %></h5>
-                        <h3 class="text-center font-weight-light"><%= p.price %>¥</h3>
-                        <p class="text-muted text-center mb-4 font-weight-light"> Duration: <%= p.length %> day<%= p.length === 1 ? '' : 's' %> </p>
+                        <h3 class="text-center font-weight-light">$<%= p.price %></h3>
+                        <p class="text-muted text-center mb-4 font-weight-light">
+                            Duration: <%= p.length %>
+                            <%= p.unit === 'hours' ? (p.length === 1 ? 'hour' : 'hours') : (p.length === 1 ? 'day' : 'days') %>
+                        </p>
                         <div class="d-flex align-items-center mb-2">
-                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Max Attack Time: <b><%= p.mbt %>s</b> </p>
+                            <p> Max Attack Time: <b><%= p.mbt %>s</b> </p>
                         </div>
                         <div class="d-flex align-items-center mb-2">
-                            <p> <i class="fa fa-minus" aria-hidden="true"></i> Concurrents: <b><%= p.concurrents %></b> </p>
+                            <p> Concurrents: <b><%= p.concurrents %></b> </p>
                         </div>
                         <div class="d-flex align-items-center mb-2">
-                            <p> <i class="fa fa-minus" aria-hidden="true"></i> <b>Unlimited Attacks</b> </p>
+                            <p> <b>Unlimited Attacks</b> </p>
                         </div>
                         <div class="d-flex align-items-center mb-2">
-                            <p> <i class="fa fa-minus" aria-hidden="true"></i> VIP:
+                            <p> VIP:
                                 <% if (Number(p.vip)) { %>
-                                    <span class="plan-yes fa fa-check"></span>
+                                    <span class="plan-yes">Yes</span>
                                 <% } else { %>
-                                    <span class="plan-no fa fa-times"></span>
+                                    <span class="plan-no">No</span>
                                 <% } %>
                             </p>
                         </div>
-                        <a class="link-effect" href="https://t.me/UsdtNL_bot" target="_blank" rel="noopener noreferrer">
-                            <button class="btn btn-success btn-border btn-lg w-100 fw-bold mb-3" type="button"> Buy Now </button>
-                        </a>
+                        <% if (locals.signedIn) { %>
+                        <form method="post" action="/web/api/payments/stripe">
+                            <input type="hidden" name="plan" value="<%= p.ID %>"/>
+                            <button class="btn btn-success btn-lg w-100 fw-bold mb-3" type="submit">Buy Now</button>
+                        </form>
+                        <% } else { %>
+                        <a class="btn btn-success btn-lg w-100 fw-bold mb-3" href="/web/login">Log in to buy</a>
+                        <% } %>
                     </div>
                 </div>
             </div>

@@ -38,27 +38,31 @@ export function registerPaymentRoutes(app: Application): void {
     app.post(
         "/web/api/payments/stripe",
         async (ctx: Context) => {
+            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            const fail = (status: number, message: string, reason: string): void => {
+                if (acceptJson) ctx.json({ error: message }, status);
+                else ctx.redirect("/web/plan?error=" + reason, 303);
+            };
             if (!features.payments) {
-                ctx.json({ error: "Payments are disabled." }, 403);
+                fail(403, "Payments are disabled.", "disabled");
                 return;
             }
             const user = await currentUser(ctx);
             const stripe = await stripeClient();
             if (!stripe) {
-                ctx.json({ error: "Stripe is not configured." }, 503);
+                fail(503, "Stripe is not configured.", "config");
                 return;
             }
             const f = await ctx.form();
             const planId = parseInt(f.plan || "0", 10);
             const email = f.email?.trim() ?? "";
             if (!planId) throw new HttpError(400, "Invalid plan.");
-            if (!email) throw new HttpError(400, "Email is required.");
             const plan = await webDb.plans.findUnique({ where: { ID: planId } });
             if (!plan || plan.price <= 0) throw new HttpError(404, "Plan not found.");
             const tid = genTid("STRIPE");
             const checkout = await stripe.checkout.sessions.create({
                 mode: "payment",
-                customer_email: email,
+                ...(email ? { customer_email: email } : {}),
                 line_items: [
                     {
                         quantity: 1,
@@ -83,6 +87,11 @@ export function registerPaymentRoutes(app: Application): void {
                     date: Math.floor(Date.now() / 1000),
                 },
             });
+            if (!acceptJson) {
+                if (checkout.url) ctx.redirect(checkout.url, 303);
+                else fail(502, "Stripe did not return a checkout URL.", "config");
+                return;
+            }
             ctx.json({
                 status: "pending",
                 message: "Complete payment on Stripe.",

@@ -5,34 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plan Management | IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=96dd9005e7cf28a9" />
+    <link rel="icon" href="/images/favicon.png?v=88e95fe1882fd97e" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=96dd9005e7cf28a9" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=88e95fe1882fd97e" />
     
-    <link rel="stylesheet" href="/css/dash.css?v=96dd9005e7cf28a9" />
+    <link rel="stylesheet" href="/css/dash.css?v=88e95fe1882fd97e" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=96dd9005e7cf28a9"></script>
+    <script src="/js/legacy/theme-boot.js?v=88e95fe1882fd97e"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=96dd9005e7cf28a9"></script>
-    <script src="/js/legacy/ie11.js?v=96dd9005e7cf28a9"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=96dd9005e7cf28a9" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=88e95fe1882fd97e"></script>
+    <script src="/js/legacy/ie11.js?v=88e95fe1882fd97e"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=88e95fe1882fd97e" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=96dd9005e7cf28a9"></script>
-    <script nomodule src="/js/legacy/theme.js?v=96dd9005e7cf28a9" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=88e95fe1882fd97e"></script>
+    <script nomodule src="/js/legacy/theme.js?v=88e95fe1882fd97e" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=96dd9005e7cf28a9"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=96dd9005e7cf28a9" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=88e95fe1882fd97e"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=88e95fe1882fd97e" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=96dd9005e7cf28a9"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=96dd9005e7cf28a9" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=88e95fe1882fd97e"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=88e95fe1882fd97e" defer></script>
     
-    <script type="module" src="/js/modern/menu.js?v=96dd9005e7cf28a9"></script>
-    <script nomodule src="/js/legacy/menu.js?v=96dd9005e7cf28a9" defer></script>
+    <script type="module" src="/js/modern/menu.js?v=88e95fe1882fd97e"></script>
+    <script nomodule src="/js/legacy/menu.js?v=88e95fe1882fd97e" defer></script>
     
-<meta name="csrf-token" content="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/></head>
+<meta name="csrf-token" content="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/></head>
 <body>
 
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
@@ -250,10 +250,10 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Create Plan</h4>
-                    <form class="mt-4" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                    <form class="mt-4" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                         <input type="hidden" name="action" value="create"/>
                         <div class="form-group"><label class="text-white">Name</label><input class="form-control" required name="name"/></div>
-                        <div class="form-group"><label class="text-white">Price (&yen;)</label><input class="form-control" type="number" step="0.01" min="0" required name="price"/></div>
+                        <div class="form-group"><label class="text-white">Price (USD)</label><input class="form-control" type="number" step="0.01" min="0" required name="price"/></div>
                         <div class="form-group"><label class="text-white">Duration</label><input class="form-control" type="number" min="1" required name="length"/><select class="form-control" name="unit"><option value="days">Days</option><option value="hours">Hours</option></select></div>
                         <div class="form-group"><label class="text-white">Max Attack Time (s)</label><input class="form-control" type="number" min="1" required name="mbt"/></div>
                         <div class="form-group"><label class="text-white">Concurrents</label><input class="form-control" type="number" min="1" required name="concurrents"/></div>
@@ -276,12 +276,12 @@
                                     <tr>
                                         <td>1</td>
                                         <td>Bronze</td>
-                                        <td>5.99&yen;</td>
+                                        <td>$5.99</td>
                                         <td>7 days</td>
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="1"/>
                                                     <input class="form-control mb-1" name="name" value="Bronze" required/>
@@ -298,7 +298,7 @@
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="1"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
@@ -309,12 +309,12 @@
                                     <tr>
                                         <td>2</td>
                                         <td>Silver</td>
-                                        <td>14.99&yen;</td>
+                                        <td>$14.99</td>
                                         <td>30 days</td>
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="2"/>
                                                     <input class="form-control mb-1" name="name" value="Silver" required/>
@@ -331,7 +331,7 @@
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="2"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
@@ -342,12 +342,12 @@
                                     <tr>
                                         <td>3</td>
                                         <td>Gold</td>
-                                        <td>29.99&yen;</td>
+                                        <td>$29.99</td>
                                         <td>30 days</td>
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="3"/>
                                                     <input class="form-control mb-1" name="name" value="Gold" required/>
@@ -364,7 +364,7 @@
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="3"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
@@ -375,12 +375,12 @@
                                     <tr>
                                         <td>4</td>
                                         <td>Diamond</td>
-                                        <td>74.99&yen;</td>
+                                        <td>$74.99</td>
                                         <td>90 days</td>
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="4"/>
                                                     <input class="form-control mb-1" name="name" value="Diamond" required/>
@@ -397,7 +397,7 @@
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="7c3bea3d2a05589fde57e0801089f14c424d3054843c9ac069b8db708d6e60ce"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="ce6e59e14e7ec6f320ebeba81924c3dd9adc44142896de4af333cada7da91846"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="4"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>

@@ -9,6 +9,9 @@
 <div id="wrap">
     <form id="form" method="post" action="/api/admin/edit">
         <input type="hidden" name="id1" value="<%= id %>"/>
+        <% if (locals.saved) { %>
+        <p class="submit-success" role="status">Changes saved.</p>
+        <% } %>
 
         <h2>Tool details</h2>
         <div class="form-grid">

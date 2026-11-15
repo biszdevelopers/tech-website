@@ -1,5 +1,5 @@
 import { HttpError } from "../core/09-errors";
-import { webDb } from "../lib/db/web";
+import { webDb, expireFinishedAttacks } from "../lib/db/web";
 import { withLock } from "../lib/lock";
 import { assertAllowedMethod, assertPublicTarget, buildAttackUrl } from "../lib/targets";
 
@@ -67,6 +67,7 @@ export async function launchAttack(options: {
 
     const lockKey = admin ? "hub:admin" : `hub:${options.username}`;
     return withLock(lockKey, async () => {
+        expireFinishedAttacks();
         if (plan && !admin) {
             const running = await webDb.logs.count({
                 where: { user: options.username, stopped: 0, time: { gt: 0 } },

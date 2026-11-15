@@ -84,6 +84,10 @@ async function cookieFor(kind) {
 function bodyOf(html) {
     const m = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
     let inner = m ? m[1] : html;
+    // Absolute self-links (referral URLs) embed the test origin. Ignore it so
+    // the gate survives running on a different port than the dump.
+    inner = inner.split(BASE).join("");
+    inner = inner.replace(/https?:\/\/localhost:\d+/g, "");
     inner = inner.replace(/<script[\s\S]*?<\/script>/gi, "");
     // Metadata hints the legacy framework streamed into <body> (preloads):
     // invisible to visitors, so excluded from structural comparison.

@@ -117,7 +117,9 @@ export function registerAdminRoutes(app: Application): void {
                 label,
                 checked: flags[name] === true,
             }));
-            ctx.htmlRaw(render("admin-edit", { id, sub, strands }));
+            ctx.htmlRaw(
+                render("admin-edit", { id, sub, strands, saved: ctx.query.get("saved") === "1" })
+            );
         },
         { guard: "mainAdmin" }
     );
@@ -366,7 +368,11 @@ export function registerAdminRoutes(app: Application): void {
                 domainData[field] = v === true || v === "on" || v === 1 || v === "true";
             }
             await updateDomain(id, domainData);
-            ctx.json({ success: true });
+            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+                ctx.json({ success: true });
+            } else {
+                ctx.redirect("/admin/edit/" + id + "?saved=1", 303);
+            }
         },
         { guard: "mainAdmin" }
     );

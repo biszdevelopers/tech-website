@@ -2685,3 +2685,14 @@ textarea {
     padding: 30px 12px;
     color: var(--ip-muted);
 }
+
+.alert-success {
+    background: #e7f8f0;
+    border-color: #a9e3c8;
+    color: #0a5c3d;
+}
+[data-theme="dark"] .alert-success {
+    background: rgba(46, 230, 166, 0.14);
+    border-color: rgba(46, 230, 166, 0.35);
+    color: #86f3c4;
+}
