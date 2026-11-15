@@ -40,6 +40,16 @@ import { env } from "../config/env";
 /** Hard ceiling on any request body. Blocks memory-exhaustion DoS attempts. */
 const MAX_BODY_BYTES = 1_000_000; // 1 MB - forms here are tiny; uploads use /api/submission's own path
 
+/**
+ * Stamp the server-side theme on the real root <html> tag. Kept pure and
+ * exported so the replacement cannot silently swallow the original attributes.
+ */
+export function stampTheme(html: string, theme: "dark" | "light"): string {
+    return html.replace(/<html(\s[^>]*)?>/i, (match, attrs: string | undefined) =>
+        /data-theme/i.test(match) ? match : `<html${attrs ?? ""} data-theme="${theme}">`
+    );
+}
+
 export class Context {
     /** Route parameters filled in by the Router, e.g. /tickets/:id -> ctx.params.id */
     public readonly params: Record<string, string> = {};
@@ -192,9 +202,7 @@ export class Context {
     private withServerTheme(html: string): string {
         const theme = this.cookie("theme");
         if (theme !== "dark" && theme !== "light") return html;
-        return html.replace(/<html(\s[^>]*)?>/i, (m) =>
-            m.includes("data-theme") ? m : `<html$1 data-theme="${theme}">`
-        );
+        return stampTheme(html, theme);
     }
 
     /** Send a JSON payload (API routes). */
