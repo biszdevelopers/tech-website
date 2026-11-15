@@ -12,13 +12,16 @@
     <link rel="stylesheet" href="/css/<%= file %>?v=<%= v %>" />
     <% }) %>
     <% var allScripts = ['theme.js', 'img-fallback.js', 'scroll-top.js'].concat(locals.scripts || []); %>
+    <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script src="/js/legacy/theme-boot.js?v=<%= v %>"></script>
     <!--[if IE]>
     <script src="/js/vendor/ie11-custom-properties.js?v=<%= v %>"></script>
-    <script src="/js/ie11.js?v=<%= v %>"></script>
+    <script src="/js/legacy/ie11.js?v=<%= v %>"></script>
     <link rel="stylesheet" href="/css/ie.css?v=<%= v %>" />
     <![endif]-->
     <% allScripts.forEach(function (file) { %>
-    <script src="/js/<%= file %>?v=<%= v %>" defer></script>
+    <script type="module" src="/js/modern/<%= file %>?v=<%= v %>"></script>
+    <script nomodule src="/js/legacy/<%= file %>?v=<%= v %>" defer></script>
     <% }) %>
 </head>
 <body>

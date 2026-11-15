@@ -6,6 +6,11 @@
                 <div class="card-body">
                     <h4 class="card-title">Admin Attack Launcher</h4>
                     <p class="text-muted">No cooldown. No limits. Admin-only.</p>
+                    <% if (locals.error) { %>
+                    <p class="alert alert-warning" role="alert"><%= locals.error %></p>
+                    <% } else if (locals.launched) { %>
+                    <p class="alert alert-success" role="status">Attack launched.</p>
+                    <% } %>
                     <form class="mt-4" action="/web/api/admin/hub" method="POST">
                         <div class="form-group">
                             <label class="text-white" for="host">Host</label>

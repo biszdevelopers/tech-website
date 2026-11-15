@@ -20,9 +20,10 @@
  */
 
 import { env } from "./src/config/env";
+import type { Context } from "./src/core/03-context";
 import { loadViews, render } from "./src/core/views";
 import { Application, pageCache } from "./src/core/01-application";
-import { guards } from "./src/routes/guards";
+import { guards, webSessions } from "./src/routes/guards";
 import { tlConfigs } from "./src/lib/tl-config";
 import { registerMainSiteRoutes } from "./src/routes/main-site";
 import { registerAdminRoutes } from "./src/routes/admin";
@@ -30,6 +31,8 @@ import { registerWebRoutes } from "./src/routes/web";
 import { registerWebAdminRoutes } from "./src/routes/web-admin";
 import { registerPaymentRoutes } from "./src/routes/payments";
 import { getAcceptedSubmissions, getDomainsByColumns } from "./src/server/queries/submissions";
+import { serveUpload } from "./src/lib/uploads";
+import { getWebSettings } from "./src/lib/web-settings";
 import { mainDb } from "./src/lib/db/main";
 import { webDb } from "./src/lib/db/web";
 
@@ -165,11 +168,11 @@ const notFoundPage = (url: string): string => {
     return render("not-found", { suggestions });
 };
 
-const errorPage = (ref: string): string =>
-    [
-        '<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>Server Error</title></head>',
-        `<body><h1>Something went wrong</h1><p>Reference: ${ref}</p></body></html>`,
-    ].join("");
+const errorPage = (ref: string, status: number, _path: string): string =>
+    render("error-page", {
+        ref,
+        status,
+    });
 
 // ---------------------------------------------------------------------------
 // Application assembly
@@ -193,6 +196,10 @@ app.get("/api/health", async (ctx) => {
 // what makes `npm run dev` behave like a hot-reloading bundler.
 const HTML_CACHE = env.isProd;
 
+function isWebSignedIn(ctx: Context): boolean {
+    return Boolean(webSessions.load(ctx)?.userId);
+}
+
 const TL_CARDS = Object.entries(tlConfigs).map(([id, c]) => ({
     id,
     href: "/" + id,
@@ -206,6 +213,42 @@ app.get("/", async (ctx) => {
     ctx.htmlRaw(cached);
 });
 
+app.get("/favicon.ico", async (ctx) => {
+    ctx.redirect("/images/favicon.png", 301);
+});
+
+app.get("/uploads/:file", async (ctx) => {
+    if (!serveUpload(ctx, ctx.params.file)) ctx.throw(404, "Not found");
+});
+
+// Maintenance gate for the IPstress subproject. Admin, auth and the webhook
+// stay reachable so the site can be recovered and payments reconciled.
+app.use(async (ctx, next) => {
+    if (!ctx.path.startsWith("/web")) {
+        await next();
+        return;
+    }
+    const exempt =
+        ctx.path.startsWith("/web/maintenance") ||
+        ctx.path.startsWith("/web/admin") ||
+        ctx.path.startsWith("/web/login") ||
+        ctx.path.startsWith("/web/images/") ||
+        ctx.path.startsWith("/web/api/auth/") ||
+        ctx.path.startsWith("/web/api/payments/stripe/webhook") ||
+        ctx.path.startsWith("/web/api/admin/");
+    if (exempt) {
+        await next();
+        return;
+    }
+    const settings = await getWebSettings();
+    if (settings.maintaince === "1") {
+        if (ctx.path.startsWith("/web/api/")) ctx.json({ error: "Maintenance mode." }, 503);
+        else ctx.redirect("/web/maintenance");
+        return;
+    }
+    await next();
+});
+
 registerMainSiteRoutes(app);
 registerAdminRoutes(app);
 registerWebRoutes(app);
@@ -217,28 +260,50 @@ registerPaymentRoutes(app);
 // Web user pages.
 app.get("/web/plan", async (ctx) => {
     const plans = await webDb.plans.findMany({ orderBy: { price: "asc" } });
-    ctx.htmlRaw(render("web-plan", { plans }));
-});
-app.get("/web/tickets", async (ctx) => {
-    ctx.htmlRaw(render("web-tickets", {}));
+    ctx.htmlRaw(
+        render("web-plan", {
+            plans,
+            signedIn: isWebSignedIn(ctx),
+            error: ctx.query.get("error") ?? "",
+        })
+    );
 });
 app.get("/web/tickets/new", async (ctx) => {
-    ctx.htmlRaw(render("web-tickets-new", {}));
+    ctx.htmlRaw(render("web-tickets-new", { signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/giftcards", async (ctx) => {
-    ctx.htmlRaw(render("web-giftcards", {}));
+    ctx.htmlRaw(
+        render("web-giftcards", {
+            signedIn: isWebSignedIn(ctx),
+            redeemed: ctx.query.get("redeemed") ?? "",
+            error: ctx.query.get("error") ?? "",
+        })
+    );
 });
 app.get("/web/affiliate", async (ctx) => {
-    ctx.htmlRaw(render("web-affiliate", {}));
+    const session = webSessions.load(ctx);
+    const user = session?.userId
+        ? await webDb.users.findUnique({ where: { ID: session.userId } })
+        : null;
+    const stats =
+        user === null
+            ? null
+            : {
+                  referralLink:
+                      user.ID > 0 ? `${env.siteOrigin}/web/register?ref=${user.ID}` : "N/A",
+                  referralCount: await webDb.users.count({ where: { referedBy: user.ID } }),
+                  referralBalance: user.referralbalance,
+              };
+    ctx.htmlRaw(render("web-affiliate", { signedIn: Boolean(user), stats }));
 });
 app.get("/web/wheel", async (ctx) => {
-    ctx.htmlRaw(render("web-wheel", {}));
+    ctx.htmlRaw(render("web-wheel", { signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/maintenance", async (ctx) => {
-    const settings = await webDb.settings.findFirst({ select: { description: true } });
+    const settings = await getWebSettings();
     ctx.htmlRaw(
         render("web-maintenance", {
-            description: settings?.description ?? "Premium IP stress testing service",
+            description: settings.description || "Premium IP stress testing service",
         })
     );
 });
@@ -250,10 +315,10 @@ app.get("/web", async (ctx) => {
     ctx.htmlRaw(body!);
 });
 app.get("/web/login", async (ctx) => {
-    ctx.htmlRaw(render("web-login", {}));
+    ctx.htmlRaw(render("web-login", { error: ctx.query.get("error") ?? "" }));
 });
 app.get("/web/register", async (ctx) => {
-    ctx.htmlRaw(render("web-register", {}));
+    ctx.htmlRaw(render("web-register", { ref: ctx.query.get("ref") ?? "" }));
 });
 
 // Tool detail page: every TL strategy description for one tool, stacked.

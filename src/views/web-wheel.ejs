@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Wheel · IPstress', css: ['webtheme.css'], scripts: ['wheel.js'] }) %>
+<%- include('partials/head', { title: 'Wheel | IPstress', css: ['webtheme.css'], scripts: ['wheel.js'] }) %>
 <%- include('partials/web-header') %>
 <div class="page-breadcrumb">
     <div class="d-flex align-items-center">
@@ -21,8 +21,9 @@
                     <h4 class="card-title">Spin &amp; Win</h4>
                     <p class="text-muted">Try your luck and win exciting prizes!</p>
                     <div class="mt-4">
-                        <div id="superwheel" style="margin: 0 auto; max-width: 400px"></div>
-                        <button class="btn btn-danger btn-lg mt-4" disabled> SPIN NOW </button>
+                        <div id="superwheel" class="wheel-host"></div>
+                        <p id="wheel-result" class="text-muted mt-3" role="status" aria-live="polite"></p>
+                        <button class="btn btn-danger btn-lg mt-4"> SPIN NOW </button>
                     </div>
                 </div>
             </div>

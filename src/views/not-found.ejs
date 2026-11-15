@@ -1,26 +1,28 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>Not Found</title>
-    <link rel="stylesheet" href="/css/globals.css" />
-</head>
-<body>
-<h1>404 - Page Not Found</h1>
-<p>That page doesn't exist. Did you mean one of these?</p>
+<%- include('partials/head', { title: 'Not Found | BIBS-C Tech Tools' }) %>
+<%- include('partials/navbar') %>
 
-<% if (suggestions.length > 0) { %>
-<p>Tools matching your request:</p>
-<ul>
-    <% suggestions.forEach(function (s) { %>
-    <li><a href="/tool/<%= s.id %>"><%= s.techname %></a></li>
-    <% }) %>
-</ul>
-<% } %>
+<div id="wrap">
+    <section class="notice-page">
+        <p class="notice-page__code">404</p>
+        <h1>Page not found</h1>
+        <p>That page doesn't exist. Check the address or head back to the tools.</p>
 
-<ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/search">Search all tools</a></li>
-</ul>
+        <% if (suggestions.length > 0) { %>
+        <h2>Tools matching your request</h2>
+        <ul class="notice-page__list">
+            <% suggestions.forEach(function (s) { %>
+            <li><a href="/tool/<%= s.id %>"><%= s.techname %></a></li>
+            <% }) %>
+        </ul>
+        <% } %>
+
+        <p class="notice-page__actions">
+            <a class="notice-page__btn" href="/">Home</a>
+            <a class="notice-page__btn notice-page__btn--ghost" href="/search">Search all tools</a>
+        </p>
+    </section>
+</div>
+
+<%- include('partials/footer') %>
 </body>
 </html>

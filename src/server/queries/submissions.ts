@@ -24,21 +24,57 @@ import { mainDb } from "../../lib/db/main";
 import { pageCache } from "../../core/06-cache";
 import type { SubmissionRow, DomainRow } from "../../types/db";
 
-/** Bust every page that displays tool data. Called after ANY admin mutation. */
+/**
+ * Data snapshot: pages read arrays/Maps, never the DB on a warm request.
+ * Writes rebuild the snapshot once and bump the page-cache generation.
+ */
+let acceptedCache: SubmissionRow[] | null = null;
+let allCache: SubmissionRow[] | null = null;
+let domainCache: DomainRow[] | null = null;
+
+/** Legacy rows may contain javascript:/data: links; never render those. */
+function safeLink(value: unknown): string {
+    try {
+        const url = new URL(String(value ?? ""));
+        return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : "#";
+    } catch {
+        return "#";
+    }
+}
+
+function sanitizeRows(rows: SubmissionRow[]): SubmissionRow[] {
+    return rows.map((row) => ({ ...row, link: safeLink(row.link) }));
+}
+
 function invalidateToolPages(): void {
+    acceptedCache = null;
+    allCache = null;
+    domainCache = null;
     pageCache.bust(["home", "tl:*"]);
 }
 
 export async function getAcceptedSubmissions(): Promise<SubmissionRow[]> {
-    return mainDb.submission.findMany({ where: { accepted: true }, orderBy: { id: "asc" } });
+    if (!acceptedCache) {
+        acceptedCache = sanitizeRows(
+            await mainDb.submission.findMany({
+                where: { accepted: true },
+                orderBy: { id: "asc" },
+            })
+        );
+    }
+    return acceptedCache;
 }
 
 export async function getAllSubmissions(): Promise<SubmissionRow[]> {
-    return mainDb.submission.findMany({ orderBy: { id: "desc" } });
+    if (!allCache) {
+        allCache = sanitizeRows(await mainDb.submission.findMany({ orderBy: { id: "desc" } }));
+    }
+    return allCache;
 }
 
 export async function getAllDomains(): Promise<DomainRow[]> {
-    return mainDb.domains.findMany({ orderBy: { id: "asc" } });
+    if (!domainCache) domainCache = await mainDb.domains.findMany({ orderBy: { id: "asc" } });
+    return domainCache;
 }
 
 /**
@@ -54,7 +90,8 @@ export async function getDomainsByColumns(columns: string[]): Promise<DomainRow[
 }
 
 export async function getSubmissionById(id: number): Promise<SubmissionRow | null> {
-    return mainDb.submission.findUnique({ where: { id } });
+    const row = await mainDb.submission.findUnique({ where: { id } });
+    return row ? { ...row, link: safeLink(row.link) } : null;
 }
 
 export async function getDomainById(id: number): Promise<DomainRow | null> {

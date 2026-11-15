@@ -1,5 +1,5 @@
 [Unit]
-Description=Tech-Website (Next.js)
+Description=Tech-Website (Node 24 SSR)
 After=network.target
 
 [Service]
@@ -10,6 +10,7 @@ Type=simple
 User=techweb
 WorkingDirectory=/opt/tech-website
 EnvironmentFile=/opt/tech-website/.env
+Environment=NODE_ENV=production
 ExecStart=/usr/bin/node --env-file=/opt/tech-website/.env dist/server.js
 Restart=always
 RestartSec=5
@@ -22,7 +23,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
-ReadWritePaths=/opt/tech-website/prisma
+ReadWritePaths=/opt/tech-website/prisma /opt/tech-website/var
 
 [Install]
 WantedBy=multi-user.target

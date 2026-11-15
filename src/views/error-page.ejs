@@ -1,0 +1,23 @@
+<%- include('partials/head', { title: 'Request Failed | BIBS-C Tech Tools' }) %>
+<%- include('partials/navbar') %>
+<% var code = Number(locals.status) || 500; var denied = code === 401 || code === 403; %>
+<div id="wrap">
+    <section class="notice-page">
+        <p class="notice-page__code"><%= code %></p>
+        <h1><%= denied ? 'Access denied' : 'Something went wrong' %></h1>
+        <p><%= denied
+            ? 'You do not have access to that page.'
+            : 'The request could not be completed. If it keeps happening, share the reference below.' %></p>
+        <p class="notice-page__ref">Reference: <code><%= locals.ref || 'unknown' %></code></p>
+        <p class="notice-page__actions">
+            <a class="notice-page__btn" href="/">Home</a>
+            <% if (!denied) { %>
+            <a class="notice-page__btn notice-page__btn--ghost" href="/search">Search all tools</a>
+            <% } %>
+        </p>
+    </section>
+</div>
+
+<%- include('partials/footer') %>
+</body>
+</html>

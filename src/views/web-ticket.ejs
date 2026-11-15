@@ -1,0 +1,57 @@
+<%- include('partials/head', { title: 'Ticket #' + ticket.id + ' | IPstress', css: ['webtheme.css'] }) %>
+<%- include('partials/web-header') %>
+<div class="page-breadcrumb">
+    <div class="d-flex align-items-center">
+        <h4 class="page-title text-truncate text-white font-weight-medium mb-0"><%= ticket.subject %></h4>
+        <div class="ml-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb m-0 p-0">
+                    <li class="breadcrumb-item text-sql"><a href="/web/tickets">Tickets</a></li>
+                    <li class="breadcrumb-item text-muted" aria-current="page">#<%= ticket.id %></li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0"><%= ticket.subject %></h4>
+                        <span class="badge badge-info"><%= ticket.status %></span>
+                    </div>
+                    <p class="text-muted mb-1">Opened by <%= ticket.username %> on
+                        <%= new Date(Number(ticket.date) * 1000).toLocaleString('en-US') %></p>
+                    <div class="ticket-thread">
+                        <div class="ticket-message">
+                            <p><%= ticket.content %></p>
+                        </div>
+                        <% (messages || []).forEach(function (m) { %>
+                        <div class="ticket-message <%= m.sender === ticket.username ? '' : 'ticket-message--staff' %>">
+                            <div class="ticket-message__meta"><b><%= m.sender %></b>
+                                <span><%= new Date(Number(m.date) * 1000).toLocaleString('en-US') %></span>
+                            </div>
+                            <p><%= m.content %></p>
+                        </div>
+                        <% }) %>
+                    </div>
+                    <% if (ticket.status !== 'Closed') { %>
+                    <form class="mt-4" action="/web/api/tickets/<%= ticket.id %>" method="POST">
+                        <div class="form-group">
+                            <label class="text-white" for="reply">Reply</label>
+                            <textarea class="form-control" id="reply" name="content" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Reply</button>
+                    </form>
+                    <% } else { %>
+                    <p class="text-muted mt-4">This ticket is closed.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

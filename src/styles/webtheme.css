@@ -27,7 +27,7 @@
     letter-spacing: -0.01em;
 }
 .web-header__brand:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .web-header__mark {
     display: inline-flex;
@@ -64,7 +64,7 @@
         background 0.2s ease;
 }
 .web-header__nav a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
     background: rgba(229, 244, 255, 0.05);
 }
 .web-header__cta {
@@ -94,7 +94,7 @@
 }
 .web-header__btn--ghost:hover {
     border-color: #17d984;
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .web-header__btn--solid {
     background: #17d984;
@@ -182,7 +182,7 @@
     padding-bottom: 15px;
 }
 .title h2 span {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .title p {
     color: #e5f4ff;
@@ -220,18 +220,6 @@
 .scroll-top:focus i:before,
 .scroll-top:hover i:before {
     animation: BottomToTop 0.3s forwards;
-}
-#preloader {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 999999;
-    background: #fff url(/web/images/preloader.html) no-repeat 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 body {
     font-family:
@@ -442,7 +430,7 @@ body button:hover {
     padding: 26px 0 14px;
 }
 .header_area .main-menu nav li:hover > a {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .header_area .main-menu nav li .submenu {
     position: absolute;
@@ -500,7 +488,7 @@ body button:hover {
     margin-bottom: 30px;
 }
 .banner_area .banner_content h1 span {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .banner_area .banner_content p {
     color: #e5f4ff;
@@ -659,7 +647,7 @@ body button:hover {
     margin-bottom: 60px;
 }
 .start_mining_area .mining_text span:nth-child(3) {
-    color: #17d984;
+    color: var(--ip-accent-strong);
     font:
         400 14px/28px Noto Sans,
         sans-serif;
@@ -677,7 +665,7 @@ body button:hover {
 }
 .start_mining_area .mining_text a:focus,
 .start_mining_area .mining_text a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .start_mining_area .mt_3:before {
     background: url(/web/images/start/icon2.png) no-repeat;
@@ -741,7 +729,7 @@ body button:hover {
     color: #fff;
 }
 .easily_acces .btn_list li .brand_list a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .ma_2 {
     background: #f0f9ff;
@@ -887,7 +875,7 @@ body button:hover {
     background: #17d984;
 }
 .our_roadmap_area .rac h6 {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .our_roadmap_area .rt_2 {
     padding-right: 0;
@@ -920,7 +908,7 @@ body button:hover {
     background: #17d984;
 }
 .ra_2 .rac h6 {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .ra_2 .row_border {
     padding-top: 109px;
@@ -936,7 +924,7 @@ body button:hover {
     background: #17d984;
 }
 .ra_2 .row_border .rac h6 {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .what_say_area {
     background: #394a6a;
@@ -1180,7 +1168,7 @@ body button:hover {
     border: 1px dashed #17d984;
 }
 .footer_area .footer_widget .fot_list li a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .footer_area .footer_widget h5 {
     color: #e5f4ff;
@@ -1225,7 +1213,7 @@ body button:hover {
     font-size: 12px;
 }
 .footer_area .footer_widget .cta_list li a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .footer_area .copy_right {
     text-align: center;
@@ -1479,4 +1467,1270 @@ body button:hover {
         height: 180px;
         margin: 0 auto;
     }
+}
+
+/* ---- components that used inline styles -------------------------------- */
+.maintenance-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 69px);
+    padding: 48px 20px;
+    background: var(--ip-bg);
+    color: var(--ip-text);
+    text-align: center;
+}
+.maintenance-heading {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+    color: var(--ip-text);
+}
+.maintenance-copy {
+    font-size: 1.1rem;
+    max-width: 60ch;
+    color: var(--ip-muted);
+}
+.maintenance-link {
+    color: var(--ip-accent-strong);
+    margin-top: 2rem;
+    display: inline-block;
+    font-weight: 600;
+}
+.plan-yes {
+    color: #067a52;
+    font-weight: bold;
+}
+.plan-no {
+    color: #b3261e;
+    font-weight: bold;
+}
+[data-theme="dark"] .plan-yes {
+    color: #2ee6a6;
+}
+[data-theme="dark"] .plan-no {
+    color: #ff7b72;
+}
+.wheel-host {
+    margin: 0 auto;
+    max-width: 400px;
+}
+
+/* ==========================================================================
+   V4 IPSTRESS THEME LAYER
+   The marketing template was hardcoded dark. These tokens keep the existing
+   dark identity and add a light counterpart used by the same theme cookie.
+   ========================================================================== */
+:root {
+    --ip-bg: #0a0e27;
+    --ip-surface: #101230;
+    --ip-card: #101230;
+    --ip-elevated: #151a3d;
+    --ip-text: #e5f4ff;
+    --ip-muted: #9aa8d0;
+    --ip-border: rgba(229, 244, 255, 0.12);
+    --ip-input-border: #5a6791;
+    --ip-accent: #17d984;
+    --ip-accent-strong: #0cf293;
+    --ip-on-accent: #04121f;
+    color-scheme: dark;
+}
+
+[data-theme="light"] {
+    --ip-bg: #f6f8fc;
+    --ip-surface: #ffffff;
+    --ip-card: #ffffff;
+    --ip-elevated: #eef2fa;
+    --ip-text: #101a3a;
+    --ip-muted: #5a6d92;
+    --ip-border: #d8dde7;
+    --ip-input-border: #8a8f9c;
+    --ip-accent: #0bb87a;
+    --ip-accent-strong: #0a7d57;
+    --ip-on-accent: #ffffff;
+    color-scheme: light;
+}
+
+body {
+    background: var(--ip-bg);
+    color: var(--ip-text);
+}
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6 {
+    color: var(--ip-text);
+}
+body p,
+body .text-muted {
+    color: var(--ip-muted);
+}
+body a {
+    color: var(--ip-accent-strong);
+}
+.web-header {
+    background: var(--ip-surface);
+    border-bottom: 1px solid var(--ip-border);
+}
+.web-header__nav a {
+    color: var(--ip-text);
+}
+.web-header__btn--ghost {
+    border-color: var(--ip-border);
+    color: var(--ip-text);
+}
+.web-header__btn--solid {
+    background: var(--ip-accent);
+    color: var(--ip-on-accent);
+}
+.web-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--ip-border);
+    border-radius: 10px;
+    background: var(--ip-elevated);
+    color: var(--ip-text);
+    cursor: pointer;
+}
+.web-theme-toggle:hover,
+.web-theme-toggle:focus-visible {
+    border-color: var(--ip-accent);
+    color: var(--ip-accent-strong);
+    outline: none;
+}
+.web-theme-toggle .icon-sun {
+    display: none;
+}
+.web-theme-toggle .icon-moon {
+    display: block;
+}
+[data-theme="dark"] .web-theme-toggle .icon-sun {
+    display: block;
+}
+[data-theme="dark"] .web-theme-toggle .icon-moon {
+    display: none;
+}
+
+.card {
+    background: var(--ip-card);
+    border: 1px solid var(--ip-border);
+    color: var(--ip-text);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+.card .card-title,
+.card h4,
+.card h5 {
+    color: var(--ip-text);
+}
+.table {
+    color: var(--ip-text);
+}
+.table th,
+.table td {
+    border-color: var(--ip-border);
+}
+.table thead th {
+    color: var(--ip-text);
+    font-weight: 600;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background: color-mix(in srgb, var(--ip-elevated) 55%, transparent);
+}
+.table tbody tr:hover {
+    background: color-mix(in srgb, var(--ip-accent) 8%, transparent);
+}
+.form-control {
+    background: var(--ip-bg);
+    border: 1px solid var(--ip-input-border);
+    color: var(--ip-text);
+    border-radius: 10px;
+}
+.form-control:focus {
+    background: var(--ip-bg);
+    color: var(--ip-text);
+    border-color: var(--ip-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ip-accent) 22%, transparent);
+}
+.form-control::placeholder {
+    color: var(--ip-muted);
+}
+.btn-primary {
+    background: var(--ip-accent);
+    border-color: var(--ip-accent);
+    color: var(--ip-on-accent);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+    background: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+    color: var(--ip-on-accent);
+}
+.btn-secondary {
+    background: var(--ip-elevated);
+    border-color: var(--ip-border);
+    color: var(--ip-text);
+}
+.badge-info {
+    background: color-mix(in srgb, var(--ip-accent) 18%, transparent);
+    color: var(--ip-accent-strong);
+    border: 1px solid color-mix(in srgb, var(--ip-accent) 30%, transparent);
+}
+.page-breadcrumb {
+    background: transparent;
+    border-bottom: 1px solid var(--ip-border);
+}
+.page-title,
+.breadcrumb-item,
+.breadcrumb-item a {
+    color: var(--ip-text) !important;
+}
+.ticket-thread {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+.ticket-message {
+    padding: 12px 14px;
+    border: 1px solid var(--ip-border);
+    border-radius: 12px;
+    background: var(--ip-elevated);
+}
+.ticket-message--staff {
+    border-color: color-mix(in srgb, var(--ip-accent) 35%, var(--ip-border));
+    background: color-mix(in srgb, var(--ip-accent) 8%, var(--ip-elevated));
+}
+.ticket-message__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--ip-muted);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
+/* Light theme: keep the hero artwork, lift the chrome and content surfaces. */
+[data-theme="light"] .banner_area,
+[data-theme="light"] .our_mission_area,
+[data-theme="light"] .mining_invest_area,
+[data-theme="light"] .start_mining_area,
+[data-theme="light"] .make_bitcoin,
+[data-theme="light"] .easily_acces,
+[data-theme="light"] .popular_feature_area,
+[data-theme="light"] .our_roadmap_area,
+[data-theme="light"] .team_area,
+[data-theme="light"] .faq_area,
+[data-theme="light"] .brand_area,
+[data-theme="light"] .footer_area,
+[data-theme="light"] .footer_area .copy_right {
+    background: var(--ip-surface);
+}
+[data-theme="light"] .banner_area .banner_content h1,
+[data-theme="light"] .title h2,
+[data-theme="light"] .our_mission_area .title h2,
+[data-theme="light"] .mining_invest_area .title h2,
+[data-theme="light"] .start_mining_area h3,
+[data-theme="light"] .our_roadmap_area h6,
+[data-theme="light"] .team_area h5,
+[data-theme="light"] .faq_area h5,
+[data-theme="light"] .footer_area h5,
+[data-theme="light"] .footer_area .footer_widget h5 {
+    color: var(--ip-text);
+}
+[data-theme="light"] .banner_area .banner_content p,
+[data-theme="light"] .title p,
+[data-theme="light"] .our_roadmap_area p,
+[data-theme="light"] .faq_area p,
+[data-theme="light"] .footer_area p,
+[data-theme="light"] .footer_area .footer_widget p {
+    color: var(--ip-muted);
+}
+[data-theme="light"] .what_say_area {
+    background: var(--ip-elevated);
+}
+[data-theme="light"] .what_say_area .client_text {
+    background: var(--ip-card);
+}
+[data-theme="light"] .what_say_area .client_text p,
+[data-theme="light"] .what_say_area .client_img h6,
+[data-theme="light"] .what_say_area .client_img a {
+    color: var(--ip-text);
+}
+[data-theme="light"] .footer_area .footer_widget .cta_list li a,
+[data-theme="light"] .footer_area .fot_list li a,
+[data-theme="light"] .footer_area .copy_right a {
+    color: var(--ip-text);
+}
+[data-theme="light"] .footer_area .footer_widget .input_area .form-control {
+    background: var(--ip-bg);
+    border-color: var(--ip-border);
+    color: var(--ip-text);
+}
+
+/* Light mode: dark text on the bright green buttons (white was 2.6:1). */
+[data-theme="light"] {
+    --ip-on-accent: #04121f;
+    --ip-accent: #12b979;
+    --ip-accent-strong: #067a52;
+}
+
+/* Light-theme text inside the marketing sections. */
+[data-theme="light"] .banner_area h1,
+[data-theme="light"] .banner_area h2,
+[data-theme="light"] .our_mission_area h2,
+[data-theme="light"] .our_mission_area h5,
+[data-theme="light"] .mining_invest_area h2,
+[data-theme="light"] .mining_invest_area h3,
+[data-theme="light"] .start_mining_area h3,
+[data-theme="light"] .our_roadmap_area h6,
+[data-theme="light"] .team_area h5,
+[data-theme="light"] .faq_area h5,
+[data-theme="light"] .footer_area h5,
+[data-theme="light"] .footer_area .footer_widget h5 {
+    color: var(--ip-text);
+}
+[data-theme="light"] .banner_area p,
+[data-theme="light"] .our_mission_area p,
+[data-theme="light"] .mining_invest_area p,
+[data-theme="light"] .our_roadmap_area p,
+[data-theme="light"] .team_area span,
+[data-theme="light"] .faq_area p,
+[data-theme="light"] .footer_area p {
+    color: var(--ip-muted);
+}
+[data-theme="light"] .banner_area .banner_content h1 span,
+[data-theme="light"] .our_mission_area .mission_text h5,
+[data-theme="light"] .popular_feature_area .feature_box h5,
+[data-theme="light"] .start_mining_area .mining_text h3 span {
+    color: var(--ip-accent-strong);
+}
+[data-theme="light"] .start_mining_area .mining_text {
+    background: var(--ip-card);
+    color: var(--ip-text);
+}
+[data-theme="light"] .faq_area .nav-tabs .nav-link {
+    color: var(--ip-muted);
+}
+[data-theme="light"] .faq_area .nav-tabs .nav-link.active {
+    color: var(--ip-text);
+    border-bottom-color: var(--ip-accent);
+}
+[data-theme="light"] .popular_feature_area .feature_box {
+    background: var(--ip-elevated);
+}
+
+.alert {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    margin-bottom: 16px;
+}
+.alert-danger {
+    background: #fdecec;
+    border-color: #f3b4b4;
+    color: #8a1c1c;
+}
+.alert-warning {
+    background: #fff6e0;
+    border-color: #f0cf8a;
+    color: #6a4a00;
+}
+[data-theme="dark"] .alert-danger {
+    background: rgba(255, 107, 107, 0.14);
+    border-color: rgba(255, 107, 107, 0.35);
+    color: #ffb4ab;
+}
+[data-theme="dark"] .alert-warning {
+    background: rgba(240, 180, 76, 0.14);
+    border-color: rgba(240, 180, 76, 0.35);
+    color: #ffd58a;
+}
+
+/* ==========================================================================
+   LOCAL GRID + UTILITIES
+   The IPstress views use Bootstrap class names, but Bootstrap itself is not
+   shipped. This is the subset the templates actually use, implemented without
+   a dependency and aligned to the 1440px page width.
+   ========================================================================== */
+.container,
+.container-lg {
+    width: min(calc(100% - 2 * var(--ip-gutter, 24px)), 1320px);
+    margin-left: auto;
+    margin-right: auto;
+}
+.container-fluid {
+    width: min(calc(100% - 2 * var(--ip-gutter, 24px)), 1440px);
+    margin-left: auto;
+    margin-right: auto;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -12px;
+    margin-right: -12px;
+}
+.row > [class*="col-"] {
+    padding-left: 12px;
+    padding-right: 12px;
+    min-width: 0;
+    width: 100%;
+}
+.col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+/* md first, lg after: an element with both classes must use the lg width. */
+.col-md-4 {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+}
+.col-md-5 {
+    flex: 0 0 41.6667%;
+    max-width: 41.6667%;
+}
+.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+.col-md-7 {
+    flex: 0 0 58.3333%;
+    max-width: 58.3333%;
+}
+.col-md-8 {
+    flex: 0 0 66.6667%;
+    max-width: 66.6667%;
+}
+.col-lg-2 {
+    flex: 0 0 16.6667%;
+    max-width: 16.6667%;
+}
+.col-lg-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+.col-lg-4 {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+}
+.col-lg-5 {
+    flex: 0 0 41.6667%;
+    max-width: 41.6667%;
+}
+.col-lg-6,
+.col-xl-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+.col-lg-7 {
+    flex: 0 0 58.3333%;
+    max-width: 58.3333%;
+}
+.col-lg-8 {
+    flex: 0 0 66.6667%;
+    max-width: 66.6667%;
+}
+.offset-lg-3 {
+    margin-left: 25%;
+}
+.offset-lg-2 {
+    margin-left: 16.6667%;
+}
+
+@media (max-width: 991px) {
+    .col-lg-2,
+    .col-lg-3,
+    .col-lg-4,
+    .col-lg-5,
+    .col-lg-6,
+    .col-lg-7,
+    .col-lg-8,
+    .col-xl-6,
+    .offset-lg-2,
+    .offset-lg-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-left: 0;
+    }
+    .col-md-4,
+    .col-md-5,
+    .col-md-6,
+    .col-md-7,
+    .col-md-8 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+@media (max-width: 767px) {
+    .col-md-4,
+    .col-md-5,
+    .col-md-6,
+    .col-md-7,
+    .col-md-8 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.align-items-center {
+    align-items: center;
+}
+.justify-content-center {
+    justify-content: center;
+}
+.justify-content-between {
+    justify-content: space-between;
+}
+.d-flex {
+    display: flex;
+}
+.d-none {
+    display: none;
+}
+.d-block {
+    display: block;
+}
+.position-relative {
+    position: relative;
+}
+.ml-auto {
+    margin-left: auto;
+}
+.mr-auto {
+    margin-right: auto;
+}
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+.mt-2 {
+    margin-top: 8px;
+}
+.mt-3 {
+    margin-top: 14px;
+}
+.mt-4 {
+    margin-top: 22px;
+}
+.mb-0 {
+    margin-bottom: 0;
+}
+.mb-2 {
+    margin-bottom: 8px;
+}
+.mb-3 {
+    margin-bottom: 14px;
+}
+.mb-4 {
+    margin-bottom: 22px;
+}
+.mr-1 {
+    margin-right: 6px;
+}
+.ml-2 {
+    margin-left: 8px;
+}
+.p-3 {
+    padding: 16px;
+}
+.w-100 {
+    width: 100%;
+}
+.text-center {
+    text-align: center;
+}
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.font-weight-medium {
+    font-weight: 500;
+}
+.font-weight-bold {
+    font-weight: 700;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+.no-block {
+    display: block;
+}
+
+/* Bootstrap-ish buttons used outside the dashboard. */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font:
+        600 0.95rem/1.2 Noto Sans,
+        sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease;
+}
+.btn-sm {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 7px;
+}
+.btn-lg {
+    padding: 13px 24px;
+    font-size: 1.05rem;
+}
+.btn-block {
+    display: flex;
+    width: 100%;
+}
+.btn-warning {
+    background: transparent;
+    border-color: var(--ip-accent);
+    color: var(--ip-accent-strong);
+}
+.btn-warning:hover,
+.btn-warning:focus {
+    background: var(--ip-accent);
+    border-color: var(--ip-accent);
+    color: var(--ip-on-accent);
+}
+.btn-success {
+    background: #087a51;
+    color: #fff;
+    border-color: #087a51;
+}
+.btn-success:hover {
+    background: #06623f;
+    border-color: #06623f;
+    color: #fff;
+}
+.btn-danger {
+    background: #b3261e;
+    color: #fff;
+    border-color: #b3261e;
+}
+.btn-danger:hover {
+    background: #941d17;
+    border-color: #941d17;
+    color: #fff;
+}
+[data-theme="dark"] .btn-success {
+    background: #2ee6a6;
+    color: #04121f;
+    border-color: #2ee6a6;
+}
+[data-theme="dark"] .btn-danger {
+    background: #ff7b72;
+    color: #2a0604;
+    border-color: #ff7b72;
+}
+
+/* Auth screens */
+.auth-wrapper {
+    min-height: calc(100vh - 80px);
+    padding: 56px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.auth-wrapper > .row {
+    width: 100%;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.auth-wrapper .row > [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+.auth-wrapper .row > [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+.auth-wrapper .card {
+    width: 100%;
+}
+[data-theme="light"] .text-white {
+    color: var(--ip-text) !important;
+}
+[data-theme="dark"] .text-white {
+    color: #ffffff !important;
+}
+
+/* Marketing rhythm and widths (legacy template used fixed 110-300px pads). */
+.web-header__inner {
+    max-width: 1440px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+[data-theme="light"] .web-header__brand,
+[data-theme="light"] .web-header__brand:hover,
+[data-theme="light"] .web-header__name {
+    color: var(--ip-text);
+}
+.banner_area {
+    padding: clamp(80px, 9vw, 140px) 0 clamp(56px, 7vw, 96px);
+}
+.banner_area .banner_content h1 {
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    line-height: 1.08;
+    margin-bottom: 22px;
+}
+.banner_area .banner_content p {
+    font-size: clamp(1rem, 1.25vw, 1.2rem);
+    line-height: 1.6;
+    margin-bottom: 26px;
+}
+.banner_area .right-ilustrat {
+    margin-left: 0;
+    text-align: center;
+}
+.banner_area .right-ilustrat img {
+    max-width: 100%;
+    height: auto;
+}
+.banner_area .btn_list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.our_mission_area,
+.mining_invest_area,
+.start_mining_area,
+.faq_area,
+.what_say_area,
+.footer_area {
+    padding-top: clamp(56px, 7vw, 96px);
+    padding-bottom: clamp(56px, 7vw, 96px);
+}
+.title {
+    padding-bottom: clamp(28px, 4vw, 52px);
+}
+.title h2 {
+    font-size: clamp(1.7rem, 2.7vw, 2.4rem);
+    line-height: 1.2;
+}
+.footer_area {
+    padding-bottom: 0;
+}
+.footer_area .copy_right {
+    margin-top: 48px;
+}
+
+/* IPstress pages do not load globals.css, so give them a minimal reset. */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+html {
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+}
+img,
+svg {
+    max-width: 100%;
+}
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+[data-theme="light"] .theme_btn {
+    background: var(--ip-accent);
+    color: var(--ip-on-accent);
+    border-color: var(--ip-accent);
+}
+[data-theme="light"] .theme_btn:hover,
+[data-theme="light"] .theme_btn:focus {
+    background: transparent;
+    color: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+}
+[data-theme="light"] .theme_btn.b-btn {
+    background: transparent;
+    color: var(--ip-text);
+    border-color: var(--ip-accent-strong);
+}
+[data-theme="light"] .theme_btn.b-btn:hover,
+[data-theme="light"] .theme_btn.b-btn:focus {
+    background: var(--ip-elevated);
+    color: var(--ip-text);
+    border-color: var(--ip-accent-strong);
+}
+
+[data-theme="light"] .web-theme-toggle {
+    background: #ffffff;
+    border-color: #cfd7e5;
+    color: #101a3a;
+}
+[data-theme="light"] .web-theme-toggle:hover,
+[data-theme="light"] .web-theme-toggle:focus-visible {
+    border-color: var(--ip-accent-strong);
+    color: var(--ip-accent-strong);
+}
+
+/* Form primitives used by the IPstress auth and admin-facing pages. */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ip-text);
+}
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    line-height: 1.4;
+}
+.card-body {
+    padding: clamp(20px, 2.4vw, 30px);
+}
+.card-title {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ip-text);
+}
+
+.card-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+.card-group > .card {
+    flex: 1 1 240px;
+}
+
+/* Bright-green hover text is unreadable on white; use the dark brand green. */
+[data-theme="light"] .web-header__nav a:hover,
+[data-theme="light"] .web-header__brand:hover,
+[data-theme="light"] .footer_area a:hover,
+[data-theme="light"] .web-header__btn--ghost:hover {
+    color: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+}
+[data-theme="light"] .web-header__btn--ghost:hover {
+    background: transparent;
+}
+.scroll-top {
+    color: var(--ip-on-accent);
+}
+
+/* ==========================================================================
+   V5 LAYOUT POLISH
+   Normalises the legacy marketing spacing, fixes the mobile header and gives
+   the account pages the same rhythm as the rest of the site.
+   ========================================================================== */
+:root {
+    --ip-gutter: clamp(16px, 3vw, 40px);
+    --ip-section-y: clamp(48px, 6vw, 96px);
+}
+
+.banner_area {
+    padding: clamp(52px, 7vw, 104px) 0 clamp(48px, 6vw, 88px);
+}
+.banner_area:before {
+    background-size: contain;
+    background-position: left bottom;
+    max-width: 70%;
+    height: 70%;
+}
+.banner_area .banner_content h1 {
+    font-size: clamp(2rem, 3.6vw, 3.4rem);
+    line-height: 1.1;
+    margin-bottom: 18px;
+}
+.banner_area .banner_content p {
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    line-height: 1.65;
+    margin-bottom: 28px;
+}
+
+/* Header: one row on desktop, brand row + scrollable nav on phones. */
+@media (max-width: 720px) {
+    .web-header__inner {
+        flex-wrap: wrap;
+        gap: 10px 12px;
+        padding: 10px 16px;
+    }
+    .web-header__nav {
+        display: block;
+        order: 3;
+        flex: 0 0 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+        margin: 0 -16px;
+        padding: 0 10px;
+    }
+    .web-header__nav::-webkit-scrollbar {
+        display: none;
+    }
+    .web-header__nav ul {
+        gap: 2px;
+        width: max-content;
+    }
+    .web-header__nav a {
+        padding: 7px 12px;
+        white-space: nowrap;
+    }
+    .web-header__cta {
+        margin-left: auto;
+    }
+}
+
+/* Section rhythm */
+.our_mission_area,
+.mining_invest_area,
+.start_mining_area,
+.faq_area,
+.what_say_area,
+.footer_area {
+    padding-top: var(--ip-section-y);
+    padding-bottom: var(--ip-section-y);
+}
+.our_mission_area {
+    padding-left: var(--ip-gutter);
+    padding-right: var(--ip-gutter);
+}
+.our_mission_area .mission_text {
+    margin-bottom: 0;
+    padding: 56px 20px 20px;
+}
+.our_mission_area .mission_text:before {
+    left: 0;
+    top: 0;
+    width: min(100%, 250px);
+    height: 190px;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+.our_mission_area .mission_text h5 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+.our_mission_area .mission_text p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.our_mission_area .title {
+    padding-bottom: clamp(20px, 3vw, 36px);
+}
+.mining_invest_area {
+    padding-left: 0;
+    padding-right: 0;
+}
+.mining_invest_area .right_img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 24px auto 0;
+    border-radius: 14px;
+}
+.mining_invest_area .mining_text {
+    margin-bottom: 0;
+}
+.mining_invest_area .mining_text .ti_2 p {
+    padding-right: 0;
+}
+.faq_area .title,
+.footer_area .title {
+    padding-bottom: clamp(20px, 3vw, 36px);
+}
+.faq_area .nav-tabs {
+    border-bottom: 1px solid var(--ip-border);
+    margin-bottom: 24px;
+}
+.faq_area .nav-tabs .nav-link {
+    display: inline-block;
+    padding: 10px 2px;
+    margin-right: 24px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    text-decoration: none;
+}
+.faq_area .nav-tabs .nav-link.active {
+    border-bottom-color: var(--ip-accent);
+}
+.faq_area .nav-tabs h6 {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.faq_area .faq_desc {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--ip-border);
+}
+.faq_area .faq_desc:last-child {
+    border-bottom: 0;
+}
+.faq_area .faq_desc h5 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+}
+.faq_area .faq_desc p {
+    margin: 0;
+    max-width: 80ch;
+    line-height: 1.7;
+}
+.footer_area {
+    padding-bottom: 28px;
+}
+.footer_area .footer_widget {
+    margin-bottom: 24px;
+}
+.footer_area .footer_widget h5 {
+    margin-bottom: 10px;
+}
+.footer_area .cta_list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.footer_area .cta_list li {
+    margin-bottom: 6px;
+}
+.footer_area .copy_right {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--ip-border);
+    font-size: 0.88rem;
+}
+
+/* Buttons used on the marketing pages. */
+.btn-primary {
+    background: var(--ip-accent);
+    color: var(--ip-on-accent);
+    border-color: var(--ip-accent);
+}
+.btn-primary:hover {
+    background: var(--ip-accent-strong);
+    border-color: var(--ip-accent-strong);
+    color: var(--ip-on-accent);
+}
+
+/* Account pages share the same page-head rhythm. */
+.page-breadcrumb {
+    width: min(calc(100% - 2 * var(--ip-gutter)), 1440px);
+    margin: 0 auto;
+    padding: 22px 0 14px;
+    border-bottom: 1px solid var(--ip-border);
+}
+.page-breadcrumb .d-flex {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.page-breadcrumb .page-title {
+    margin: 0;
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+    font-weight: 600;
+    color: var(--ip-text);
+}
+.page-breadcrumb .breadcrumb {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.82rem;
+}
+.page-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+    content: "/";
+    margin-right: 6px;
+    opacity: 0.6;
+}
+.page-breadcrumb .breadcrumb-item.text-sql {
+    color: var(--ip-muted);
+}
+.container-fluid > .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+.container-fluid > .row,
+.container > .row {
+    row-gap: 20px;
+}
+
+/* Generic tables on the account pages. */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+.table th,
+.table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--ip-border);
+    vertical-align: middle;
+}
+.table thead th {
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ip-muted);
+}
+.table td {
+    color: var(--ip-text);
+}
+.table tbody tr:last-child td {
+    border-bottom: 0;
+}
+.table .text-muted {
+    color: var(--ip-muted) !important;
+}
+
+/* Auth card sizing + spacing. */
+.auth-wrapper {
+    padding: clamp(32px, 5vw, 64px) 20px;
+}
+.auth-wrapper .card-body .card-title {
+    font-size: 1.35rem;
+}
+
+/* The wheel is drawn on a fixed 400px canvas; scale it to the card width. */
+.wheel-host {
+    max-width: 400px;
+    margin: 0 auto;
+}
+.wheel-host canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Stacked mission cards on phones: the legacy blobs were 230px tall and
+   created huge gaps between cards. */
+@media (max-width: 767px) {
+    .our_mission_area .mission_text {
+        background: var(--ip-card);
+        border: 1px solid var(--ip-border);
+        border-radius: 14px;
+        padding: 22px 20px;
+        margin-bottom: 14px;
+        min-height: 0;
+    }
+    .our_mission_area .mission_text:before {
+        width: 120px;
+        height: 100px;
+        left: auto;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.45;
+    }
+    .our_mission_area .mission_text:hover:before,
+    .our_mission_area .mt_1:hover:before,
+    .our_mission_area .mt_01:hover:before {
+        transform: translateY(-50%) scale(0.9);
+    }
+    .our_mission_area .mission_text h5,
+    .our_mission_area .mission_text p {
+        position: relative;
+        z-index: 1;
+        max-width: 88%;
+    }
+    .our_mission_area .mission_text p {
+        margin: 0;
+    }
+}
+
+/* Legacy FAQ spacing added 58px above every item (and the panel wrapper). */
+.faq_area .faq_desc {
+    margin: 0;
+}
+
+/* Account dashboards nest a container inside a container; keep one gutter. */
+.container-fluid .container-fluid,
+.container .container-fluid {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+.activity .table td:last-child {
+    text-align: right;
+}
+
+/* The form grid inside the auth card should not use negative gutters. */
+.auth-wrapper .card .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+.auth-wrapper .card .row > [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.referral-link {
+    word-break: break-all;
+}
+
+/* Empty-state rows read as a message, not a cramped table cell. */
+.table td.text-center {
+    padding: 30px 12px;
+    color: var(--ip-muted);
+}
+
+.alert-success {
+    background: #e7f8f0;
+    border-color: #a9e3c8;
+    color: #0a5c3d;
+}
+[data-theme="dark"] .alert-success {
+    background: rgba(46, 230, 166, 0.14);
+    border-color: rgba(46, 230, 166, 0.35);
+    color: #86f3c4;
+}
+
+/* Keyboard focus was suppressed above; restore a visible ring for keyboard
+ * users without showing it on mouse clicks. IE11 ignores :focus-visible, so
+ * the plain :focus rule keeps its outline there. */
+body a:focus,
+body button:focus,
+body .btn:focus,
+body summary:focus,
+body input[type="checkbox"]:focus {
+    outline: 2px solid var(--ip-accent-strong);
+    outline-offset: 2px;
+}
+body a:focus:not(:focus-visible),
+body button:focus:not(:focus-visible),
+body .btn:focus:not(:focus-visible),
+body summary:focus:not(:focus-visible),
+body input[type="checkbox"]:focus:not(:focus-visible) {
+    outline: none;
 }

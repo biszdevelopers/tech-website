@@ -26,7 +26,8 @@ export const mainSessions = new SessionManager(
     "main-session",
     env.sessionSecretMain,
     env.sessionTtlSeconds,
-    env.isProd
+    env.isProd,
+    "Strict"
 );
 
 export const webSessions = new SessionManager(
@@ -36,11 +37,13 @@ export const webSessions = new SessionManager(
     env.isProd
 );
 
-/** Main-site admin session (public directory back office). */
+/** Main-site admin session (public directory back office).
+ *  Unauthenticated callers get the same 404 as an unknown URL: the back
+ *  office must not be discoverable from the public site. */
 export async function requireMainAdmin(ctx: Context): Promise<void> {
     const session = mainSessions.load(ctx);
     if (session?.islogin) return;
-    ctx.throw(401, "Unauthorized");
+    ctx.throw(404, "Page not found.");
 }
 
 /**
@@ -53,14 +56,16 @@ export async function requireWebUser(ctx: Context): Promise<SessionData> {
     return session;
 }
 
-/** Web-app administrator: rank >= 1, verified against the live user row. */
+/** Web-app administrator: rank >= 1, verified against the live user row.
+ *  Non-admins see a 404, not a 403, so the admin area is not discoverable. */
 export async function requireWebAdmin(ctx: Context): Promise<void> {
-    const session = await requireWebUser(ctx);
+    const session = webSessions.load(ctx);
+    if (!session?.userId) ctx.throw(404, "Page not found.");
     const user = await webDb.users.findUnique({
-        where: { ID: session.userId! },
+        where: { ID: session.userId },
         select: { rank: true },
     });
-    if (!user || Number(user.rank) < 1) ctx.throw(403, "Admin access required.");
+    if (!user || Number(user.rank) < 1) ctx.throw(404, "Page not found.");
 }
 
 /** Map consumed by Application - names used in route options resolve here. */

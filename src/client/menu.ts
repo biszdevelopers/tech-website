@@ -15,6 +15,13 @@ function initDashMenu(): void {
         link.addEventListener("click", function () {
             if (window.innerWidth < 880 && sidebar) sidebar.classList.remove("open");
         });
+        // Mark the current section so the sidebar shows where you are.
+        const href = link.getAttribute("href") || "";
+        const here = window.location.pathname;
+        if (href === here || (href !== "/web" && here.indexOf(href + "/") === 0)) {
+            const item = link.closest(".sidebar-item");
+            if (item) item.classList.add("active");
+        }
     });
 
     const togglers = document.querySelectorAll('[data-toggle="dropdown"]');

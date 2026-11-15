@@ -1,0 +1,63 @@
+<%- include('partials/head', { title: 'New Submission | BIBS-C Tech Tools', css: ['globals.css', 'form.css'] }) %>
+<%- include('partials/navbar') %>
+<div id="adminTopbar"><h1>New Tech Tool</h1></div>
+<div id="adminNav">
+    <ul>
+        <li><a href="/admin">&#8592; Back to Admin</a></li>
+    </ul>
+</div>
+<div id="wrap">
+    <form id="form" method="post" action="/api/admin/create" enctype="multipart/form-data">
+        <h2>Tool details</h2>
+        <div class="form-grid">
+            <label class="field"><span>Tool name</span>
+                <input class="l" type="text" name="techname" required/>
+            </label>
+            <label class="field"><span>Link</span>
+                <input class="l" type="text" name="link" placeholder="https://..." required/>
+            </label>
+            <label class="field"><span>Display text</span>
+                <input class="l" type="text" name="displaytext" required/>
+            </label>
+        </div>
+
+        <h2>Descriptions</h2>
+        <label class="field"><span>TL1: Knowing Our Students</span>
+            <textarea class="l" name="tl1_desc"></textarea>
+        </label>
+        <label class="field"><span>TL2: Strategies for Learning</span>
+            <textarea class="l" name="tl2_desc"></textarea>
+        </label>
+        <label class="field"><span>TL3: Evidence for Learning</span>
+            <textarea class="l" name="tl3_desc"></textarea>
+        </label>
+        <label class="field"><span>TL4: Crafting the Curriculum</span>
+            <textarea class="l" name="tl4_desc"></textarea>
+        </label>
+
+        <h2>Strands</h2>
+        <div class="domains">
+            <% strands.forEach(function (s) { %>
+            <label><input type="checkbox" name="<%= s.name %>"/><%= s.label %></label>
+            <% }) %>
+        </div>
+
+        <h2>Submission details</h2>
+        <div class="form-grid">
+            <label class="field"><span>Submitter name</span>
+                <input class="l" type="text" name="username"/>
+            </label>
+            <label class="field"><span>Contact email</span>
+                <input class="l" type="text" name="contact"/>
+            </label>
+            <label class="field"><span>Screenshot (PNG, JPEG or WebP)</span>
+                <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp"/>
+            </label>
+        </div>
+
+        <label class="check"><input type="checkbox" name="accepted"/> Publish immediately</label>
+        <button type="submit" class="submit-btn">Create Tool</button>
+    </form>
+</div>
+</body>
+</html>

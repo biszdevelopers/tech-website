@@ -45,12 +45,19 @@ export interface SessionData {
 }
 
 export class SessionManager {
+    public readonly cookieName: string;
+
     constructor(
-        public readonly cookieName: string,
+        name: string,
         private readonly secret: string,
         private readonly ttlSeconds: number,
-        private readonly secureCookies: boolean
-    ) {}
+        private readonly secureCookies: boolean,
+        private readonly sameSite: "Lax" | "Strict" = "Lax"
+    ) {
+        // __Host- forbids Domain, requires Secure + Path=/, which makes cookie
+        // tossing from a sibling host impossible in production.
+        this.cookieName = secureCookies ? `__Host-${name}` : name;
+    }
 
     /** Read + verify. Returns null for missing/tampered/expired cookies - never throws. */
     load(ctx: Context): SessionData | null {
@@ -79,6 +86,7 @@ export class SessionManager {
         ctx.setCookie(this.cookieName, `v1.${payload}.${signature}`, {
             httpOnly: true,
             secure: this.secureCookies,
+            sameSite: this.sameSite,
             maxAge: this.ttlSeconds,
         });
     }
@@ -88,6 +96,7 @@ export class SessionManager {
         ctx.setCookie(this.cookieName, "", {
             httpOnly: true,
             secure: this.secureCookies,
+            sameSite: this.sameSite,
             maxAge: 0,
         });
     }

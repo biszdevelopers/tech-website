@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: config.title + ' · BIBS·C Tech Tools', description: 'Filter and explore tech tools aligned with ' + config.title + ' strands.', scripts: ['filters.js'] }) %>
+<%- include('partials/head', { title: config.title + ' | BIBS-C Tech Tools', description: 'Filter and explore tech tools aligned with ' + config.title + ' strands.', scripts: ['filters.js'] }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead">
@@ -9,7 +9,7 @@
         <div class="label" id="<%= strand.domainColumn %>">
             <input type="hidden" name="<%= strand.checkboxName %>" value="0"/>
             <span class="<%= strand.cssClass %>"><%= strand.label %>
-                <input type="checkbox" class="checkf" name="<%= strand.checkboxName %>"<%- checked[i] ? ' checked=""' : '' %> value="1"/>
+                <input type="checkbox" class="checkf" aria-label="<%= strand.label %>" name="<%= strand.checkboxName %>"<%- checked[i] ? ' checked=""' : '' %> value="1"/>
             </span>
             <div class="overlay"><% if (tl === 'tl3' && i === config.strands.length - 1) { %><%= strand.tooltip %><% } else { %> <%= strand.tooltip %> <% } %></div>
         </div>
@@ -22,10 +22,10 @@
 <div id="all">
     <div class="techtip-wrap" id="results">
         <p class="jump-menu">
-            Jump to: <a href="#tl-title">Top</a> · <a href="#filter">Filter</a><% config.strands.forEach(function (s) { %><span>
-            · <a href="#<%= s.domainColumn %>"><%= s.label %></a>
+            Jump to: <a href="#tl-title">Top</a> | <a href="#filter">Filter</a><% config.strands.forEach(function (s) { %><span>
+            | <a href="#<%= s.domainColumn %>"><%= s.label %></a>
             </span><% }) %>
-            · <a href="/#front">Home</a> · <a href="/search">Search</a>
+            | <a href="/#front">Home</a> | <a href="/search">Search</a>
         </p>
 
         <% if (filtered.length === 0) { %>
@@ -40,7 +40,7 @@
                 <% } }) %>
             </div>
             <div class="info">
-                <div class="img"><img src="/testuploads/<%= tool.id %>.png" alt="<%= tool.techname %>"/></div>
+                <div class="img"><img src="/uploads/<%= tool.id %>" alt="<%= tool.techname %>" loading="lazy" decoding="async"/></div>
                 <div class="desc"><% if (tool.tight) { %><%= tool.desc %><% } else { %> <%= tool.desc %> <% } %></div>
                 <div class="link">
                     <ul><li><a href="<%= tool.link %>" target="_blank" rel="noreferrer"><%= tool.displaytext %></a></li></ul>

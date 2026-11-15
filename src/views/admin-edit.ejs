@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Edit Submission #' + id + ' · BIBS·C Tech Tools' }) %>
+<%- include('partials/head', { title: 'Edit Submission #' + id + ' | BIBS-C Tech Tools', css: ['globals.css', 'form.css'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1>Edit Submission #<%= id %></h1></div>
 <div id="adminNav">
@@ -6,38 +6,59 @@
         <li><a href="/admin">&#8592; Back to Admin</a></li>
     </ul>
 </div>
-<form method="post" action="/api/admin/edit">
-    <table>
-        <thead>
-            <tr>
-                <th>Tool ID</th><th>Tool Name</th><th>TL1 Description</th><th>TL2 Description</th>
-                <th>TL3 Description</th><th>TL4 Description</th><th>Link</th><th>Display Text</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><%= id %></td>
-                <td><textarea name="Techname"><%= sub.techname %></textarea></td>
-                <td><textarea name="description"><%= sub.tl1_desc %></textarea></td>
-                <td><textarea name="description2"><%= sub.tl2_desc %></textarea></td>
-                <td><textarea name="description3"><%= sub.tl3_desc %></textarea></td>
-                <td><textarea name="description4"><%= sub.tl4_desc %></textarea></td>
-                <td><textarea name="Link"><%= sub.link %></textarea></td>
-                <td><textarea name="display"><%= sub.displaytext %></textarea></td>
-            </tr>
-        </tbody>
-    </table>
-    <input type="hidden" name="id1" value="<%= id %>"/>
-    <h3>Strands</h3>
-    <ul>
-        <% strands.forEach(function (s) { %>
-            <li>
-                <input type="checkbox" name="<%= s.name %>"<%- s.checked ? ' checked=""' : '' %>/>
-                <span><%= s.label %></span>
-            </li>
-        <% }) %>
-    </ul>
-    <button type="submit">Submit</button>
-</form>
+<div id="wrap">
+    <form id="form" method="post" action="/api/admin/edit">
+        <input type="hidden" name="id1" value="<%= id %>"/>
+        <% if (locals.saved) { %>
+        <p class="submit-success" role="status">Changes saved.</p>
+        <% } %>
+
+        <h2>Tool details</h2>
+        <div class="form-grid">
+            <label class="field"><span>Tool name</span>
+                <input class="l" type="text" name="Techname" value="<%= sub.techname %>" required/>
+            </label>
+            <label class="field"><span>Link</span>
+                <input class="l" type="text" name="Link" value="<%= sub.link %>" required/>
+            </label>
+            <label class="field"><span>Display text</span>
+                <input class="l" type="text" name="display" value="<%= sub.displaytext %>" required/>
+            </label>
+        </div>
+
+        <h2>Descriptions</h2>
+        <label class="field"><span>TL1: Knowing Our Students</span>
+            <textarea class="l" name="description"><%= sub.tl1_desc %></textarea>
+        </label>
+        <label class="field"><span>TL2: Strategies for Learning</span>
+            <textarea class="l" name="description2"><%= sub.tl2_desc %></textarea>
+        </label>
+        <label class="field"><span>TL3: Evidence for Learning</span>
+            <textarea class="l" name="description3"><%= sub.tl3_desc %></textarea>
+        </label>
+        <label class="field"><span>TL4: Crafting the Curriculum</span>
+            <textarea class="l" name="description4"><%= sub.tl4_desc %></textarea>
+        </label>
+
+        <h2>Strands</h2>
+        <div class="domains">
+            <% strands.forEach(function (s) { %>
+            <label><input type="checkbox" name="<%= s.name %>"<%- s.checked ? ' checked=""' : '' %>/><%= s.label %></label>
+            <% }) %>
+        </div>
+
+        <button type="submit" class="submit-btn">Save changes</button>
+    </form>
+
+    <h2 class="panel-title">Screenshot</h2>
+    <div class="screenshot-panel">
+        <img class="admin-shot" src="/uploads/<%= id %>" alt="Current screenshot"/>
+        <form method="post" action="/api/admin/screenshot" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<%= id %>"/>
+            <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp" required/>
+            <button type="submit" class="submit-btn">Replace screenshot</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>

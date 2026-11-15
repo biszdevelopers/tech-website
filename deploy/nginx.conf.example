@@ -1,6 +1,6 @@
 # /etc/nginx/sites-available/tech-website
-# Reverse proxy for the Next.js server. TLS via certbot:
-#   sudo certbot --nginx -d example.com
+# Optional reverse proxy. The Node app also works standalone (`pnpm start`)
+# and performs its own compression, caching and security headers.
 
 server {
     listen 80;
@@ -9,7 +9,8 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name example.com;
 
     # Managed by certbot after first run:
@@ -18,14 +19,8 @@ server {
 
     client_max_body_size 10m;
 
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript image/svg+xml;
-
-    # Immutable build assets
-    location /_next/static/ {
-        proxy_pass http://127.0.0.1:3000;
-        add_header Cache-Control "public, max-age=31536000, immutable";
-    }
+    # The app precompresses and serves .br/.gz itself; do not double-compress.
+    gzip off;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -34,8 +29,6 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_read_timeout 60s;
+        proxy_read_timeout 90s;
     }
 }

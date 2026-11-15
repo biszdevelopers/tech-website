@@ -1,4 +1,8 @@
-﻿import "dotenv/config";
+try {
+    process.loadEnvFile();
+} catch {
+    /* real environment wins */
+}
 import { mainDb as prisma } from "../src/lib/db/main";
 import * as bcrypt from "bcryptjs";
 import { readFileSync } from "node:fs";
@@ -136,7 +140,7 @@ function splitSection(block: string): ParsedTool[] {
 async function main(): Promise<void> {
     console.log("Seeding main database...");
 
-    const hashedPW = await bcrypt.hash("admin123", 10);
+    const hashedPW = await bcrypt.hash("admin123", 12);
     await prisma.login.upsert({
         where: { User: "admin" },
         update: { PW: hashedPW },
@@ -147,7 +151,7 @@ async function main(): Promise<void> {
     // Per-tool upsert. We assign a stable, sequential id (1, 2, 3, …) so the
     // /testuploads/<id>.png filenames line up with the rows.
     const tools = loadTools();
-    console.log(`  · Parsed ${tools.length} tools from tools.txt`);
+    console.log(`  | Parsed ${tools.length} tools from tools.txt`);
 
     // First, wipe any existing domain rows so we don't accumulate stale tags
     // when a tool is removed from the workbook. Submission rows will be

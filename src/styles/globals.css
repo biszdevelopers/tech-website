@@ -44,7 +44,7 @@
     --color-footer-bg: #0d1440;
     --color-card-inverse: #1a237e;
     --color-input-bg: #ffffff;
-    --color-input-border: #cccccc;
+    --color-input-border: #8a8f9c;
 
     --space-1: 4px;
     --space-2: 8px;
@@ -271,12 +271,9 @@ h6 {
     border-radius: 2px;
 }
 
-#nav a:hover li {
-    background: var(--color-accent);
-    color: var(--color-ink-on-accent);
-}
-#nav a:hover .nav-underline {
-    width: calc(100% - 40px);
+#nav a:hover .nav-underline,
+#nav a:focus-visible .nav-underline {
+    width: calc(100% - 32px);
 }
 
 #search {
@@ -332,6 +329,8 @@ footer a:hover {
     border-radius: var(--radius-md);
     padding: var(--space-2) var(--space-3);
     margin: var(--space-2) 0 var(--space-3);
+    width: fit-content;
+    max-width: 100%;
 }
 .jump-menu a {
     color: var(--color-ink);
@@ -561,14 +560,15 @@ footer a:hover {
     flex: 1 1 280px;
     min-width: 240px;
     padding: 10px 12px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-input-border);
     border-radius: var(--radius-md);
     font-size: 1rem;
     background: var(--color-input-bg);
     color: var(--color-ink);
 }
 .search-form input[type="text"]:focus {
-    outline: none;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
     border-color: var(--color-ink);
     box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
@@ -593,7 +593,8 @@ footer a:hover {
     color: var(--color-muted);
     font-size: 0.9rem;
 }
-.tags-more {
+/* Must out-rank `.techtip .tags span` (white chips) or it is invisible. */
+.techtip .tags .tags-more {
     font-size: 11px;
     color: var(--color-muted);
     font-style: italic;
@@ -607,45 +608,38 @@ footer a:hover {
  * down) so they win on equal specificity via source order. We also re-state
  * the rules for `.techtip .tags .n*` and `.label span.n*` so the chips pick
  * up the right background even when nested under more specific selectors. */
+/* Chip backgrounds are chosen so every label clears WCAG AA (4.5:1) at the
+ * 12px chip size. Darker hues keep white text; the lighter cyan family uses
+ * the navy ink token instead. */
 .n1,
 .techtip .tags .n1,
 .label span.n1 {
     background: #516acb;
+    color: #fff;
 }
 .n2,
 .techtip .tags .n2,
 .label span.n2 {
-    background: #5275c4;
+    background: #4866b7;
+    color: #fff;
 }
 .n3,
 .techtip .tags .n3,
 .label span.n3 {
     background: #518bdb;
+    color: #0d1440;
 }
 .n4,
 .techtip .tags .n4,
 .label span.n4 {
     background: #4ea0d6;
+    color: #0d1440;
 }
 .n5,
 .techtip .tags .n5,
 .label span.n5 {
     background: #4ec1de;
-}
-
-/* Strand chips always use white text. This rule is written last so it beats
- * `.techtip .tags span` and `.label span` background-only rules above. */
-.techtip .tags .n1,
-.techtip .tags .n2,
-.techtip .tags .n3,
-.techtip .tags .n4,
-.techtip .tags .n5,
-.label span.n1,
-.label span.n2,
-.label span.n3,
-.label span.n4,
-.label span.n5 {
-    color: #fff;
+    color: #0d1440;
 }
 
 .techtip .tags a {
@@ -1021,7 +1015,7 @@ footer a:hover {
     width: 100%;
     min-height: 80px;
     padding: 8px 10px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-input-border);
     border-radius: var(--radius-sm);
     font-family: var(--font-sans);
     font-size: 0.9rem;
@@ -1126,7 +1120,7 @@ footer a:hover {
         font-size: 1.4rem;
     }
     #nav {
-        display: block;
+        display: flex;
     }
     #nav a {
         height: auto;
@@ -1207,12 +1201,16 @@ footer a:hover {
     .overlay {
         height: auto;
         position: static;
-        padding-bottom: 10px;
-        margin-right: 5%;
+        padding: 0 2px;
+        margin: 6px 0 16px;
+        max-width: 60ch;
         opacity: 1;
         border: 0;
         box-shadow: none;
         background: transparent;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+        line-height: 1.5;
     }
     #search {
         position: static;
@@ -1249,7 +1247,7 @@ footer a:hover {
     --color-accent: #0cf293;
     --color-accent-soft: rgba(12, 242, 147, 0.16);
     --color-input-bg: #101743;
-    --color-input-border: #3a4588;
+    --color-input-border: #5a6791;
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
     --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -1361,4 +1359,980 @@ footer a:hover {
 }
 [data-theme="dark"] #theme-toggle .icon-moon {
     display: none;
+}
+
+/* ---- inline-style migration + anchor offsets ---------------------------- */
+.section-anchor,
+.tl-section,
+.tlx,
+.tl-submit-cta {
+    scroll-margin-top: var(--nav-offset);
+}
+.hero-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    color: transparent;
+    z-index: 0;
+}
+.hero-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(13, 15, 45, 0.35), rgba(13, 15, 45, 0.55));
+    z-index: 1;
+}
+
+/* ==========================================================================
+   V4 THEME SYSTEM - one token vocabulary for light, dark and OS preference.
+   Component rules at the end deliberately use tokens only, so both themes
+   get the same hierarchy and contrast.
+   ========================================================================== */
+:root {
+    --color-elevated: #ffffff;
+    --color-hairline: rgba(13, 15, 45, 0.08);
+    --color-focus: #0bb87a;
+    --color-success: #0b8f5f;
+    --color-warning: #a86600;
+    --color-danger: #b3261e;
+    --radius-xl: 20px;
+    --shadow-3: 0 18px 50px rgba(13, 15, 45, 0.16);
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-bg: #080c1b;
+        --color-surface: #0f1630;
+        --color-surface-2: #141d3b;
+        --color-panel: #0f1630;
+        --color-panel-tint: #131b38;
+        --color-elevated: #172043;
+        --color-footer-bg: #060a17;
+        --color-card-inverse: #0d1430;
+        --color-nav-bg: #0b1228;
+        --color-deep: #0d1430;
+        --color-ink: #eef1ff;
+        --color-ink-strong: #ffffff;
+        --color-muted: #a7b1d1;
+        --color-border: #232d52;
+        --color-hairline: rgba(255, 255, 255, 0.08);
+        --color-accent: #2ee6a6;
+        --color-accent-soft: rgba(46, 230, 166, 0.14);
+        --color-accent-strong: #0cf293;
+        --color-ink-on-accent: #04121f;
+        --color-input-bg: #0c1329;
+        --color-input-border: #5a6791;
+        --color-success: #4be3a4;
+        --color-warning: #f0b44c;
+        --color-danger: #ff7b72;
+        --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.35);
+        --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 20px 48px rgba(0, 0, 0, 0.45);
+        --shadow-3: 0 24px 70px rgba(0, 0, 0, 0.55);
+        color-scheme: dark;
+    }
+}
+
+[data-theme="dark"] {
+    --color-bg: #080c1b;
+    --color-surface: #0f1630;
+    --color-surface-2: #141d3b;
+    --color-panel: #0f1630;
+    --color-panel-tint: #131b38;
+    --color-elevated: #172043;
+    --color-footer-bg: #060a17;
+    --color-card-inverse: #0d1430;
+    --color-nav-bg: #0b1228;
+    --color-deep: #0d1430;
+    --color-ink: #eef1ff;
+    --color-ink-strong: #ffffff;
+    --color-muted: #a7b1d1;
+    --color-border: #232d52;
+    --color-hairline: rgba(255, 255, 255, 0.08);
+    --color-accent: #2ee6a6;
+    --color-accent-soft: rgba(46, 230, 166, 0.14);
+    --color-accent-strong: #0cf293;
+    --color-ink-on-accent: #04121f;
+    --color-input-bg: #0c1329;
+    --color-input-border: #5a6791;
+    --color-success: #4be3a4;
+    --color-warning: #f0b44c;
+    --color-danger: #ff7b72;
+    --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.35);
+    --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 20px 48px rgba(0, 0, 0, 0.45);
+    --shadow-3: 0 24px 70px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-ink-strong);
+}
+
+[data-theme="dark"] body {
+    background-image:
+        radial-gradient(900px 420px at 50% -160px, rgba(46, 230, 166, 0.1), transparent 70%),
+        linear-gradient(180deg, #070b18 0%, var(--color-bg) 320px);
+    background-repeat: no-repeat;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body {
+        background-image:
+            radial-gradient(900px 420px at 50% -160px, rgba(46, 230, 166, 0.1), transparent 70%),
+            linear-gradient(180deg, #070b18 0%, var(--color-bg) 320px);
+        background-repeat: no-repeat;
+    }
+}
+
+[data-theme="dark"] body::before {
+    opacity: 0.02;
+}
+:where([data-theme="dark"]) a {
+    color: var(--color-accent-strong);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body::before {
+        opacity: 0.02;
+    }
+    :where(:root:not([data-theme="light"])) a {
+        color: var(--color-accent-strong);
+    }
+}
+
+:root[data-theme="dark"] .techtip-wrap,
+:root[data-theme="dark"] .tlx,
+:root[data-theme="dark"] #basicinfo,
+:root[data-theme="dark"] .admin-filters,
+:root[data-theme="dark"] #adminNav,
+:root[data-theme="dark"] #adminTopbar,
+:root[data-theme="dark"] .AdminTable_wrap__1AlVX {
+    border-color: var(--color-hairline);
+    box-shadow: var(--shadow-1);
+}
+
+:root[data-theme="dark"] .n1 {
+    background: rgba(81, 106, 203, 0.3);
+    color: #c3ccff;
+    border: 1px solid rgba(129, 149, 255, 0.4);
+}
+:root[data-theme="dark"] .n2 {
+    background: rgba(72, 102, 183, 0.3);
+    color: #c1d0ff;
+    border: 1px solid rgba(124, 156, 255, 0.38);
+}
+:root[data-theme="dark"] .n3 {
+    background: rgba(81, 139, 219, 0.26);
+    color: #c6e2ff;
+    border: 1px solid rgba(125, 185, 255, 0.36);
+}
+:root[data-theme="dark"] .n4 {
+    background: rgba(78, 160, 214, 0.24);
+    color: #c1ebff;
+    border: 1px solid rgba(121, 205, 255, 0.34);
+}
+:root[data-theme="dark"] .n5 {
+    background: rgba(78, 193, 222, 0.22);
+    color: #bdf5ff;
+    border: 1px solid rgba(120, 225, 247, 0.34);
+}
+:root[data-theme="dark"] .n1,
+:root[data-theme="dark"] .n2,
+:root[data-theme="dark"] .n3,
+:root[data-theme="dark"] .n4,
+:root[data-theme="dark"] .n5 {
+    font-weight: 600;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .n1 {
+        background: rgba(81, 106, 203, 0.3);
+        color: #c3ccff;
+        border: 1px solid rgba(129, 149, 255, 0.4);
+    }
+    :root:not([data-theme="light"]) .n2 {
+        background: rgba(72, 102, 183, 0.3);
+        color: #c1d0ff;
+        border: 1px solid rgba(124, 156, 255, 0.38);
+    }
+    :root:not([data-theme="light"]) .n3 {
+        background: rgba(81, 139, 219, 0.26);
+        color: #c6e2ff;
+        border: 1px solid rgba(125, 185, 255, 0.36);
+    }
+    :root:not([data-theme="light"]) .n4 {
+        background: rgba(78, 160, 214, 0.24);
+        color: #c1ebff;
+        border: 1px solid rgba(121, 205, 255, 0.34);
+    }
+    :root:not([data-theme="light"]) .n5 {
+        background: rgba(78, 193, 222, 0.22);
+        color: #bdf5ff;
+        border: 1px solid rgba(120, 225, 247, 0.34);
+    }
+}
+
+/* Text controls only: checkboxes/radios/ranges keep their own native or
+ * custom paint, otherwise this rule wipes out `.checkf` and hides ticks. */
+:root[data-theme="dark"]
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+    background: var(--color-input-bg);
+    border-color: var(--color-input-border);
+    color: var(--color-ink-strong);
+}
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+    color: #7d88ad;
+}
+:root[data-theme="dark"] input:focus,
+:root[data-theme="dark"] textarea:focus,
+:root[data-theme="dark"] select:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent);
+}
+:root[data-theme="dark"] input:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-ink-strong);
+    box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
+}
+
+:root[data-theme="dark"] table th {
+    background: var(--color-surface-2);
+    color: var(--color-ink-strong);
+    border-color: var(--color-hairline);
+}
+:root[data-theme="dark"] table td {
+    border-color: var(--color-hairline);
+}
+:root[data-theme="dark"] table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] ::selection {
+    background: var(--color-accent);
+    color: var(--color-ink-on-accent);
+}
+:root[data-theme="dark"] * {
+    scrollbar-color: #2a3560 transparent;
+    scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==========================================================================
+   V4 LAYOUT POLISH - one wide, aligned container for every page.
+   The old layout capped sections at 1040-1100px, which left huge dead space
+   on desktop and squeezed the four TL cards. These rules use one page grid.
+   ========================================================================== */
+:root {
+    --page-max: 1440px;
+    --page-pad: clamp(18px, 4vw, 48px);
+    --content-gutter: max(var(--page-pad), calc((100% - var(--page-max)) / 2));
+}
+
+#topbar {
+    padding: 14px var(--content-gutter);
+    background: var(--color-panel);
+}
+#topbar h1 {
+    font-style: normal;
+    font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+    font-weight: 750;
+    letter-spacing: -0.015em;
+    padding-bottom: 0;
+}
+#cover #topbar {
+    gap: 16px;
+}
+
+#navbar {
+    box-shadow: 0 4px 24px rgba(13, 15, 45, 0.16);
+}
+#nav {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0;
+    justify-content: center;
+}
+#nav li {
+    width: auto;
+    flex: 1 1 0;
+    padding: 14px 16px;
+    font-size: clamp(0.86rem, 0.95vw, 1rem);
+    letter-spacing: 0.005em;
+}
+#nav a {
+    font-weight: 550;
+}
+
+#front {
+    min-height: clamp(240px, 26vw, 360px);
+    padding: clamp(40px, 5vw, 72px) var(--content-gutter);
+    background: var(--color-deep);
+}
+#front h1 {
+    width: min(900px, 100%);
+    margin: 0;
+    padding: 0;
+    font-size: clamp(1.85rem, 3vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+
+#all {
+    background: var(--color-panel);
+}
+#basicinfo {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: clamp(32px, 3.4vw, 52px) 0;
+    background: transparent;
+}
+#basicinfo p {
+    max-width: 72ch;
+    font-size: clamp(0.98rem, 1.05vw, 1.06rem);
+    line-height: 1.65;
+}
+#basicinfo h1,
+.section-anchor {
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    letter-spacing: -0.015em;
+    margin-top: 32px;
+}
+#basicinfo #about.section-anchor {
+    margin-top: 0;
+}
+.jump-menu {
+    font-size: clamp(0.82rem, 0.95vw, 0.95rem);
+    line-height: 2;
+    padding: 10px 14px;
+    margin: 20px 0 0;
+}
+
+.tl-section {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: clamp(24px, 3vw, 44px) 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(14px, 1.6vw, 24px);
+}
+.tl-section > a {
+    display: flex;
+    min-width: 0;
+}
+.tlx {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: clamp(18px, 1.8vw, 26px);
+    border-radius: var(--radius-lg);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+.tlhead {
+    font-size: clamp(1.02rem, 1.2vw, 1.22rem);
+    line-height: 1.3;
+    margin: 0 0 6px;
+}
+.tlx__strands-label {
+    font-size: clamp(0.78rem, 0.9vw, 0.88rem);
+    margin: 0 0 12px;
+    text-align: left;
+}
+.tlx__strands {
+    display: grid;
+    gap: 8px;
+    justify-content: stretch;
+    text-align: left;
+}
+.tlx__strands li {
+    font-size: clamp(0.86rem, 0.95vw, 0.96rem);
+    line-height: 1.35;
+    padding-left: 14px;
+}
+.tlx__strands li:first-child {
+    padding-left: 14px;
+}
+.tlx__strands li:first-child::before {
+    display: block;
+}
+.tl-submit-cta {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 8px 0 clamp(36px, 5vw, 72px);
+    font-size: clamp(0.95rem, 1vw, 1.05rem);
+}
+
+#subhead {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0;
+}
+#subhead h1 {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: clamp(28px, 3vw, 44px) 0 10px;
+    font-size: clamp(1.75rem, 2.6vw, 2.4rem);
+    letter-spacing: -0.02em;
+}
+#subhead h3 {
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    margin-bottom: 12px;
+}
+#subhead form {
+    padding-bottom: 22px;
+}
+
+.techtip-wrap {
+    max-width: var(--page-max);
+    margin: clamp(20px, 2.4vw, 36px) auto;
+    padding: clamp(20px, 2vw, 34px);
+    border-radius: var(--radius-lg);
+}
+.techtip {
+    padding: 6px 0;
+}
+.techtip .info {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) 220px;
+    align-items: start;
+    gap: clamp(18px, 2vw, 32px);
+}
+.techtip .img,
+.techtip .img img {
+    width: 96px;
+    height: 96px;
+}
+.techtip .img img {
+    border-radius: 10px;
+}
+.techtip h3 {
+    font-size: clamp(1.12rem, 1.35vw, 1.4rem);
+    letter-spacing: -0.01em;
+}
+.techtip .desc {
+    max-width: 95ch;
+    font-size: clamp(0.94rem, 1vw, 1.02rem);
+    line-height: 1.65;
+}
+.techtip .link {
+    width: auto;
+    font-size: clamp(0.88rem, 0.95vw, 0.98rem);
+}
+.techtip .line {
+    margin: 18px 0 12px;
+    opacity: 0.7;
+}
+
+#wrap {
+    max-width: var(--page-max);
+    padding: clamp(22px, 2.4vw, 40px) 0 64px;
+}
+#adminTopbar {
+    padding: clamp(20px, 2vw, 30px);
+    border-radius: var(--radius-lg);
+}
+#adminTopbar h1 {
+    font-size: clamp(1.5rem, 2vw, 2rem);
+}
+#adminNav {
+    border-radius: var(--radius-md);
+}
+
+footer {
+    padding: clamp(28px, 3vw, 44px) var(--page-pad);
+    margin-top: 0;
+}
+footer #footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+    margin: 0 0 12px;
+    font-size: clamp(0.9rem, 1vw, 1rem);
+}
+footer #footer-nav a {
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    padding: 2px 0;
+    border-bottom: 1px solid transparent;
+}
+footer #footer-nav a:hover {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+}
+footer #footer-copy {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.72);
+}
+footer #footer-copy a {
+    color: rgba(255, 255, 255, 0.82);
+    margin-left: 10px;
+}
+
+@media (max-width: 1100px) {
+    .tl-section {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .techtip .info {
+        grid-template-columns: 84px minmax(0, 1fr);
+    }
+    .techtip .img,
+    .techtip .img img {
+        width: 84px;
+        height: 84px;
+    }
+    .techtip .link {
+        grid-column: 2;
+    }
+}
+@media (max-width: 760px) {
+    #nav {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    #nav::-webkit-scrollbar {
+        display: none;
+    }
+    #nav li {
+        flex: 0 0 auto;
+        padding: 12px 18px;
+        font-size: 0.9rem;
+    }
+    #nav a {
+        white-space: nowrap;
+    }
+    #nav a .nav-underline {
+        bottom: 0;
+    }
+    .tl-section {
+        grid-template-columns: 1fr;
+        padding: 22px 0;
+    }
+    .techtip .info {
+        grid-template-columns: 1fr;
+    }
+    .techtip .img,
+    .techtip .img img {
+        width: 72px;
+        height: 72px;
+    }
+    .techtip .link {
+        grid-column: auto;
+    }
+    #front {
+        padding: 40px var(--page-pad);
+    }
+}
+
+/* Shared width: fills the 1440px page column and keeps a gutter on mobile. */
+#basicinfo,
+.tl-section,
+.tl-submit-cta,
+#subhead,
+.techtip-wrap,
+#wrap {
+    width: min(calc(100% - 2 * var(--page-pad)), var(--page-max));
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#submissions,
+#adminNav,
+#adminTopbar {
+    width: min(calc(100% - 2 * var(--page-pad)), var(--page-max));
+    margin-left: auto;
+    margin-right: auto;
+}
+#adminTopbar {
+    margin-top: 24px;
+}
+
+/* ==========================================================================
+   CONTRAST + FOCUS CORRECTIONS
+   Every text/background pair below is checked against WCAG AA (4.5:1 text,
+   3:1 UI). Focus rings use a darker green on light surfaces.
+   ========================================================================== */
+:root {
+    --color-focus: #067a52;
+}
+[data-theme="dark"] {
+    --color-focus: #7ef0c0;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-focus: #7ef0c0;
+    }
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus,
+summary:focus,
+a:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* Modern browsers hide it again unless the user is on the keyboard. IE11
+ * ignores this selector, which keeps its outline visible. */
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+summary:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* TL cards are full-card links; keep every child readable on the mint hover. */
+a.tlx,
+a.tlx:visited {
+    color: #fff;
+}
+a.tlx:hover,
+a.tlx:focus-visible,
+a.tlx:hover .tlhead,
+a.tlx:focus-visible .tlhead,
+a.tlx:hover .tlx__strands-label,
+a.tlx:focus-visible .tlx__strands-label,
+a.tlx:hover .tlx__strands li,
+a.tlx:focus-visible .tlx__strands li {
+    color: var(--color-ink-on-accent);
+}
+a.tlx:hover .tlx__strands li::before,
+a.tlx:focus-visible .tlx__strands li::before {
+    background: var(--color-ink-on-accent);
+}
+
+/* Green text on the white panel was only 2.6:1; use ink and keep green as the
+ * underline/accent instead. */
+.jump-menu a:hover,
+#adminNav a:hover {
+    color: var(--color-ink-strong);
+    text-decoration-color: var(--color-accent-strong);
+}
+
+/* Small status badges must invert in dark mode. */
+[data-theme="dark"] .AdminTable_badgeOk__o19q_ {
+    background: rgba(46, 230, 166, 0.16);
+    color: #86f3c4;
+}
+[data-theme="dark"] .AdminTable_badgePending__XpYWw {
+    background: rgba(94, 214, 255, 0.16);
+    color: #9be9ff;
+}
+
+/* Icons that used the bright mint on white. */
+.plan-yes {
+    color: #067a52;
+}
+.plan-no {
+    color: #b3261e;
+}
+
+/* Dark chips: beat `.techtip .tags .n*` / `.label span.n*` specificity. */
+[data-theme="dark"] .n1,
+[data-theme="dark"] .techtip .tags .n1,
+[data-theme="dark"] .label span.n1 {
+    background: rgba(81, 106, 203, 0.3);
+    color: #c3ccff;
+    border: 1px solid rgba(129, 149, 255, 0.4);
+}
+[data-theme="dark"] .n2,
+[data-theme="dark"] .techtip .tags .n2,
+[data-theme="dark"] .label span.n2 {
+    background: rgba(72, 102, 183, 0.3);
+    color: #c1d0ff;
+    border: 1px solid rgba(124, 156, 255, 0.38);
+}
+[data-theme="dark"] .n3,
+[data-theme="dark"] .techtip .tags .n3,
+[data-theme="dark"] .label span.n3 {
+    background: rgba(81, 139, 219, 0.26);
+    color: #c6e2ff;
+    border: 1px solid rgba(125, 185, 255, 0.36);
+}
+[data-theme="dark"] .n4,
+[data-theme="dark"] .techtip .tags .n4,
+[data-theme="dark"] .label span.n4 {
+    background: rgba(78, 160, 214, 0.24);
+    color: #c1ebff;
+    border: 1px solid rgba(121, 205, 255, 0.34);
+}
+[data-theme="dark"] .n5,
+[data-theme="dark"] .techtip .tags .n5,
+[data-theme="dark"] .label span.n5 {
+    background: rgba(78, 193, 222, 0.22);
+    color: #bdf5ff;
+    border: 1px solid rgba(120, 225, 247, 0.34);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .n1,
+    :root:not([data-theme="light"]) .techtip .tags .n1,
+    :root:not([data-theme="light"]) .label span.n1 {
+        background: rgba(81, 106, 203, 0.3);
+        color: #c3ccff;
+        border: 1px solid rgba(129, 149, 255, 0.4);
+    }
+    :root:not([data-theme="light"]) .n2,
+    :root:not([data-theme="light"]) .techtip .tags .n2,
+    :root:not([data-theme="light"]) .label span.n2 {
+        background: rgba(72, 102, 183, 0.3);
+        color: #c1d0ff;
+        border: 1px solid rgba(124, 156, 255, 0.38);
+    }
+    :root:not([data-theme="light"]) .n3,
+    :root:not([data-theme="light"]) .techtip .tags .n3,
+    :root:not([data-theme="light"]) .label span.n3 {
+        background: rgba(81, 139, 219, 0.26);
+        color: #c6e2ff;
+        border: 1px solid rgba(125, 185, 255, 0.36);
+    }
+    :root:not([data-theme="light"]) .n4,
+    :root:not([data-theme="light"]) .techtip .tags .n4,
+    :root:not([data-theme="light"]) .label span.n4 {
+        background: rgba(78, 160, 214, 0.24);
+        color: #c1ebff;
+        border: 1px solid rgba(121, 205, 255, 0.34);
+    }
+    :root:not([data-theme="light"]) .n5,
+    :root:not([data-theme="light"]) .techtip .tags .n5,
+    :root:not([data-theme="light"]) .label span.n5 {
+        background: rgba(78, 193, 222, 0.22);
+        color: #bdf5ff;
+        border: 1px solid rgba(120, 225, 247, 0.34);
+    }
+}
+
+#theme-toggle:focus-visible,
+.checkf:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+#nav li:focus-within {
+    color: #fff;
+}
+
+#adminTopbar,
+#adminTopbar h1,
+#adminTopbar h1#admin-heading {
+    color: var(--color-ink-strong);
+}
+[data-theme="dark"] .AdminTable_mono__EqBH0,
+[data-theme="dark"] .AdminTable_desc__CgL_8,
+[data-theme="dark"] .admin-count {
+    color: var(--color-muted);
+}
+
+#topbutton:hover {
+    color: var(--color-ink-on-accent);
+}
+
+/* ==========================================================================
+   DOCS PAGE
+   ========================================================================== */
+.docs-page #basicinfo {
+    width: min(calc(100% - 2 * var(--page-pad)), 1080px);
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+    padding: clamp(24px, 3vw, 44px);
+    margin-top: clamp(20px, 2.4vw, 32px);
+    margin-bottom: clamp(32px, 4vw, 56px);
+}
+.docs-body h2 {
+    margin: 32px 0 10px;
+    font-size: clamp(1.2rem, 1.6vw, 1.5rem);
+}
+.docs-body h2:first-child {
+    margin-top: 0;
+}
+.docs-body p,
+.docs-body li {
+    max-width: 92ch;
+    line-height: 1.7;
+    color: var(--color-ink-strong);
+}
+.docs-body ul {
+    margin: 0 0 8px;
+    padding-left: 22px;
+}
+.docs-body li {
+    margin-bottom: 6px;
+}
+.docs-body code {
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--color-surface-2);
+    color: var(--color-ink-strong);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86em;
+}
+[data-theme="dark"] .docs-body code {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#basicinfo .jump-menu {
+    max-width: 100%;
+}
+
+/* ==========================================================================
+   NOTICE PAGES (404 / 500)
+   ========================================================================== */
+.notice-page {
+    max-width: 640px;
+    margin: clamp(28px, 5vw, 64px) auto;
+    padding: clamp(28px, 4vw, 48px);
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+    text-align: center;
+}
+.notice-page__code {
+    margin: 0 0 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--color-accent-strong);
+}
+.notice-page h1 {
+    margin: 0 0 10px;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+.notice-page h2 {
+    margin: 26px 0 10px;
+    font-size: 1.05rem;
+}
+.notice-page p {
+    margin: 0 0 8px;
+    color: var(--color-muted);
+}
+.notice-page__list {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding-left: 20px;
+    text-align: left;
+}
+.notice-page__ref {
+    margin-top: 14px;
+}
+.notice-page__ref code {
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--color-surface-2);
+    color: var(--color-ink-strong);
+}
+.notice-page__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 26px;
+}
+.notice-page__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-accent-strong);
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+.notice-page__btn:hover {
+    background: var(--color-ink-strong);
+    border-color: var(--color-ink-strong);
+    color: #fff;
+}
+.notice-page__btn--ghost {
+    background: transparent;
+    color: var(--color-ink-strong);
+    border-color: var(--color-border);
+}
+.notice-page__btn--ghost:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-ink);
+    color: var(--color-ink-strong);
+}
+
+/* Logos keep their real aspect ratio instead of being cropped to a square. */
+.techtip .img img {
+    object-fit: contain;
+    padding: 6px;
+    background: #fff;
+}
+
+/* The dark-mode link colour is zero-specificity, so card colours win. */
+
+@media (max-width: 760px) {
+    /* On phones the primary nav is a single horizontally scrollable row. */
+    #nav {
+        scroll-padding-inline: 12px;
+    }
+}
+
+/* Search results have no third (external link) column. */
+.techtip.search-result .info {
+    grid-template-columns: 96px minmax(0, 1fr);
+}
+.techtip.search-result .desc {
+    max-width: 90ch;
+}
+
+/* Tool detail: two columns (image + copy) and readable section headings. */
+.techtip.tool-detail .info {
+    grid-template-columns: 96px minmax(0, 1fr);
+}
+.techtip.tool-detail .desc {
+    max-width: 90ch;
+}
+.techtip.tool-detail .desc h2 {
+    margin: 20px 0 6px;
+    font-size: 1.15rem;
+}
+.techtip.tool-detail .desc section:first-child h2 {
+    margin-top: 0;
+}
+.techtip.tool-detail .desc p {
+    margin: 0 0 8px;
+    line-height: 1.65;
+}
+
+/* Search highlight stays readable in both themes. */
+mark {
+    padding: 0 2px;
+    border-radius: 2px;
+    background: #fff3a3;
+    color: #1a1a1a;
+}
+[data-theme="dark"] mark {
+    background: rgba(255, 221, 87, 0.22);
+    color: #ffe58a;
 }

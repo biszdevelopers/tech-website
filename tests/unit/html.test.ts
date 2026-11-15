@@ -1,6 +1,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { esc, markup, unsafe } from "../../src/core/04-html";
+import { stampTheme } from "../../src/core/03-context";
+
+test("stampTheme preserves root attributes and never nests a fake html tag", () => {
+    assert.equal(stampTheme('<html lang="en">', "dark"), '<html lang="en" data-theme="dark">');
+    assert.equal(
+        stampTheme("<!doctype html><html>", "light"),
+        '<!doctype html><html data-theme="light">'
+    );
+    assert.equal(
+        stampTheme('<html lang="en" data-theme="light">', "dark"),
+        '<html lang="en" data-theme="light">'
+    );
+});
 
 test("esc() neutralizes every dangerous character", () => {
     assert.equal(

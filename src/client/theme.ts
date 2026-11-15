@@ -34,10 +34,14 @@ function themeFlip(): void {
 function themeReady(): void {
     // Saved choice wins; first visit follows the OS preference.
     let saved: string | null = null;
-    try {
-        saved = localStorage.getItem(THEME_KEY);
-    } catch (e) {
-        /* storage blocked - fall through to OS preference */
+    const cookie = /(?:^|;\s*)theme=([^;]+)/.exec(document.cookie);
+    if (cookie) saved = decodeURIComponent(cookie[1]);
+    if (!saved) {
+        try {
+            saved = localStorage.getItem(THEME_KEY);
+        } catch (e) {
+            /* storage blocked - fall through to OS preference */
+        }
     }
     if (!saved && window.matchMedia) {
         saved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";

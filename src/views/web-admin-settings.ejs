@@ -20,20 +20,26 @@
                             <textarea class="form-control" name="description" rows="3"><%= s.description %></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Cooldown</label>
-                            <input class="form-control" type="number" name="cooldown" value="<%= s.cooldown %>"/>
+                            <label class="text-white">Cooldown between attacks</label>
+                            <select class="form-control" name="cooldown">
+                                <option value="0"<%- !Number(s.cooldown) ? ' selected' : '' %>>Off</option>
+                                <option value="1"<%- Number(s.cooldown) ? ' selected' : '' %>>On</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Cooldown Time (seconds)</label>
-                            <input class="form-control" type="number" name="cooldownTime" value="<%= s.cooldownTime %>"/>
+                            <input class="form-control" type="number" min="0" name="cooldownTime" value="<%= s.cooldownTime %>"/>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Max Attacks Per User</label>
-                            <input class="form-control" type="number" name="maxattacks" value="<%= s.maxattacks %>"/>
+                            <label class="text-white">Max Attacks Per User (per 24 hours, 0 = unlimited)</label>
+                            <input class="form-control" type="number" min="0" name="maxattacks" value="<%= s.maxattacks %>"/>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Test Boots</label>
-                            <input class="form-control" type="number" name="testboots" value="<%= s.testboots %>"/>
+                            <label class="text-white">Maintenance mode</label>
+                            <select class="form-control" name="maintaince">
+                                <option value="0"<%- s.maintaince !== '1' ? ' selected' : '' %>>Off</option>
+                                <option value="1"<%- s.maintaince === '1' ? ' selected' : '' %>>On</option>
+                            </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Save General Settings</button>
                     </form>
@@ -48,19 +54,25 @@
                         <input type="hidden" name="action" value="update"/>
                         <div class="form-group">
                             <label class="text-white">PayPal Email</label>
-                            <input class="form-control" name="paypal" value=""/>
+                            <input class="form-control" name="paypal" value=""
+                                   placeholder="<%= s.hasPaypal ? 'Configured - leave blank to keep' : 'Not configured' %>"/>
+                            <label class="text-muted"><input type="checkbox" name="clear_paypal"/> Clear</label>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Bitcoin Address</label>
-                            <input class="form-control" name="bitcoin" value=""/>
+                            <input class="form-control" name="bitcoin" value=""
+                                   placeholder="<%= s.hasBitcoin ? 'Configured - leave blank to keep' : 'Not configured' %>"/>
+                            <label class="text-muted"><input type="checkbox" name="clear_bitcoin"/> Clear</label>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Stripe Public Key</label>
-                            <input class="form-control" name="stripePubKey" value=""/>
+                            <input class="form-control" name="stripePubKey" value="<%= s.stripePubKey %>"/>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Stripe Secret Key</label>
-                            <input class="form-control" type="password" name="stripeSecretKey" value=""/>
+                            <input class="form-control" type="password" name="stripeSecretKey" value=""
+                                   placeholder="<%= s.hasStripeSecret ? 'Configured - leave blank to keep' : 'Not configured' %>"/>
+                            <label class="text-muted"><input type="checkbox" name="clear_stripeSecretKey"/> Clear</label>
                         </div>
                         <button type="submit" class="btn btn-primary">Save Payment Settings</button>
                     </form>

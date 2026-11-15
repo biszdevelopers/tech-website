@@ -6,14 +6,14 @@ body {
     --color-deep: #141c52;
 }
 
-/* Login page · richie-rich90454 · June 2026
+/* Login page | richie-rich90454 | June 2026
  *
  * Uses the shared design tokens from globals.css. Page-scoped layout is
  * contained inside #main so we don't disturb the global page chrome.
  */
 
 #main {
-    max-width: 1100px;
+    max-width: var(--page-max, 1440px);
     margin: 0 auto;
     padding: var(--space-7) var(--space-4);
     display: flex;
@@ -35,7 +35,7 @@ body {
 }
 
 #login {
-    background: #fff;
+    background: var(--color-panel);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-1);
@@ -69,9 +69,9 @@ body {
     width: 100%;
     box-sizing: border-box;
     padding: 10px 12px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-input-border);
     border-radius: var(--radius-md);
-    background: #fff;
+    background: var(--color-input-bg);
     color: var(--color-ink-strong);
     font-family: var(--font-sans);
     font-size: 0.95rem;
@@ -81,7 +81,8 @@ body {
 }
 
 #login-form input:focus {
-    outline: none;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
     border-color: var(--color-ink);
     box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
@@ -153,4 +154,28 @@ body {
 [data-theme="dark"] #login-form button[type="submit"] {
     background: var(--color-accent-strong);
     color: var(--color-ink-on-accent);
+}
+
+[data-theme="dark"] #login-error {
+    background: rgba(255, 107, 107, 0.14);
+    border-color: rgba(255, 107, 107, 0.35);
+    color: #ffb4ab;
+}
+[data-theme="dark"] #login h2,
+[data-theme="dark"] #login-heading {
+    color: var(--color-ink);
+}
+
+/* Centre the admin sign-in card in the available viewport instead of pinning
+   it to the top-left of a tall empty page. */
+#main {
+    min-height: calc(100vh - 96px);
+    align-items: center;
+    padding: clamp(32px, 6vh, 72px) var(--space-4);
+}
+@media (max-width: 720px) {
+    #main {
+        min-height: 0;
+        align-items: flex-start;
+    }
 }

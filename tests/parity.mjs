@@ -17,7 +17,7 @@
  *   - named entities                     (&#39; vs ' - identical after decode)
  * Everything else must match EXACTLY: tags, attributes, order, classes, text.
  *
- * Usage: BASE=http://localhost:3000 npm run parity
+ * Usage: BASE=http://localhost:3000 pnpm run parity
  */
 
 import { readFileSync } from "node:fs";
@@ -39,7 +39,9 @@ const MANIFEST = [
     ["web-maintenance.html", "/web/maintenance"],
     ["web-giftcards-anon.html", "/web/giftcards"],
     ["web-affiliate-anon.html", "/web/affiliate"],
-    ["web-tickets-anon.html", "/web/tickets"],
+    // Tickets now require authentication (the legacy anonymous shell was a
+    // placeholder that never loaded data); covered by the authed page instead.
+    ["web-tickets-anon.html", "/web/tickets", "", "skip"],
     ["web-tickets-new.html", "/web/tickets/new"],
     ["web-wheel.html", "/web/wheel"],
     ["admin.html", "/admin", "main", "skip"],
@@ -82,6 +84,10 @@ async function cookieFor(kind) {
 function bodyOf(html) {
     const m = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
     let inner = m ? m[1] : html;
+    // Absolute self-links (referral URLs) embed the test origin. Ignore it so
+    // the gate survives running on a different port than the dump.
+    inner = inner.split(BASE).join("");
+    inner = inner.replace(/https?:\/\/localhost:\d+/g, "");
     inner = inner.replace(/<script[\s\S]*?<\/script>/gi, "");
     // Metadata hints the legacy framework streamed into <body> (preloads):
     // invisible to visitors, so excluded from structural comparison.
@@ -146,7 +152,6 @@ function decodeEntities(s) {
         .replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(Number(d)))
         .replace(/&#x([0-9a-f]+);/gi, (m, h) => String.fromCodePoint(parseInt(h, 16)))
         .replace(/&copy;|&#169;/g, "\u00a9")
-        .replace(/&middot;|&#183;/g, "\u00b7")
         .replace(/&hellip;/g, "\u2026")
         .replace(/&mdash;/g, "\u2014")
         .replace(/&ndash;/g, "\u2013")

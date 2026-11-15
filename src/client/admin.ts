@@ -12,10 +12,16 @@ function initAdminPanel(): void {
     if (!table) return;
 
     // ---- XHR transport (fetch does not exist in IE11) --------------------
+    function csrf(): string {
+        const meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
+        return meta ? meta.content : "";
+    }
+
     function post(url: string, idList: string): void {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("x-csrf-token", csrf());
         xhr.onreadystatechange = function () {
             if (xhr.readyState !== 4) return;
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -82,6 +88,7 @@ function initAdminPanel(): void {
 
     const th = document.createElement("th");
     th.setAttribute("data-bulk", "on");
+    th.className = "admin-col-bulk";
     const selectAll = document.createElement("input");
     selectAll.type = "checkbox";
     selectAll.setAttribute("aria-label", "Select all rows");
@@ -93,6 +100,10 @@ function initAdminPanel(): void {
         const box = document.createElement("input");
         box.type = "checkbox";
         box.className = "bulk-row";
+        box.setAttribute(
+            "aria-label",
+            "Select row " + ((row.cells[0].textContent || "").trim() || "entry")
+        );
         td.appendChild(box);
         row.insertBefore(td, row.cells[0]);
     });
@@ -111,13 +122,13 @@ function initAdminPanel(): void {
     if (!nav || !nav.parentElement) return;
 
     const bar = document.createElement("div");
-    bar.style.margin = "12px 0";
+    bar.className = "admin-bulkbar";
 
     function bulkButton(label: string): HTMLButtonElement {
         const b = document.createElement("button");
         b.type = "button";
         b.textContent = label;
-        b.style.marginRight = "8px";
+        b.className = "admin-bulkbar__btn";
         b.addEventListener("click", function () {
             const ids = selectedIds();
             if (!ids) {
@@ -140,7 +151,7 @@ function initAdminPanel(): void {
     const csvLink = document.createElement("a");
     csvLink.href = "/admin/export.csv";
     csvLink.textContent = "Export CSV";
-    csvLink.style.marginLeft = "8px";
+    csvLink.className = "admin-bulkbar__link";
     bar.appendChild(csvLink);
 
     nav.parentElement.insertBefore(bar, nav.nextSibling);

@@ -31,11 +31,14 @@
  */
 
 import { createServer, type Server } from "node:http";
+import { createServer as createHttpsServer } from "node:https";
+import { readFileSync } from "node:fs";
+import { env } from "../config/env";
 import { Context } from "./03-context";
 import { Router, type Handler, type RouteOptions } from "./02-router";
 import { pageCache } from "./06-cache"; // re-exported for route modules' convenience
 import { StaticFiles } from "./07-static";
-import { applySecurityHeaders, csrfOriginCheck } from "./08-security";
+import { applySecurityHeaders, csrfProtection } from "./08-security";
 import { rateLimit as rateLimitCheck } from "../lib/rate-limit";
 import { HttpError, logEvent, withErrorBoundary } from "./09-errors";
 
@@ -58,7 +61,7 @@ interface AppOptions {
     staticRoot?: string;
     guards?: GuardMap;
     notFoundPage: string | ((url: string) => string);
-    errorPage: (ref: string) => string;
+    errorPage: (ref: string, status: number, path: string) => string;
     /** True in production: disables dev-only headers/behaviors. Defaults from NODE_ENV. */
     isProd?: boolean;
 }
@@ -101,7 +104,13 @@ export class Application {
      *  leaking an unhandled 'error' event stack. */
     listen(port: number): Promise<void> {
         return new Promise((resolveListen, rejectListen) => {
-            this.server = createServer((req, res) => void this.handle(req, res));
+            this.server =
+                env.tlsCert && env.tlsKey
+                    ? createHttpsServer(
+                          { cert: readFileSync(env.tlsCert), key: readFileSync(env.tlsKey) },
+                          (req, res) => void this.handle(req, res)
+                      )
+                    : createServer((req, res) => void this.handle(req, res));
             // nginx's default idle timeout is 60s; ours MUST be higher or the
             // proxy occasionally races the socket and serves random 502s.
             this.server.keepAliveTimeout = 65_000;
@@ -121,7 +130,7 @@ export class Application {
                 }
             };
             this.server.once("error", onError);
-            this.server.listen(port, () => {
+            this.server.listen(port, env.host, () => {
                 this.server!.removeListener("error", onError);
                 resolveListen();
             });
@@ -131,7 +140,10 @@ export class Application {
     /** Finish in-flight requests, then release the port (systemd stop/start). */
     async shutdown(): Promise<void> {
         if (!this.server) return;
+        const force = setTimeout(() => this.server?.closeAllConnections(), 10_000);
+        force.unref();
         await new Promise<void>((done) => this.server!.close(() => done()));
+        clearTimeout(force);
     }
 
     /** Entry point wired to node:http. Split from listen() so tests can call it. */
@@ -182,7 +194,7 @@ export class Application {
      * then route dispatch as the terminal "middleware".
      */
     private async runPipeline(ctx: Context): Promise<void> {
-        const chain: Middleware[] = [csrfOriginCheck, ...this.middlewares];
+        const chain: Middleware[] = [csrfProtection, ...this.middlewares];
         let index = -1;
         const runner = async (): Promise<void> => {
             index += 1;
