@@ -168,11 +168,10 @@ const notFoundPage = (url: string): string => {
     return render("not-found", { suggestions });
 };
 
-const errorPage = (ref: string, status: number, path: string): string =>
+const errorPage = (ref: string, status: number, _path: string): string =>
     render("error-page", {
         ref,
         status,
-        loginHref: path.startsWith("/web") ? "/web/login" : "/login",
     });
 
 // ---------------------------------------------------------------------------
