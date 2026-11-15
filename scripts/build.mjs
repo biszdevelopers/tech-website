@@ -76,7 +76,8 @@ await esbuild.build({
 console.log("build: build id + precompress");
 const hash = createHash("sha256");
 for (const dir of ["dist/public/css", "dist/public/js/modern", "dist/public/js/legacy"]) {
-    for (const file of readdirSync(dir).sort()) hash.update(file).update(readFileSync(join(dir, file)));
+    for (const file of readdirSync(dir).sort())
+        hash.update(file).update(readFileSync(join(dir, file)));
 }
 const id = hash.digest("hex").slice(0, 16);
 writeFileSync("dist/build-id.json", JSON.stringify({ id }));

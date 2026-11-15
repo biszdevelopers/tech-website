@@ -141,14 +141,35 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         plans: [{ ID: 1, name: "Gold" }],
     },
     "web-admin-plans": {
-        plans: [{ ID: 1, name: "Gold", price: 10, length: 30, mbt: 3600, concurrents: 3, vip: 0, unit: "days", private: 0 }],
+        plans: [
+            {
+                ID: 1,
+                name: "Gold",
+                price: 10,
+                length: 30,
+                mbt: 3600,
+                concurrents: 3,
+                vip: 0,
+                unit: "days",
+                private: 0,
+            },
+        ],
     },
     "web-admin-methods": {
         methods: [{ id: 1, name: "UDP", fullname: "UDP Flood", type: "layer4", command: "./udp" }],
     },
     "web-admin-news": { news: [{ ID: 1, title: "Hi", content: "Body", date: "2026-01-01" }] },
     "web-admin-servers": {
-        servers: [{ id: 1, name: "srv1", api: "https://api.example.test/attack?host=[host]", slots: 10, methods: "UDP", vip: 0 }],
+        servers: [
+            {
+                id: 1,
+                name: "srv1",
+                api: "https://api.example.test/attack?host=[host]",
+                slots: 10,
+                methods: "UDP",
+                vip: 0,
+            },
+        ],
     },
     "web-admin-giftcards": {
         cards: [{ ID: 1, code: "GC-AAA-BBB", planID: 1, claimedby: 0, date: 1800000000 }],
@@ -166,8 +187,28 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         ],
         status: "all",
     },
-    "web-ticket": { ticket: { id: 1, subject: "Help", username: "tester", status: "Waiting for admin response", date: 1800000000, content: "Need help" }, messages: [] },
-    "web-admin-ticket": { ticket: { id: 1, subject: "Help", username: "tester", status: "Waiting for admin response", date: 1800000000, content: "Need help" }, messages: [] },
+    "web-ticket": {
+        ticket: {
+            id: 1,
+            subject: "Help",
+            username: "tester",
+            status: "Waiting for admin response",
+            date: 1800000000,
+            content: "Need help",
+        },
+        messages: [],
+    },
+    "web-admin-ticket": {
+        ticket: {
+            id: 1,
+            subject: "Help",
+            username: "tester",
+            status: "Waiting for admin response",
+            date: 1800000000,
+            content: "Need help",
+        },
+        messages: [],
+    },
     "admin-new": { strands: [{ name: "R", label: "Relationship", checked: false }] },
     "admin-import": {},
     "web-admin-attacklogs": {

@@ -64,7 +64,10 @@ export function registerWebRoutes(app: Application): void {
             throw new HttpError(401, "Invalid username or password.");
         }
         if (check.rehashed) {
-            await webDb.users.update({ where: { ID: user.ID }, data: { password: check.rehashed } });
+            await webDb.users.update({
+                where: { ID: user.ID },
+                data: { password: check.rehashed },
+            });
         }
         if (Number(user.status) === 1) {
             if (asHtml) {
@@ -351,7 +354,10 @@ export function registerWebRoutes(app: Application): void {
                 if (!card) throw new HttpError(400, "Invalid or already claimed gift card code.");
                 const plan = await webDb.plans.findUnique({ where: { ID: card.planID } });
                 if (!plan) {
-                    throw new HttpError(400, "Plan associated with this gift card no longer exists.");
+                    throw new HttpError(
+                        400,
+                        "Plan associated with this gift card no longer exists."
+                    );
                 }
                 const now = Math.floor(Date.now() / 1000);
                 await webDb.giftcards.update({
@@ -429,7 +435,9 @@ export function registerWebRoutes(app: Application): void {
                     });
                     await webDb.users.update({
                         where: { ID: user.ID },
-                        data: { referralbalance: Number(fresh?.referralbalance ?? 0) + prize.points },
+                        data: {
+                            referralbalance: Number(fresh?.referralbalance ?? 0) + prize.points,
+                        },
                     });
                 }
                 await webDb.actions.create({

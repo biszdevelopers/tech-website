@@ -17,7 +17,14 @@ test("uploads: accepts real PNG/JPEG/WebP signatures only", () => {
 });
 
 test("targets: literal private addresses are refused", async () => {
-    for (const host of ["127.0.0.1", "10.1.2.3", "192.168.1.4", "169.254.169.254", "::1", "localhost"]) {
+    for (const host of [
+        "127.0.0.1",
+        "10.1.2.3",
+        "192.168.1.4",
+        "169.254.169.254",
+        "::1",
+        "localhost",
+    ]) {
         await assert.rejects(assertPublicTarget(host));
     }
     assert.equal(await assertPublicTarget("1.1.1.1"), "1.1.1.1");

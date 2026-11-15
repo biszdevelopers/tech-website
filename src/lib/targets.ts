@@ -45,7 +45,12 @@ export async function assertPublicTarget(raw: string): Promise<string> {
     if (host.includes("/") || host.includes("@") || /\s/.test(host)) {
         throw new HttpError(400, "Invalid target host.");
     }
-    if (host === "localhost" || host.endsWith(".local") || host.endsWith(".internal") || host.endsWith(".home.arpa")) {
+    if (
+        host === "localhost" ||
+        host.endsWith(".local") ||
+        host.endsWith(".internal") ||
+        host.endsWith(".home.arpa")
+    ) {
         throw new HttpError(400, "Target must be a public host.");
     }
 

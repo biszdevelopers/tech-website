@@ -6,7 +6,10 @@ export const webRegisterSchema = z
             .string()
             .min(3, "Username must be at least 3 characters")
             .max(20)
-            .regex(/^[a-zA-Z0-9_.-]+$/, "Username may only contain letters, numbers, dot, dash and underscore"),
+            .regex(
+                /^[a-zA-Z0-9_.-]+$/,
+                "Username may only contain letters, numbers, dot, dash and underscore"
+            ),
         password: z.string().min(10, "Password must be at least 10 characters").max(200),
         confirmPassword: z.string(),
     })

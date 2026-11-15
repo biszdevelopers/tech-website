@@ -12,7 +12,7 @@ Drizzle, and a small TypeScript client. No React, no hydration.
 - Legacy IE11 path: ES5 + polyfills via `nomodule`; modern browsers get an
   ES2015 bundle via `<script type="module">`.
 - Build: `tsc` (server/legacy) + esbuild (modern/minify) + PostCSS/autoprefixer
-  + precompressed `.br`/`.gz` siblings.
+    - precompressed `.br`/`.gz` siblings.
 
 ## Commands
 

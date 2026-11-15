@@ -1,4 +1,8 @@
-try { process.loadEnvFile(); } catch { /* real environment wins */ }
+try {
+    process.loadEnvFile();
+} catch {
+    /* real environment wins */
+}
 import { webDb as prisma } from "../src/lib/db/web";
 import bcrypt from "bcryptjs";
 

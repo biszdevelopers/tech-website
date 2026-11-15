@@ -70,7 +70,12 @@ function buildManifest(root: string): void {
             }
             if (entry.name.endsWith(".br") || entry.name.endsWith(".gz")) continue;
             const stat = statSync(full);
-            const rel = "/" + full.slice(root.length + 1).split(sep).join("/");
+            const rel =
+                "/" +
+                full
+                    .slice(root.length + 1)
+                    .split(sep)
+                    .join("/");
             manifest.set(rel, {
                 size: stat.size,
                 mtimeMs: stat.mtimeMs,

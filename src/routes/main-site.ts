@@ -67,7 +67,10 @@ export function registerMainSiteRoutes(app: Application): void {
                 throw new HttpError(401, "Invalid username or password.");
             }
             if (check.rehashed) {
-                await mainDb.login.update({ where: { User: user.User }, data: { PW: check.rehashed } });
+                await mainDb.login.update({
+                    where: { User: user.User },
+                    data: { PW: check.rehashed },
+                });
             }
             await mainSessions.save(ctx, { islogin: true });
             ctx.redirect("/admin", 303);

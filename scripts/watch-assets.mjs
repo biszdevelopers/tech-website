@@ -5,7 +5,17 @@ import * as esbuild from "esbuild";
 import postcss from "postcss";
 import autoprefixer from "autoprefixer";
 
-const CLIENT_ENTRIES = ["admin", "filters", "img-fallback", "menu", "scroll-top", "tabs", "theme", "theme-boot", "wheel"];
+const CLIENT_ENTRIES = [
+    "admin",
+    "filters",
+    "img-fallback",
+    "menu",
+    "scroll-top",
+    "tabs",
+    "theme",
+    "theme-boot",
+    "wheel",
+];
 
 mkdirSync("dist/public/css", { recursive: true });
 mkdirSync("dist/public/js/modern", { recursive: true });
@@ -15,7 +25,10 @@ async function buildCss() {
         try {
             const source = readFileSync(join("src/styles", file), "utf8");
             const processed = await postcss([
-                autoprefixer({ overrideBrowserslist: ["ie 11", "> 0.5%", "not dead"], grid: false }),
+                autoprefixer({
+                    overrideBrowserslist: ["ie 11", "> 0.5%", "not dead"],
+                    grid: false,
+                }),
             ]).process(source, { from: join("src/styles", file) });
             writeFileSync(join("dist/public/css", file), processed.css);
             console.log("[styles]", file);

@@ -30,10 +30,7 @@ export function detectImage(data: Buffer): DetectedImage | null {
     if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) {
         return { ext: "jpg", mime: "image/jpeg" };
     }
-    if (
-        data.toString("ascii", 0, 4) === "RIFF" &&
-        data.toString("ascii", 8, 12) === "WEBP"
-    ) {
+    if (data.toString("ascii", 0, 4) === "RIFF" && data.toString("ascii", 8, 12) === "WEBP") {
         return { ext: "webp", mime: "image/webp" };
     }
     return null;
@@ -87,7 +84,10 @@ function locate(id: number): UploadFile | null {
     for (const ext of ["png", "jpg", "webp"] as const) {
         const path = join(dir, `${id}.${ext}`);
         if (existsSync(path)) {
-            found = { path, mime: ext === "png" ? "image/png" : ext === "jpg" ? "image/jpeg" : "image/webp" };
+            found = {
+                path,
+                mime: ext === "png" ? "image/png" : ext === "jpg" ? "image/jpeg" : "image/webp",
+            };
             break;
         }
     }

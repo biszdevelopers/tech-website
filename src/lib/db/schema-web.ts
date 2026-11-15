@@ -6,13 +6,15 @@ export const twoauthsettings = sqliteTable("2authsettings", {
     secret: text("secret").primaryKey(),
 });
 
-export const actions = sqliteTable("actions", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    admin: text("admin").notNull().default(""),
-    client: text("client").notNull().default(""),
-    action: text("action").notNull().default(""),
-    date: integer("date").notNull().default(0),
-},
+export const actions = sqliteTable(
+    "actions",
+    {
+        id: integer("id").primaryKey({ autoIncrement: true }),
+        admin: text("admin").notNull().default(""),
+        client: text("client").notNull().default(""),
+        action: text("action").notNull().default(""),
+        date: integer("date").notNull().default(0),
+    },
     (t) => [index("actions_client_action_date").on(t.client, t.action, t.date)]
 );
 
@@ -93,21 +95,21 @@ export const loginlogs = sqliteTable("loginlogs", {
 export const logs = sqliteTable(
     "logs",
     {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    user: text("user").notNull().default(""),
-    ip: text("ip").notNull().default(""),
-    time: integer("time").notNull().default(0),
-    method: text("method").notNull().default(""),
-    postdata: text("postdata").notNull().default(""),
-    mode: text("mode").notNull().default(""),
-    ratelimit: text("ratelimit").notNull().default(""),
-    cookie: text("cookie").notNull().default(""),
-    date: integer("date").notNull().default(0),
-    chart: text("chart").notNull().default(""),
-    stopped: integer("stopped").notNull().default(0),
-    handler: text("handler").notNull().default(""),
-    origin: text("origin").notNull().default(""),
-},
+        id: integer("id").primaryKey({ autoIncrement: true }),
+        user: text("user").notNull().default(""),
+        ip: text("ip").notNull().default(""),
+        time: integer("time").notNull().default(0),
+        method: text("method").notNull().default(""),
+        postdata: text("postdata").notNull().default(""),
+        mode: text("mode").notNull().default(""),
+        ratelimit: text("ratelimit").notNull().default(""),
+        cookie: text("cookie").notNull().default(""),
+        date: integer("date").notNull().default(0),
+        chart: text("chart").notNull().default(""),
+        stopped: integer("stopped").notNull().default(0),
+        handler: text("handler").notNull().default(""),
+        origin: text("origin").notNull().default(""),
+    },
     (t) => [
         index("logs_handler_stopped").on(t.handler, t.stopped),
         index("logs_user_stopped").on(t.user, t.stopped),
@@ -115,13 +117,15 @@ export const logs = sqliteTable(
     ]
 );
 
-export const messages = sqliteTable("messages", {
-    messageid: integer("messageid").primaryKey({ autoIncrement: true }),
-    ticketid: integer("ticketid").notNull().default(0),
-    content: text("content").notNull().default(""),
-    sender: text("sender").notNull().default(""),
-    date: integer("date").notNull().default(0),
-},
+export const messages = sqliteTable(
+    "messages",
+    {
+        messageid: integer("messageid").primaryKey({ autoIncrement: true }),
+        ticketid: integer("ticketid").notNull().default(0),
+        content: text("content").notNull().default(""),
+        sender: text("sender").notNull().default(""),
+        date: integer("date").notNull().default(0),
+    },
     (t) => [index("messages_ticket_date").on(t.ticketid, t.date)]
 );
 
@@ -226,14 +230,16 @@ export const smtpsettings = sqliteTable("smtpsettings", {
     port: integer("port").notNull().default(0),
 });
 
-export const tickets = sqliteTable("tickets", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    subject: text("subject").notNull().default(""),
-    content: text("content").notNull().default(""),
-    status: text("status").notNull().default(""),
-    username: text("username").notNull().default(""),
-    date: integer("date").notNull().default(0),
-},
+export const tickets = sqliteTable(
+    "tickets",
+    {
+        id: integer("id").primaryKey({ autoIncrement: true }),
+        subject: text("subject").notNull().default(""),
+        content: text("content").notNull().default(""),
+        status: text("status").notNull().default(""),
+        username: text("username").notNull().default(""),
+        date: integer("date").notNull().default(0),
+    },
     (t) => [index("tickets_username_date").on(t.username, t.date)]
 );
 

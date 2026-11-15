@@ -1,4 +1,8 @@
-try { process.loadEnvFile(); } catch { /* real environment wins */ }
+try {
+    process.loadEnvFile();
+} catch {
+    /* real environment wins */
+}
 import bcrypt from "bcryptjs";
 import { mainDb } from "../src/lib/db/main";
 import { webDb } from "../src/lib/db/web";

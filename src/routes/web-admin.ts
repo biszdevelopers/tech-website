@@ -23,7 +23,11 @@ function actor(ctx: { cookie: (name: string) => string | undefined }): string {
     return webSessions.load(ctx as never)?.username ?? "admin";
 }
 
-async function audit(ctx: Parameters<typeof actor>[0], action: string, target: string): Promise<void> {
+async function audit(
+    ctx: Parameters<typeof actor>[0],
+    action: string,
+    target: string
+): Promise<void> {
     await webDb.actions.create({
         data: {
             admin: actor(ctx),
@@ -167,7 +171,8 @@ export function registerWebAdminRoutes(app: Application): void {
                 }
                 if (Number(target.rank) >= 2 && rank < 2) {
                     const supers = await webDb.users.count({ where: { rank: 2 } });
-                    if (supers <= 1) throw new HttpError(400, "Cannot demote the last super admin.");
+                    if (supers <= 1)
+                        throw new HttpError(400, "Cannot demote the last super admin.");
                 }
                 const data: Record<string, string | number> = {
                     username,
@@ -178,7 +183,8 @@ export function registerWebAdminRoutes(app: Application): void {
                 };
                 const pw = str(body, "password");
                 if (pw) {
-                    if (pw.length < 10) throw new HttpError(400, "Password must be at least 10 characters.");
+                    if (pw.length < 10)
+                        throw new HttpError(400, "Password must be at least 10 characters.");
                     data.password = await bcrypt.hash(pw, 12);
                 }
                 await webDb.users.update({ where: { ID: id }, data });
@@ -187,7 +193,8 @@ export function registerWebAdminRoutes(app: Application): void {
                     ctx.json({ success: "User updated." });
                 } else ctx.redirect("/web/admin/users", 303);
             } else if (action === "delete") {
-                if (session?.userId === id) throw new HttpError(400, "You cannot delete your own account.");
+                if (session?.userId === id)
+                    throw new HttpError(400, "You cannot delete your own account.");
                 const target = await webDb.users.findUnique({ where: { ID: id } });
                 if (!target) throw new HttpError(404, "User not found.");
                 if (Number(target.rank) >= 2) {
@@ -195,7 +202,8 @@ export function registerWebAdminRoutes(app: Application): void {
                         throw new HttpError(403, "Only a super admin can delete a super admin.");
                     }
                     const supers = await webDb.users.count({ where: { rank: 2 } });
-                    if (supers <= 1) throw new HttpError(400, "Cannot delete the last super admin.");
+                    if (supers <= 1)
+                        throw new HttpError(400, "Cannot delete the last super admin.");
                 }
                 await webDb.users.delete({ where: { ID: id } });
                 await audit(ctx, "user.delete", target.username);
@@ -244,7 +252,8 @@ export function registerWebAdminRoutes(app: Application): void {
             } else if (action === "delete") {
                 const id = num(body, "id");
                 const inUse = await webDb.users.count({ where: { membership: id } });
-                if (inUse > 0) throw new HttpError(400, "Plan is assigned to users; reassign them first.");
+                if (inUse > 0)
+                    throw new HttpError(400, "Plan is assigned to users; reassign them first.");
                 await webDb.plans.delete({ where: { ID: id } });
                 await audit(ctx, "plan.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
@@ -276,21 +285,35 @@ export function registerWebAdminRoutes(app: Application): void {
                 command: str(body, "command").trim(),
             };
             if (action === "create") {
-                if (!payload.name || !payload.fullname) throw new HttpError(400, "Name and full name are required.");
+                if (!payload.name || !payload.fullname)
+                    throw new HttpError(400, "Name and full name are required.");
                 await webDb.methods.create({ data: payload });
                 await audit(ctx, "method.create", payload.name);
             } else if (action === "update") {
                 const id = num(body, "id");
                 if (!id) throw new HttpError(400, "Missing method id.");
-                if (!payload.name || !payload.fullname) throw new HttpError(400, "Name and full name are required.");
+                if (!payload.name || !payload.fullname)
+                    throw new HttpError(400, "Name and full name are required.");
                 await webDb.methods.update({ where: { id }, data: payload });
                 await audit(ctx, "method.update", String(id));
             } else if (action === "delete") {
                 const id = num(body, "id");
                 const servers = await webDb.api.findMany({ select: { methods: true, name: true } });
                 const method = await webDb.methods.findUnique({ where: { id } });
-                if (method && servers.some((s) => String(s.methods).toUpperCase().split(",").map((m) => m.trim()).includes(method.name.toUpperCase()))) {
-                    throw new HttpError(400, "Method is used by an API server; remove it there first.");
+                if (
+                    method &&
+                    servers.some((s) =>
+                        String(s.methods)
+                            .toUpperCase()
+                            .split(",")
+                            .map((m) => m.trim())
+                            .includes(method.name.toUpperCase())
+                    )
+                ) {
+                    throw new HttpError(
+                        400,
+                        "Method is used by an API server; remove it there first."
+                    );
                 }
                 await webDb.methods.delete({ where: { id } });
                 await audit(ctx, "method.delete", String(id));
@@ -321,7 +344,8 @@ export function registerWebAdminRoutes(app: Application): void {
                 content: str(body, "content").trim(),
             };
             if (action === "create") {
-                if (!payload.title || !payload.content) throw new HttpError(400, "Title and content are required.");
+                if (!payload.title || !payload.content)
+                    throw new HttpError(400, "Title and content are required.");
                 await webDb.news.create({
                     data: { ...payload, date: new Date().toISOString().slice(0, 10) },
                 });
@@ -329,7 +353,8 @@ export function registerWebAdminRoutes(app: Application): void {
             } else if (action === "update") {
                 const id = num(body, "id");
                 if (!id) throw new HttpError(400, "Missing announcement id.");
-                if (!payload.title || !payload.content) throw new HttpError(400, "Title and content are required.");
+                if (!payload.title || !payload.content)
+                    throw new HttpError(400, "Title and content are required.");
                 await webDb.news.update({ where: { ID: id }, data: payload });
                 await audit(ctx, "news.update", String(id));
             } else if (action === "delete") {
@@ -428,7 +453,8 @@ export function registerWebAdminRoutes(app: Application): void {
                             if (!exists) break;
                             code = "";
                         }
-                        if (!code) throw new HttpError(500, "Could not generate a unique gift card code.");
+                        if (!code)
+                            throw new HttpError(500, "Could not generate a unique gift card code.");
                         await webDb.giftcards.create({
                             data: { code, planID, claimedby: 0, dateClaimed: 0, date: now },
                         });

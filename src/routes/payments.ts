@@ -132,7 +132,8 @@ export function registerPaymentRoutes(app: Application): void {
             const userId = parseInt(sess.metadata?.userId || "0", 10);
             const planId = parseInt(sess.metadata?.planId || "0", 10);
             if (!tid || !userId || !planId) throw new HttpError(400, "Missing payment metadata.");
-            if (sess.payment_status !== "paid") throw new HttpError(400, "Payment is not complete.");
+            if (sess.payment_status !== "paid")
+                throw new HttpError(400, "Payment is not complete.");
             const plan = await webDb.plans.findUnique({ where: { ID: planId } });
             if (!plan) throw new HttpError(400, "Plan no longer exists.");
             const expected = Math.round(Number(plan.price) * 100);

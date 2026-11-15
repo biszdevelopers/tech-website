@@ -115,7 +115,7 @@ export class Router {
 
     /** O(1) bucket lookup independent of the total number of routes. */
     private candidates(method: string, first?: string): CompiledRoute[] {
-        const specific = first ? this.buckets.get(`${method} ${first}`) ?? [] : [];
+        const specific = first ? (this.buckets.get(`${method} ${first}`) ?? []) : [];
         const any = this.buckets.get(`${method} *`) ?? [];
         return specific.length === 0 ? any : specific.concat(any);
     }

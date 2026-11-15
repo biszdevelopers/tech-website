@@ -109,7 +109,8 @@ export async function launchAttack(options: {
             throw new HttpError(400, "The selected API server does not support that method.");
         }
         const pool = candidate ? [candidate] : matching;
-        if (pool.length === 0) throw new HttpError(400, "No API server supports the selected method.");
+        if (pool.length === 0)
+            throw new HttpError(400, "No API server supports the selected method.");
 
         let best: ApiServerRow | undefined;
         let lowest = Infinity;
@@ -163,7 +164,8 @@ export async function launchAttack(options: {
                 origin: options.origin,
             },
         });
-        if (!ok) throw new HttpError(502, "Attack was logged but the API server may be unreachable.");
+        if (!ok)
+            throw new HttpError(502, "Attack was logged but the API server may be unreachable.");
 
         return { host, port: String(port), seconds, method, server: best.name };
     });

@@ -62,7 +62,9 @@ function requiredInProd(name: string): string {
     const value = process.env[name]?.trim() ?? "";
     if (value) return value;
     if (isProd) {
-        throw new Error(`Missing environment variable ${name}. Set it to the public origin, e.g. https://example.com`);
+        throw new Error(
+            `Missing environment variable ${name}. Set it to the public origin, e.g. https://example.com`
+        );
     }
     return `http://localhost:${port}`;
 }

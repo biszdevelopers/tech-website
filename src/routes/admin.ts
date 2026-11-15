@@ -77,9 +77,10 @@ export function registerAdminRoutes(app: Application): void {
         "/admin",
         async (ctx) => {
             const q = (ctx.query.get("q") ?? "").trim().toLowerCase();
-            const status = ctx.query.get("status") === "accepted" || ctx.query.get("status") === "pending"
-                ? ctx.query.get("status")
-                : "all";
+            const status =
+                ctx.query.get("status") === "accepted" || ctx.query.get("status") === "pending"
+                    ? ctx.query.get("status")
+                    : "all";
             const page = Math.max(1, Number(ctx.query.get("page") ?? 1) || 1);
             const perPage = 50;
             let subs = await getAllSubmissions();
@@ -157,7 +158,11 @@ export function registerAdminRoutes(app: Application): void {
         async (ctx) => {
             ctx.htmlRaw(
                 render("admin-new", {
-                    strands: EDIT_STRANDS.map(({ name, label }) => ({ name, label, checked: false })),
+                    strands: EDIT_STRANDS.map(({ name, label }) => ({
+                        name,
+                        label,
+                        checked: false,
+                    })),
                 })
             );
         },
@@ -223,7 +228,8 @@ export function registerAdminRoutes(app: Application): void {
             } catch (error) {
                 throw new HttpError(400, error instanceof Error ? error.message : "Invalid CSV.");
             }
-            if (rows.length < 2) throw new HttpError(400, "CSV needs a header row and at least one data row.");
+            if (rows.length < 2)
+                throw new HttpError(400, "CSV needs a header row and at least one data row.");
             const header = rows[0].map((h) => h.trim().toLowerCase());
             const index = (name: string): number => header.indexOf(name);
             const required = ["name", "link", "display"];

@@ -88,7 +88,9 @@ export class Context {
      */
     get ip(): string {
         if (env.trustProxy) {
-            const forwarded = String(this.raw.headers["x-forwarded-for"] ?? "").split(",")[0].trim();
+            const forwarded = String(this.raw.headers["x-forwarded-for"] ?? "")
+                .split(",")[0]
+                .trim();
             if (forwarded) return forwarded;
         }
         return this.raw.socket.remoteAddress || "unknown";
@@ -98,9 +100,9 @@ export class Context {
     hasAuthCookie(): boolean {
         return Boolean(
             this.cookie("main-session") ||
-                this.cookie("web-session") ||
-                this.cookie("__Host-main-session") ||
-                this.cookie("__Host-web-session")
+            this.cookie("web-session") ||
+            this.cookie("__Host-main-session") ||
+            this.cookie("__Host-web-session")
         );
     }
 
@@ -291,10 +293,7 @@ export class Context {
         const token = this.csrfToken.replace(/"/g, "&quot;");
         let out = html;
         if (out.includes("</head>") && !out.includes('name="csrf-token"')) {
-            out = out.replace(
-                "</head>",
-                `<meta name="csrf-token" content="${token}"/></head>`
-            );
+            out = out.replace("</head>", `<meta name="csrf-token" content="${token}"/></head>`);
         }
         return out.replace(/<form\b[^>]*>/gi, (tag) => {
             if (tag.includes('name="_csrf"')) return tag;
