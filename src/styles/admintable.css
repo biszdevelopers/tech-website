@@ -318,11 +318,25 @@
     background: #ff9a93;
 }
 
+/* On narrow screens the table keeps its column rhythm and scrolls instead of
+ * squeezing every cell into one character per line. */
+.AdminTable_table__3iS2Y {
+    min-width: 1080px;
+}
+@media (max-width: 900px) {
+    .AdminTable_wrap__1AlVX {
+        margin-left: calc(-1 * var(--page-pad));
+        margin-right: calc(-1 * var(--page-pad));
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+    }
+}
+
 /* Clamp descriptions without changing the table-cell display. */
 .AdminTable_desc__CgL_8 {
     display: table-cell;
     width: 11%;
-    max-height: 4.2em;
     overflow: hidden;
     line-height: 1.45;
 }

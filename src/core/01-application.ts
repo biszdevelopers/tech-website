@@ -61,7 +61,7 @@ interface AppOptions {
     staticRoot?: string;
     guards?: GuardMap;
     notFoundPage: string | ((url: string) => string);
-    errorPage: (ref: string) => string;
+    errorPage: (ref: string, status: number, path: string) => string;
     /** True in production: disables dev-only headers/behaviors. Defaults from NODE_ENV. */
     isProd?: boolean;
 }

@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'New Submission · BIBS·C Tech Tools' }) %>
+<%- include('partials/head', { title: 'New Submission · BIBS·C Tech Tools', css: ['globals.css', 'form.css'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1>New Tech Tool</h1></div>
 <div id="adminNav">
@@ -6,40 +6,58 @@
         <li><a href="/admin">&#8592; Back to Admin</a></li>
     </ul>
 </div>
-<form method="post" action="/api/admin/create" enctype="multipart/form-data">
-    <table>
-        <thead>
-            <tr>
-                <th>Tool Name</th><th>TL1 Description</th><th>TL2 Description</th>
-                <th>TL3 Description</th><th>TL4 Description</th><th>Link</th><th>Display Text</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><textarea name="techname" required></textarea></td>
-                <td><textarea name="tl1_desc"></textarea></td>
-                <td><textarea name="tl2_desc"></textarea></td>
-                <td><textarea name="tl3_desc"></textarea></td>
-                <td><textarea name="tl4_desc"></textarea></td>
-                <td><textarea name="link" required placeholder="https://..."></textarea></td>
-                <td><textarea name="displaytext" required></textarea></td>
-            </tr>
-        </tbody>
-    </table>
-    <p><label>Submitter name <input type="text" name="username"/></label></p>
-    <p><label>Contact email <input type="text" name="contact"/></label></p>
-    <p><label>Screenshot (PNG, JPEG or WebP) <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp"/></label></p>
-    <p><label><input type="checkbox" name="accepted"/> Publish immediately</label></p>
-    <h3>Strands</h3>
-    <ul>
-        <% strands.forEach(function (s) { %>
-            <li>
-                <input type="checkbox" name="<%= s.name %>"/>
-                <span><%= s.label %></span>
-            </li>
-        <% }) %>
-    </ul>
-    <button type="submit">Create Tool</button>
-</form>
+<div id="wrap">
+    <form id="form" method="post" action="/api/admin/create" enctype="multipart/form-data">
+        <h2>Tool details</h2>
+        <div class="form-grid">
+            <label class="field"><span>Tool name</span>
+                <input class="l" type="text" name="techname" required/>
+            </label>
+            <label class="field"><span>Link</span>
+                <input class="l" type="text" name="link" placeholder="https://..." required/>
+            </label>
+            <label class="field"><span>Display text</span>
+                <input class="l" type="text" name="displaytext" required/>
+            </label>
+        </div>
+
+        <h2>Descriptions</h2>
+        <label class="field"><span>TL1 · Knowing Our Students</span>
+            <textarea class="l" name="tl1_desc"></textarea>
+        </label>
+        <label class="field"><span>TL2 · Strategies for Learning</span>
+            <textarea class="l" name="tl2_desc"></textarea>
+        </label>
+        <label class="field"><span>TL3 · Evidence for Learning</span>
+            <textarea class="l" name="tl3_desc"></textarea>
+        </label>
+        <label class="field"><span>TL4 · Crafting the Curriculum</span>
+            <textarea class="l" name="tl4_desc"></textarea>
+        </label>
+
+        <h2>Strands</h2>
+        <div class="domains">
+            <% strands.forEach(function (s) { %>
+            <label><input type="checkbox" name="<%= s.name %>"/><%= s.label %></label>
+            <% }) %>
+        </div>
+
+        <h2>Submission details</h2>
+        <div class="form-grid">
+            <label class="field"><span>Submitter name</span>
+                <input class="l" type="text" name="username"/>
+            </label>
+            <label class="field"><span>Contact email</span>
+                <input class="l" type="text" name="contact"/>
+            </label>
+            <label class="field"><span>Screenshot (PNG, JPEG or WebP)</span>
+                <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp"/>
+            </label>
+        </div>
+
+        <label class="check"><input type="checkbox" name="accepted"/> Publish immediately</label>
+        <button type="submit" class="submit-btn">Create Tool</button>
+    </form>
+</div>
 </body>
 </html>

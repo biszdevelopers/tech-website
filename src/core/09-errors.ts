@@ -50,7 +50,10 @@ export function logEvent(level: "info" | "warn" | "error", fields: Record<string
 export async function withErrorBoundary(
     ctx: Context,
     run: () => Promise<void>,
-    views: { notFoundPage: string | ((url: string) => string); errorPage: (ref: string) => string }
+    views: {
+        notFoundPage: string | ((url: string) => string);
+        errorPage: (ref: string, status: number, path: string) => string;
+    }
 ): Promise<void> {
     try {
         await run();
@@ -100,6 +103,6 @@ export async function withErrorBoundary(
         }
         // 4xx keeps its honest status; 5xx hides internals behind the ref id
         // so stack traces and SQL details never leak to visitors.
-        ctx.htmlRaw(views.errorPage(ref), status >= 500 ? 500 : status);
+        ctx.htmlRaw(views.errorPage(ref, status, ctx.path), status >= 500 ? 500 : status);
     }
 }

@@ -3,14 +3,14 @@
 
 <div id="subhead">
     <h1 id="tool-heading"><%= tool.techname %></h1>
-    <p class="jump-menu"> Jump to: <% strands.forEach(function (t) { %><a href="/<%= t.tl %>">#<%= t.tl %></a> <% }) %> · <a href="/search">Search</a> · <a href="/">Home</a></p>
+    <p class="jump-menu"> Jump to: <% strands.forEach(function (t) { %><a href="#<%= t.tl %>"><%= t.tl.replace('tl', 'TL') %></a> <% }) %> · <a href="/search">Search</a> · <a href="/">Home</a></p>
 </div>
 
 <div id="bar">&nbsp;</div>
 
 <div id="all">
     <div class="techtip-wrap" id="results">
-        <div class="techtip" id="tool-<%= tool.id %>">
+        <div class="techtip tool-detail" id="tool-<%= tool.id %>">
             <div class="line" id="line-<%= tool.id %>"></div>
             <h3 class="name"><%= tool.techname %></h3>
             <div class="tags">

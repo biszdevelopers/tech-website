@@ -172,6 +172,7 @@ export function registerWebRoutes(app: Application): void {
             const exp = new Date(user.expire * 1000).toLocaleDateString("en-US");
             ctx.htmlRaw(
                 render("web-dashboard", {
+                    signedIn: true,
                     planName,
                     maxTime,
                     maxConcurrents: maxConc,
@@ -201,7 +202,11 @@ export function registerWebRoutes(app: Application): void {
                 }),
             ]);
             ctx.htmlRaw(
-                render("web-hub", { methods: methods as never[], servers: servers as never[] })
+                render("web-hub", {
+                    signedIn: true,
+                    methods: methods as never[],
+                    servers: servers as never[],
+                })
             );
         },
         { guard: "webUser" }
@@ -297,6 +302,7 @@ export function registerWebRoutes(app: Application): void {
                 : null;
             ctx.htmlRaw(
                 render("web-profile", {
+                    signedIn: true,
                     user,
                     plan,
                     expiry: new Date(user.expire * 1000).toLocaleDateString("en-US"),
@@ -463,7 +469,7 @@ export function registerWebRoutes(app: Application): void {
                 where: { username: user.username },
                 orderBy: { date: "desc" },
             });
-            ctx.htmlRaw(render("web-tickets", { tickets }));
+            ctx.htmlRaw(render("web-tickets", { signedIn: true, tickets }));
         },
         { guard: "webUser" }
     );
@@ -482,7 +488,7 @@ export function registerWebRoutes(app: Application): void {
                 where: { ticketid: id },
                 orderBy: { date: "asc" },
             });
-            ctx.htmlRaw(render("web-ticket", { ticket, messages }));
+            ctx.htmlRaw(render("web-ticket", { signedIn: true, ticket, messages }));
         },
         { guard: "webUser" }
     );

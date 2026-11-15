@@ -20,9 +20,10 @@
  */
 
 import { env } from "./src/config/env";
+import type { Context } from "./src/core/03-context";
 import { loadViews, render } from "./src/core/views";
 import { Application, pageCache } from "./src/core/01-application";
-import { guards } from "./src/routes/guards";
+import { guards, webSessions } from "./src/routes/guards";
 import { tlConfigs } from "./src/lib/tl-config";
 import { registerMainSiteRoutes } from "./src/routes/main-site";
 import { registerAdminRoutes } from "./src/routes/admin";
@@ -167,11 +168,12 @@ const notFoundPage = (url: string): string => {
     return render("not-found", { suggestions });
 };
 
-const errorPage = (ref: string): string =>
-    [
-        '<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>Server Error</title></head>',
-        `<body><h1>Something went wrong</h1><p>Reference: ${ref}</p></body></html>`,
-    ].join("");
+const errorPage = (ref: string, status: number, path: string): string =>
+    render("error-page", {
+        ref,
+        status,
+        loginHref: path.startsWith("/web") ? "/web/login" : "/login",
+    });
 
 // ---------------------------------------------------------------------------
 // Application assembly
@@ -194,6 +196,10 @@ app.get("/api/health", async (ctx) => {
 // bypassed entirely so every template save is visible on refresh - this is
 // what makes `npm run dev` behave like a hot-reloading bundler.
 const HTML_CACHE = env.isProd;
+
+function isWebSignedIn(ctx: Context): boolean {
+    return Boolean(webSessions.load(ctx)?.userId);
+}
 
 const TL_CARDS = Object.entries(tlConfigs).map(([id, c]) => ({
     id,
@@ -255,19 +261,33 @@ registerPaymentRoutes(app);
 // Web user pages.
 app.get("/web/plan", async (ctx) => {
     const plans = await webDb.plans.findMany({ orderBy: { price: "asc" } });
-    ctx.htmlRaw(render("web-plan", { plans }));
+    ctx.htmlRaw(render("web-plan", { plans, signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/tickets/new", async (ctx) => {
-    ctx.htmlRaw(render("web-tickets-new", {}));
+    ctx.htmlRaw(render("web-tickets-new", { signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/giftcards", async (ctx) => {
-    ctx.htmlRaw(render("web-giftcards", {}));
+    ctx.htmlRaw(render("web-giftcards", { signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/affiliate", async (ctx) => {
-    ctx.htmlRaw(render("web-affiliate", {}));
+    const session = webSessions.load(ctx);
+    const user = session?.userId
+        ? await webDb.users.findUnique({ where: { ID: session.userId } })
+        : null;
+    const stats =
+        user === null
+            ? null
+            : {
+                  referralLink: user.referral
+                      ? `${env.siteOrigin}/web/register?ref=${user.referral}`
+                      : "N/A",
+                  referralCount: await webDb.users.count({ where: { referedBy: user.ID } }),
+                  referralBalance: user.referralbalance,
+              };
+    ctx.htmlRaw(render("web-affiliate", { signedIn: Boolean(user), stats }));
 });
 app.get("/web/wheel", async (ctx) => {
-    ctx.htmlRaw(render("web-wheel", {}));
+    ctx.htmlRaw(render("web-wheel", { signedIn: isWebSignedIn(ctx) }));
 });
 app.get("/web/maintenance", async (ctx) => {
     const settings = await getWebSettings();

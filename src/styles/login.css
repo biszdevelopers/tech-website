@@ -165,3 +165,17 @@ body {
 [data-theme="dark"] #login-heading {
     color: var(--color-ink);
 }
+
+/* Centre the admin sign-in card in the available viewport instead of pinning
+   it to the top-left of a tall empty page. */
+#main {
+    min-height: calc(100vh - 96px);
+    align-items: center;
+    padding: clamp(32px, 6vh, 72px) var(--space-4);
+}
+@media (max-width: 720px) {
+    #main {
+        min-height: 0;
+        align-items: flex-start;
+    }
+}

@@ -5,29 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Affiliate · IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=5466fb059e6a0abd" />
+    <link rel="icon" href="/images/favicon.png?v=6172ed50c8df56ed" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=5466fb059e6a0abd" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=6172ed50c8df56ed" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=5466fb059e6a0abd"></script>
+    <script src="/js/legacy/theme-boot.js?v=6172ed50c8df56ed"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=5466fb059e6a0abd"></script>
-    <script src="/js/legacy/ie11.js?v=5466fb059e6a0abd"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=5466fb059e6a0abd" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=6172ed50c8df56ed"></script>
+    <script src="/js/legacy/ie11.js?v=6172ed50c8df56ed"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=6172ed50c8df56ed" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/theme.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=6172ed50c8df56ed"></script>
+    <script nomodule src="/js/legacy/theme.js?v=6172ed50c8df56ed" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=6172ed50c8df56ed"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=6172ed50c8df56ed" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=6172ed50c8df56ed"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=6172ed50c8df56ed" defer></script>
     
-<meta name="csrf-token" content="621b6e2ab223945b77c9a4a6f35799709fd1e86dd8f778dc131e2b40916177d1"/></head>
+<meta name="csrf-token" content="2daca2026f2c5287b2f0763b33bdfe95ab4790fa7307cf3d86e99b7781195221"/></head>
 <body>
 
 <header class="web-header">
@@ -46,12 +46,12 @@
             <ul>
                 <li><a href="/web">Home</a></li>
                 <li><a href="/web#about">About</a></li>
-                <li><a href="/web#plans">Plans</a></li>
+                <li><a href="/web/plan">Plans</a></li>
                 <li><a href="/web#faq">FAQ</a></li>
             </ul>
         </nav>
         <div class="web-header__cta">
-            <button id="theme-toggle" class="theme_btn" type="button" aria-label="Toggle dark mode"
+            <button id="theme-toggle" class="web-theme-toggle" type="button" aria-label="Toggle dark mode"
                     aria-pressed="false" title="Toggle dark mode (Alt+T)">
                 <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -70,8 +70,10 @@
                     <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
                 </svg>
             </button>
+            
             <a class="web-header__btn web-header__btn--ghost" href="/web/register">Register</a>
             <a class="web-header__btn web-header__btn--solid" href="/web/login">Log in</a>
+            
         </div>
     </div>
 </header>
@@ -96,7 +98,9 @@
                 <div class="card-body">
                     <h4 class="card-title">Affiliate Stats</h4>
                     <div class="mt-4 activity">
-                        <p class="text-muted">Loading stats...</p>
+                        
+                        <p class="text-muted">Sign in to see your referral link and balance.</p>
+                        
                     </div>
                 </div>
             </div>
@@ -104,31 +108,13 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Withdraw Balance</h4>
+                    <h4 class="card-title">How it works</h4>
                     <div class="mt-4 activity">
-                        <form action="/web/api/affiliate/withdraw" method="post"><input type="hidden" name="_csrf" value="621b6e2ab223945b77c9a4a6f35799709fd1e86dd8f778dc131e2b40916177d1"/>
-                            <div class="form-group">
-                                <label class="text-white" for="paymentMethod">Payment Method</label>
-                                <select class="form-control" id="paymentMethod" required name="paymentMethod">
-                                    <option value="" selected>Select method...</option>
-                                    <option value="BTC">Bitcoin (BTC)</option>
-                                    <option value="LTC">Litecoin (LTC)</option>
-                                    <option value="ETH">Ethereum (ETH)</option>
-                                    <option value="PayPal">PayPal</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-white" for="paymentAddress">Payment Address</label>
-                                <input class="form-control" id="paymentAddress" type="text"
-                                       placeholder="Enter your wallet address or email" required value="" name="paymentAddress"/>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-white" for="amount">Amount (¥)</label>
-                                <input class="form-control" id="amount" type="number"
-                                       placeholder="Enter amount to withdraw" min="1" required value="" name="amount"/>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block"> Request Withdrawal </button>
-                        </form>
+                        <p class="text-muted">Share your referral link with other operators. When
+                            someone registers through it and buys a plan, the commission is credited
+                            to your referral balance.</p>
+                        <p class="text-muted mb-0">Withdrawals are handled by support. Open a ticket
+                            with your payout method and address.</p>
                     </div>
                 </div>
             </div>

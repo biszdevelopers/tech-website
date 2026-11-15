@@ -14,7 +14,7 @@
             <ul>
                 <li><a href="/web">Home</a></li>
                 <li><a href="/web#about">About</a></li>
-                <li><a href="/web#plans">Plans</a></li>
+                <li><a href="/web/plan">Plans</a></li>
                 <li><a href="/web#faq">FAQ</a></li>
             </ul>
         </nav>
@@ -38,8 +38,13 @@
                     <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
                 </svg>
             </button>
+            <% if (locals.signedIn) { %>
+            <a class="web-header__btn web-header__btn--ghost" href="/web/dashboard">Dashboard</a>
+            <a class="web-header__btn web-header__btn--solid" href="/web/api/auth/logout">Log out</a>
+            <% } else { %>
             <a class="web-header__btn web-header__btn--ghost" href="/web/register">Register</a>
             <a class="web-header__btn web-header__btn--solid" href="/web/login">Log in</a>
+            <% } %>
         </div>
     </div>
 </header>

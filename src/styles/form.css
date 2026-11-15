@@ -213,3 +213,127 @@ body {
 [data-theme="dark"] #submission-errors {
     color: #ffb4ab;
 }
+
+/* --- Admin form layout --------------------------------------------------- */
+#form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+#form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+#form .field > span {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-ink);
+}
+#form .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    color: var(--color-ink);
+}
+#form .check input[type="checkbox"] {
+    accent-color: var(--color-accent-strong);
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+#form .form-hint {
+    margin: 0;
+    max-width: 90ch;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--color-muted);
+}
+#form .form-hint code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--color-surface-2);
+    color: var(--color-ink-strong);
+    font-size: 0.86em;
+}
+#form textarea.csv-input {
+    min-height: 320px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86rem;
+}
+#wrap .panel-title {
+    width: min(calc(100% - 2 * var(--page-pad)), 1200px);
+    margin: 28px auto 12px;
+    font-size: 1.05rem;
+}
+.screenshot-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+    width: min(calc(100% - 2 * var(--page-pad)), 1200px);
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-panel);
+    box-shadow: var(--shadow-1);
+}
+.screenshot-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.admin-shot {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    padding: 6px;
+    background: #fff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+@media (max-width: 900px) {
+    #form .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+[data-theme="dark"] #form .submit-btn {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+}
+[data-theme="dark"] #form .submit-btn:hover:not(:disabled) {
+    background: var(--color-accent);
+    color: var(--color-ink-on-accent);
+}
+[data-theme="dark"] #form input.l,
+[data-theme="dark"] #form textarea.l {
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Screenshot panel sits outside #form, so it needs its own button + input. */
+.screenshot-panel input[type="file"] {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+.screenshot-panel .submit-btn {
+    align-self: flex-start;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-deep);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+.screenshot-panel .submit-btn:hover {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+}
+[data-theme="dark"] .screenshot-panel .submit-btn {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+}

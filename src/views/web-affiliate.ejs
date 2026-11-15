@@ -20,7 +20,26 @@
                 <div class="card-body">
                     <h4 class="card-title">Affiliate Stats</h4>
                     <div class="mt-4 activity">
-                        <p class="text-muted">Loading stats...</p>
+                        <% if (locals.stats) { %>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>Referral link</td>
+                                    <td class="referral-link"><%= stats.referralLink %></td>
+                                </tr>
+                                <tr>
+                                    <td>Referred users</td>
+                                    <td><%= stats.referralCount %></td>
+                                </tr>
+                                <tr>
+                                    <td>Referral balance</td>
+                                    <td><%= stats.referralBalance %>&#165;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <% } else { %>
+                        <p class="text-muted">Sign in to see your referral link and balance.</p>
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -28,31 +47,13 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Withdraw Balance</h4>
+                    <h4 class="card-title">How it works</h4>
                     <div class="mt-4 activity">
-                        <form action="/web/api/affiliate/withdraw" method="post">
-                            <div class="form-group">
-                                <label class="text-white" for="paymentMethod">Payment Method</label>
-                                <select class="form-control" id="paymentMethod" required name="paymentMethod">
-                                    <option value="" selected>Select method...</option>
-                                    <option value="BTC">Bitcoin (BTC)</option>
-                                    <option value="LTC">Litecoin (LTC)</option>
-                                    <option value="ETH">Ethereum (ETH)</option>
-                                    <option value="PayPal">PayPal</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-white" for="paymentAddress">Payment Address</label>
-                                <input class="form-control" id="paymentAddress" type="text"
-                                       placeholder="Enter your wallet address or email" required value="" name="paymentAddress"/>
-                            </div>
-                            <div class="form-group">
-                                <label class="text-white" for="amount">Amount (¥)</label>
-                                <input class="form-control" id="amount" type="number"
-                                       placeholder="Enter amount to withdraw" min="1" required value="" name="amount"/>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block"> Request Withdrawal </button>
-                        </form>
+                        <p class="text-muted">Share your referral link with other operators. When
+                            someone registers through it and buys a plan, the commission is credited
+                            to your referral balance.</p>
+                        <p class="text-muted mb-0">Withdrawals are handled by support. Open a ticket
+                            with your payout method and address.</p>
                     </div>
                 </div>
             </div>
