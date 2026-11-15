@@ -132,7 +132,7 @@ a:hover {
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #66759e;
+    color: #8b98bd;
 }
 .nav-small-cap .hide-menu {
     pointer-events: none;
@@ -427,11 +427,11 @@ select.form-control optgroup {
     color: #e5f4ff;
 }
 .btn-success {
-    background: #17b26a;
+    background: #087a51;
     color: #fff;
 }
 .btn-danger {
-    background: #da4453;
+    background: #b3261e;
     color: #fff;
 }
 .btn-border {
@@ -444,9 +444,13 @@ select.form-control optgroup {
 .footer {
     margin-top: 34px;
     padding: 16px 0 4px;
-    color: #66759e;
+    color: #8b98bd;
     font-size: 12.5px;
     border-top: 1px solid rgba(229, 244, 255, 0.07);
+}
+[data-theme="light"] .footer {
+    color: #5a6d92;
+    border-top-color: #d8dde7;
 }
 
 /* --- mobile ------------------------------------------------------------- */

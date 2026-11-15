@@ -27,7 +27,7 @@
     letter-spacing: -0.01em;
 }
 .web-header__brand:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .web-header__mark {
     display: inline-flex;
@@ -64,7 +64,7 @@
         background 0.2s ease;
 }
 .web-header__nav a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
     background: rgba(229, 244, 255, 0.05);
 }
 .web-header__cta {
@@ -94,7 +94,7 @@
 }
 .web-header__btn--ghost:hover {
     border-color: #17d984;
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .web-header__btn--solid {
     background: #17d984;
@@ -182,7 +182,7 @@
     padding-bottom: 15px;
 }
 .title h2 span {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .title p {
     color: #e5f4ff;
@@ -430,7 +430,7 @@ body button:hover {
     padding: 26px 0 14px;
 }
 .header_area .main-menu nav li:hover > a {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .header_area .main-menu nav li .submenu {
     position: absolute;
@@ -488,7 +488,7 @@ body button:hover {
     margin-bottom: 30px;
 }
 .banner_area .banner_content h1 span {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .banner_area .banner_content p {
     color: #e5f4ff;
@@ -647,7 +647,7 @@ body button:hover {
     margin-bottom: 60px;
 }
 .start_mining_area .mining_text span:nth-child(3) {
-    color: #17d984;
+    color: var(--ip-accent-strong);
     font:
         400 14px/28px Noto Sans,
         sans-serif;
@@ -665,7 +665,7 @@ body button:hover {
 }
 .start_mining_area .mining_text a:focus,
 .start_mining_area .mining_text a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .start_mining_area .mt_3:before {
     background: url(/web/images/start/icon2.png) no-repeat;
@@ -729,7 +729,7 @@ body button:hover {
     color: #fff;
 }
 .easily_acces .btn_list li .brand_list a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .ma_2 {
     background: #f0f9ff;
@@ -875,7 +875,7 @@ body button:hover {
     background: #17d984;
 }
 .our_roadmap_area .rac h6 {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .our_roadmap_area .rt_2 {
     padding-right: 0;
@@ -908,7 +908,7 @@ body button:hover {
     background: #17d984;
 }
 .ra_2 .rac h6 {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .ra_2 .row_border {
     padding-top: 109px;
@@ -924,7 +924,7 @@ body button:hover {
     background: #17d984;
 }
 .ra_2 .row_border .rac h6 {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .what_say_area {
     background: #394a6a;
@@ -1168,7 +1168,7 @@ body button:hover {
     border: 1px dashed #17d984;
 }
 .footer_area .footer_widget .fot_list li a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .footer_area .footer_widget h5 {
     color: #e5f4ff;
@@ -1213,7 +1213,7 @@ body button:hover {
     font-size: 12px;
 }
 .footer_area .footer_widget .cta_list li a:hover {
-    color: #17d984;
+    color: var(--ip-accent-strong);
 }
 .footer_area .copy_right {
     text-align: center;
@@ -1497,12 +1497,18 @@ body button:hover {
     font-weight: 600;
 }
 .plan-yes {
-    color: #22ca80;
+    color: #067a52;
     font-weight: bold;
 }
 .plan-no {
-    color: #da4453;
+    color: #b3261e;
     font-weight: bold;
+}
+[data-theme="dark"] .plan-yes {
+    color: #2ee6a6;
+}
+[data-theme="dark"] .plan-no {
+    color: #ff7b72;
 }
 .wheel-host {
     margin: 0 auto;
@@ -2093,14 +2099,25 @@ body a {
     display: flex;
     width: 100%;
 }
+.btn-warning {
+    background: transparent;
+    border-color: var(--ip-accent);
+    color: var(--ip-accent-strong);
+}
+.btn-warning:hover,
+.btn-warning:focus {
+    background: var(--ip-accent);
+    border-color: var(--ip-accent);
+    color: var(--ip-on-accent);
+}
 .btn-success {
-    background: #0b8f5f;
+    background: #087a51;
     color: #fff;
-    border-color: #0b8f5f;
+    border-color: #087a51;
 }
 .btn-success:hover {
-    background: #087a51;
-    border-color: #087a51;
+    background: #06623f;
+    border-color: #06623f;
     color: #fff;
 }
 .btn-danger {

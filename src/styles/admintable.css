@@ -144,11 +144,11 @@
     color: var(--color-accent);
 }
 [data-theme="dark"] .AdminTable_btnEdit__zHqfB {
-    background: #2f6bff;
+    background: #2a63f5;
     color: #fff;
 }
 [data-theme="dark"] .AdminTable_btnEdit__zHqfB:hover {
-    background: #4d84ff;
+    background: #1f4fd0;
 }
 
 /* ---- admin filters + pagination ---------------------------------------- */
@@ -249,7 +249,7 @@
 }
 
 .admin-filters input::placeholder {
-    color: #6b7a99;
+    color: #5a6d92;
 }
 [data-theme="dark"] .admin-filters input::placeholder {
     color: #9aa8d0;
@@ -341,13 +341,13 @@
     line-height: 1.45;
 }
 .AdminTable_link__lOs5j {
-    width: 17%;
+    width: 15%;
 }
 .AdminTable_name__ZKSIb {
     width: 11%;
 }
 .AdminTable_actions__k8lIU {
-    width: 12%;
+    width: 18%;
 }
 .AdminTable_status {
     width: 8%;
