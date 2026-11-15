@@ -7,15 +7,22 @@ import bcrypt from "bcryptjs";
 import { mainDb } from "../src/lib/db/main";
 import { webDb } from "../src/lib/db/web";
 
-// Rotates or creates admin credentials for BOTH subprojects.
-// Usage: ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 10 chars> pnpm run setup
+// Creates, rotates or renames the operator credentials for BOTH subprojects.
+// Re-running after `db:init` is supported: the existing account is updated in
+// place (session ids survive), so the username and password can change at any
+// time. Usage:
+//   ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 10 chars> pnpm run setup
 
 async function main(): Promise<void> {
-    const username = process.env.ADMIN_USERNAME;
+    const username = (process.env.ADMIN_USERNAME ?? "").trim();
     const password = process.env.ADMIN_PASSWORD;
 
     if (!username || !password) {
         console.error("ADMIN_USERNAME and ADMIN_PASSWORD env vars are required.");
+        process.exit(1);
+    }
+    if (!/^[A-Za-z0-9._-]{3,20}$/.test(username)) {
+        console.error("ADMIN_USERNAME must be 3-20 characters (letters, digits, . _ -).");
         process.exit(1);
     }
     if (password.length < 10) {
@@ -25,17 +32,33 @@ async function main(): Promise<void> {
 
     const hash = await bcrypt.hash(password, 12);
 
-    await mainDb.login.upsert({
-        where: { User: username },
-        update: { PW: hash },
-        create: { User: username, PW: hash },
-    });
+    const loginRows = await mainDb.login.findMany();
+    const named = loginRows.find((row) => row.User === username);
+    if (named) {
+        await mainDb.login.update({ where: { User: named.User }, data: { PW: hash } });
+    } else if (loginRows.length > 0) {
+        await mainDb.login.update({
+            where: { User: loginRows[0].User },
+            data: { User: username, PW: hash },
+        });
+    } else {
+        await mainDb.login.create({ data: { User: username, PW: hash } });
+    }
 
-    const existing = await webDb.users.findFirst({ where: { username } });
-    if (existing) {
+    const webUser =
+        (await webDb.users.findFirst({ where: { username } })) ??
+        (await webDb.users.findFirst({
+            where: { rank: { gte: 1 } },
+            orderBy: { ID: "asc" },
+        }));
+    if (webUser) {
         await webDb.users.update({
-            where: { ID: existing.ID },
-            data: { password: hash, rank: 1 },
+            where: { ID: webUser.ID },
+            data: {
+                username,
+                password: hash,
+                rank: Math.max(1, Number(webUser.rank)),
+            },
         });
     } else {
         await webDb.users.create({
@@ -56,7 +79,7 @@ async function main(): Promise<void> {
         });
     }
 
-    console.log(`Admin credentials set for "${username}" in both databases.`);
+    console.log(`Operator credentials set for "${username}" in both databases.`);
     await mainDb.$disconnect();
     await webDb.$disconnect();
 }

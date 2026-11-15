@@ -3,9 +3,9 @@
 
 <div id="main">
     <div id="big">
-        <h1 id="login-heading">Login</h1>
+        <h1 id="login-heading">Sign in</h1>
         <div id="login">
-            <h2 id="login-info"> You have reached an admin-only access site.<br/>If you&#39;re an admin, log in with your credentials. </h2>
+            <h2 id="login-info">Enter your credentials to continue.</h2>
             <% if (locals.error === 'invalid') { %>
             <p id="login-error" role="alert">Invalid username or password.</p>
             <% } else if (locals.error === 'rate') { %>

@@ -49,6 +49,14 @@ affiliate, gift cards, reCAPTCHA or the IPstress hub without a code change.
 
 Seed credentials (`admin` / `admin123`) exist only after `pnpm run db:seed`.
 Use `pnpm run setup` with a 10+ character password for any real deployment.
+Re-running `pnpm run setup` rotates the existing operator account: the password
+is replaced and a new `ADMIN_USERNAME` renames that account in both databases
+(no duplicate admin rows, existing sessions keep their user id).
+
+The operator portals (`/login` and `/web/login` for admins) are intentionally
+unlinked. Public pages and the user dashboard show no admin entry point, and
+unauthenticated or non-admin requests to `/admin*` and `/web/admin*` return the
+ordinary 404 page.
 
 ## Themes
 

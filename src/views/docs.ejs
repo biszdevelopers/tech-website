@@ -41,7 +41,7 @@
             <li><code>pnpm run format</code> - Prettier (EJS templates excluded)</li>
             <li><code>pnpm run db:migrate</code> - generate SQL migrations from schema changes</li>
             <li><code>pnpm run db:reset</code> - recreate dev databases with seed data</li>
-            <li><code>pnpm run setup</code> - create the first admin from environment variables</li>
+            <li><code>pnpm run setup</code> - create or rotate the operator account from environment variables</li>
         </ul>
 
         <h2>Themes &amp; payments</h2>
@@ -55,8 +55,8 @@
         <h2>Sessions &amp; auth</h2>
         <p>
             Cookies are HMAC-signed (<code>v1.payload.signature</code>) verified with
-            <code>timingSafeEqual</code>. Admin rank is re-read from the database per request -
-            editing your cookie's rank value changes nothing.
+            <code>timingSafeEqual</code>. Authorization is re-read from the database per request - editing
+            the session cookie changes nothing.
         </p>
     </div>
 </div>
