@@ -148,7 +148,6 @@ function decodeEntities(s) {
         .replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(Number(d)))
         .replace(/&#x([0-9a-f]+);/gi, (m, h) => String.fromCodePoint(parseInt(h, 16)))
         .replace(/&copy;|&#169;/g, "\u00a9")
-        .replace(/&middot;|&#183;/g, "\u00b7")
         .replace(/&hellip;/g, "\u2026")
         .replace(/&mdash;/g, "\u2014")
         .replace(/&ndash;/g, "\u2013")

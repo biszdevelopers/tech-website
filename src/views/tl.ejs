@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: config.title + ' · BIBS·C Tech Tools', description: 'Filter and explore tech tools aligned with ' + config.title + ' strands.', scripts: ['filters.js'] }) %>
+<%- include('partials/head', { title: config.title + ' | BIBS-C Tech Tools', description: 'Filter and explore tech tools aligned with ' + config.title + ' strands.', scripts: ['filters.js'] }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead">
@@ -22,10 +22,10 @@
 <div id="all">
     <div class="techtip-wrap" id="results">
         <p class="jump-menu">
-            Jump to: <a href="#tl-title">Top</a> · <a href="#filter">Filter</a><% config.strands.forEach(function (s) { %><span>
-            · <a href="#<%= s.domainColumn %>"><%= s.label %></a>
+            Jump to: <a href="#tl-title">Top</a> | <a href="#filter">Filter</a><% config.strands.forEach(function (s) { %><span>
+            | <a href="#<%= s.domainColumn %>"><%= s.label %></a>
             </span><% }) %>
-            · <a href="/#front">Home</a> · <a href="/search">Search</a>
+            | <a href="/#front">Home</a> | <a href="/search">Search</a>
         </p>
 
         <% if (filtered.length === 0) { %>

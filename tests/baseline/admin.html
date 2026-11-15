@@ -3,41 +3,41 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Panel · BIBS·C Tech Tools</title>
+    <title>Admin Panel | BIBS-C Tech Tools</title>
     
-    <link rel="icon" href="/images/favicon.png?v=5466fb059e6a0abd" />
+    <link rel="icon" href="/images/favicon.png?v=96dd9005e7cf28a9" />
     
-    <link rel="stylesheet" href="/css/globals.css?v=5466fb059e6a0abd" />
+    <link rel="stylesheet" href="/css/globals.css?v=96dd9005e7cf28a9" />
     
-    <link rel="stylesheet" href="/css/admintable.css?v=5466fb059e6a0abd" />
+    <link rel="stylesheet" href="/css/admintable.css?v=96dd9005e7cf28a9" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=5466fb059e6a0abd"></script>
+    <script src="/js/legacy/theme-boot.js?v=96dd9005e7cf28a9"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=5466fb059e6a0abd"></script>
-    <script src="/js/legacy/ie11.js?v=5466fb059e6a0abd"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=5466fb059e6a0abd" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=96dd9005e7cf28a9"></script>
+    <script src="/js/legacy/ie11.js?v=96dd9005e7cf28a9"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=96dd9005e7cf28a9" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/theme.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=96dd9005e7cf28a9"></script>
+    <script nomodule src="/js/legacy/theme.js?v=96dd9005e7cf28a9" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=96dd9005e7cf28a9"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=96dd9005e7cf28a9" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=96dd9005e7cf28a9"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=96dd9005e7cf28a9" defer></script>
     
-    <script type="module" src="/js/modern/admin.js?v=5466fb059e6a0abd"></script>
-    <script nomodule src="/js/legacy/admin.js?v=5466fb059e6a0abd" defer></script>
+    <script type="module" src="/js/modern/admin.js?v=96dd9005e7cf28a9"></script>
+    <script nomodule src="/js/legacy/admin.js?v=96dd9005e7cf28a9" defer></script>
     
-<meta name="csrf-token" content="ba7d6c4ed8d11de28b56c740eda75860d18f8cd7a119c8c17478f18552f1e46c"/></head>
+<meta name="csrf-token" content="058acb4b94ea062e0e6aaf6f6b3259d3e6036a6b91dc8e3a5b74046ff3a3e523"/></head>
 <body>
 
 <div id="cover">
     <div id="topbar">
-        <h1>BIBS·C Tech Tools</h1>
+        <h1>BIBS-C Tech Tools</h1>
         <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
                 aria-pressed="false" title="Toggle dark mode (Alt+T)">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -81,7 +81,7 @@
     </ul>
 </div>
 <section id="submissions" class="section-anchor">
-    <form method="get" action="/admin" class="admin-filters"><input type="hidden" name="_csrf" value="ba7d6c4ed8d11de28b56c740eda75860d18f8cd7a119c8c17478f18552f1e46c"/>
+    <form method="get" action="/admin" class="admin-filters"><input type="hidden" name="_csrf" value="058acb4b94ea062e0e6aaf6f6b3259d3e6036a6b91dc8e3a5b74046ff3a3e523"/>
         <input type="search" name="q" value="" placeholder="Search name, link, display"/>
         <select name="status">
             <option value="all" selected>All</option>
@@ -96,7 +96,7 @@
             <thead>
                 <tr>
                     <th>ID</th><th>Name</th><th>Link</th><th>Display</th><th>TL1</th>
-                    <th>TL2</th><th>TL3</th><th>TL4</th><th>Status</th><th>Actions</th>
+                    <th>TL2</th><th>TL3</th><th>TL4</th><th class="AdminTable_status">Status</th><th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,7 +110,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">Use QuickTime to record your comments as you look at student work and then give that recor</td>
                         <td class="AdminTable_desc__CgL_8">Use QuickTime to record your comments as you look at student work and then give that recor</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -133,7 +133,7 @@
                         <td class="AdminTable_desc__CgL_8">Quizizz is a learning platform that uses gamification to make content engaging. Participan</td>
                         <td class="AdminTable_desc__CgL_8">Quizizz is a learning platform that uses gamification to make content engaging. Participan</td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -156,7 +156,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -179,7 +179,7 @@
                         <td class="AdminTable_desc__CgL_8">AP Classroom is an online resource for students enrolled in AP courses taught by authorize</td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -202,7 +202,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">Microsoft Forms can create surveys, quizzes, and polls, invite others to respond to it usi</td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -225,7 +225,7 @@
                         <td class="AdminTable_desc__CgL_8">Kahoot! is a game-based learning platform. &quot;Kahoots&quot; are multiple-choice quizzes that can </td>
                         <td class="AdminTable_desc__CgL_8">Kahoot! is a game-based learning platform. Its learning games, &quot;kahoots&quot;, are user-generat</td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -248,7 +248,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -271,7 +271,7 @@
                         <td class="AdminTable_desc__CgL_8">Group work can be facilitated by using the Channel feature in Microsoft Teams. As part of </td>
                         <td class="AdminTable_desc__CgL_8">In the online discussion, or when using the other tools, how will you give opportunities f</td>
                         <td class="AdminTable_desc__CgL_8">Students can present in Teams, using PowerPoint live! With your expectations made clear ab</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -294,7 +294,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">Padlet is an extremely easy-to-use tool that allows learners to collaborate online or to w</td>
                         <td class="AdminTable_desc__CgL_8">Padlet is an extremely easy-to-use tool that allows learners to collaborate online or to w</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -317,7 +317,7 @@
                         <td class="AdminTable_desc__CgL_8">Group Assignments can be created in Seesaw.</td>
                         <td class="AdminTable_desc__CgL_8">Seesaw is a digital platform that allows students to complete and share classroom work wit</td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -340,7 +340,7 @@
                         <td class="AdminTable_desc__CgL_8">Students can create their own YouTube channel and do live streams or record presentations </td>
                         <td class="AdminTable_desc__CgL_8">YouTube is a popular video sharing website where registered users can upload and share vid</td>
                         <td class="AdminTable_desc__CgL_8">Students can create their own YouTube channel and do live streams or record presentations </td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -363,7 +363,7 @@
                         <td class="AdminTable_desc__CgL_8">PowerPoint is a classic for presenting both in class and online. Asking students to presen</td>
                         <td class="AdminTable_desc__CgL_8">​PowerPoint ( also known as PPT or PP) is a presentation program. Students can use it to p</td>
                         <td class="AdminTable_desc__CgL_8">PowerPoint is a classic for presenting both in class and online. When using this tool, ens</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -386,7 +386,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">OneNote, an electronic notebook that is part of the Microsoft Teams package, is a perfect </td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -409,7 +409,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">Class DoJo has many features, but for this domain, it enables teachers to record feedback </td>
                         <td class="AdminTable_desc__CgL_8">Class Dojo is an online behavior management system intended to foster positive student beh</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -432,7 +432,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -455,7 +455,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">From Britannica, an online encyclopedia resource for kids in grades K-12 with safe, fact-c</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -478,7 +478,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">The Oxford Learner&#39;s Dictionary of Academic English (OLDAE) focuses on words and phrases u</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -501,7 +501,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">Nearpod is an online product that allows teachers and students to use a slide-based tool t</td>
                         <td class="AdminTable_desc__CgL_8">Nearpod is an online product that allows teachers and students to use a slide-based tool t</td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -524,7 +524,7 @@
                         <td class="AdminTable_desc__CgL_8">Zoom suspended direct-sale in China. They have shifted to a partner-only model, and Zhumu </td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -547,7 +547,7 @@
                         <td class="AdminTable_desc__CgL_8">Group work can be facilitated by using the breakout rooms feature in Zoom. (Please note: Z</td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -570,7 +570,7 @@
                         <td class="AdminTable_desc__CgL_8">PhET provides free, fun, interactive, research-based science and mathematics simulations f</td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -593,7 +593,7 @@
                         <td class="AdminTable_desc__CgL_8">Weebly is a free, easy-to-use website builder. It lets you create and publish attractive s</td>
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             
@@ -616,7 +616,7 @@
                         <td class="AdminTable_desc__CgL_8"></td>
                         <td class="AdminTable_desc__CgL_8">IXL is a targeted learning tool. It offers experiences for students, tailored to their age</td>
                         <td class="AdminTable_desc__CgL_8"></td>
-                        <td>
+                        <td class="AdminTable_status">
                             
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             

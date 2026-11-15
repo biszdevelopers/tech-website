@@ -1,9 +1,9 @@
-<%- include('partials/head', { title: tool.techname + ' · BIBS·C Tech Tools', description: String(tool.tl1_desc).slice(0, 150) }) %>
+<%- include('partials/head', { title: tool.techname + ' | BIBS-C Tech Tools', description: String(tool.tl1_desc).slice(0, 150) }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead">
     <h1 id="tool-heading"><%= tool.techname %></h1>
-    <p class="jump-menu"> Jump to: <% strands.forEach(function (t) { %><a href="#<%= t.tl %>"><%= t.tl.replace('tl', 'TL') %></a> <% }) %> · <a href="/search">Search</a> · <a href="/">Home</a></p>
+    <p class="jump-menu"> Jump to: <% strands.forEach(function (t) { %><a href="#<%= t.tl %>"><%= t.tl.replace('tl', 'TL') %></a> <% }) %> | <a href="/search">Search</a> | <a href="/">Home</a></p>
 </div>
 
 <div id="bar">&nbsp;</div>

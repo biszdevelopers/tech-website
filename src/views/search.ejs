@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: heading + ' · BIBS·C Tech Tools', description: 'Search tech tools by name, description, or strand tag.' }) %>
+<%- include('partials/head', { title: heading + ' | BIBS-C Tech Tools', description: 'Search tech tools by name, description, or strand tag.' }) %>
 <%- include('partials/navbar') %>
 
 <div id="search"></div>
@@ -16,8 +16,8 @@
     <p class="jump-menu">
         Jump to: <a href="#search-results">Results</a><% if (q && results.length > 0) {
             results.slice(0, 5).forEach(function (item, i) { %>
-            · <a href="#tool-<%= item.id %>"><%= item.techname %></a><% }) } %>
-        · <a href="/#front">Home</a>
+            | <a href="#tool-<%= item.id %>"><%= item.techname %></a><% }) } %>
+        | <a href="/#front">Home</a>
     </p>
 </div>
 

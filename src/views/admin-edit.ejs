@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Edit Submission #' + id + ' · BIBS·C Tech Tools', css: ['globals.css', 'form.css'] }) %>
+<%- include('partials/head', { title: 'Edit Submission #' + id + ' | BIBS-C Tech Tools', css: ['globals.css', 'form.css'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1>Edit Submission #<%= id %></h1></div>
 <div id="adminNav">
@@ -24,16 +24,16 @@
         </div>
 
         <h2>Descriptions</h2>
-        <label class="field"><span>TL1 · Knowing Our Students</span>
+        <label class="field"><span>TL1: Knowing Our Students</span>
             <textarea class="l" name="description"><%= sub.tl1_desc %></textarea>
         </label>
-        <label class="field"><span>TL2 · Strategies for Learning</span>
+        <label class="field"><span>TL2: Strategies for Learning</span>
             <textarea class="l" name="description2"><%= sub.tl2_desc %></textarea>
         </label>
-        <label class="field"><span>TL3 · Evidence for Learning</span>
+        <label class="field"><span>TL3: Evidence for Learning</span>
             <textarea class="l" name="description3"><%= sub.tl3_desc %></textarea>
         </label>
-        <label class="field"><span>TL4 · Crafting the Curriculum</span>
+        <label class="field"><span>TL4: Crafting the Curriculum</span>
             <textarea class="l" name="description4"><%= sub.tl4_desc %></textarea>
         </label>
 

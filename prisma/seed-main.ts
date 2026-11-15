@@ -151,7 +151,7 @@ async function main(): Promise<void> {
     // Per-tool upsert. We assign a stable, sequential id (1, 2, 3, …) so the
     // /testuploads/<id>.png filenames line up with the rows.
     const tools = loadTools();
-    console.log(`  · Parsed ${tools.length} tools from tools.txt`);
+    console.log(`  | Parsed ${tools.length} tools from tools.txt`);
 
     // First, wipe any existing domain rows so we don't accumulate stale tags
     // when a tool is removed from the workbook. Submission rows will be

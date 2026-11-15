@@ -1,11 +1,11 @@
 // Site-wide constants. Adjust here, propagate everywhere.
 
 export const SITE = {
-    name: "BIBS·C Tech Tools",
-    shortName: "BIBS·C",
+    name: "BIBS-C Tech Tools",
+    shortName: "BIBS-C",
     description: "A curated catalog of teaching technology tools, organized by domain and strand.",
     copyrightYear: 2026,
-    author: "BIBS·C Faculty",
+    author: "BIBS-C Faculty",
 } as const;
 
 export const BRAND = {
