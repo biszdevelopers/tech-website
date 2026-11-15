@@ -78,19 +78,33 @@ export async function launchAttack(options: {
                     `Concurrent attack limit reached (${plan.concurrents}). Wait for a running attack to finish.`
                 );
             }
-            const settings = await webDb.settings.findFirst({ select: { cooldownTime: true } });
-            const cooldown = settings?.cooldownTime ?? 0;
+            const settings = await webDb.settings.findFirst({
+                select: { cooldown: true, cooldownTime: true, maxattacks: true },
+            });
+            const now = Math.floor(Date.now() / 1000);
+            const cooldown = settings?.cooldown ? Number(settings.cooldownTime) : 0;
             if (cooldown > 0) {
                 const last = await webDb.logs.findFirst({
                     where: { user: options.username },
                     orderBy: { date: "desc" },
                     select: { date: true },
                 });
-                const now = Math.floor(Date.now() / 1000);
                 if (last && now - last.date < cooldown) {
                     throw new HttpError(
                         429,
                         `Cooldown active. Please wait ${cooldown - (now - last.date)} seconds.`
+                    );
+                }
+            }
+            const maxAttacks = Number(settings?.maxattacks ?? 0);
+            if (maxAttacks > 0) {
+                const recent = await webDb.logs.count({
+                    where: { user: options.username, date: { gte: now - 86400 } },
+                });
+                if (recent >= maxAttacks) {
+                    throw new HttpError(
+                        429,
+                        `Daily attack limit reached (${maxAttacks} per 24 hours).`
                     );
                 }
             }

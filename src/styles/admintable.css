@@ -162,7 +162,7 @@
 .admin-filters input[type="search"],
 .admin-filters select {
     padding: 6px 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-input-border);
     border-radius: 6px;
 }
 .admin-count {
@@ -212,6 +212,19 @@
 .AdminTable_name__ZKSIb {
     overflow-wrap: anywhere;
     word-break: break-word;
+}
+/* Long URLs and descriptions used to make every row a screen tall. */
+.AdminTable_link__lOs5j {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.admin-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 .AdminTable_actions__k8lIU {
     flex-wrap: wrap;
@@ -268,30 +281,7 @@
     color: var(--color-ink-on-accent);
 }
 
-/* Column rhythm for the submissions table. */
-.AdminTable_mono__EqBH0 {
-    width: 4%;
-}
-.AdminTable_name__ZKSIb {
-    width: 12%;
-}
-.AdminTable_link__lOs5j {
-    width: 19%;
-    word-break: break-all;
-}
-.AdminTable_desc__CgL_8 {
-    width: 12%;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.AdminTable_actions__k8lIU {
-    width: 13%;
-}
-.AdminTable_status {
-    width: 8%;
-}
+/* Column rhythm is defined on the header row below. */
 .admin-filters input,
 .admin-filters select,
 .admin-filters button,
@@ -333,25 +323,40 @@
     }
 }
 
-/* Clamp descriptions without changing the table-cell display. */
+/* Clamp the long cells without changing the table-cell display. */
 .AdminTable_desc__CgL_8 {
     display: table-cell;
-    width: 11%;
     overflow: hidden;
     line-height: 1.45;
 }
-.AdminTable_link__lOs5j {
-    width: 15%;
+
+/* Column widths belong on the header row: `table-layout: fixed` ignores the
+ * widths of body cells, and the bulk-selection column is added at runtime. */
+.admin-col-bulk {
+    width: 4%;
 }
-.AdminTable_name__ZKSIb {
+.admin-col-id {
+    width: 5%;
+    white-space: nowrap;
+}
+.admin-col-name {
     width: 11%;
 }
-.AdminTable_actions__k8lIU {
-    width: 18%;
+.admin-col-link {
+    width: 15%;
 }
-.AdminTable_status {
+.admin-col-display {
     width: 8%;
 }
-.AdminTable_mono__EqBH0 {
-    width: 4%;
+.admin-col-desc {
+    width: 9.5%;
+}
+.admin-col-status {
+    width: 7%;
+}
+.admin-col-actions {
+    width: 17%;
+}
+.AdminTable_link__lOs5j {
+    width: 100%;
 }

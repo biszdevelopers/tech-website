@@ -5,34 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plan Management | IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=3febea60f0e1519e" />
+    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/dash.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/dash.css?v=9baaf329e2d162d8" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=3febea60f0e1519e"></script>
+    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=3febea60f0e1519e"></script>
-    <script src="/js/legacy/ie11.js?v=3febea60f0e1519e"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=3febea60f0e1519e" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
+    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/theme.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/menu.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/menu.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/menu.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/menu.js?v=9baaf329e2d162d8" defer></script>
     
-<meta name="csrf-token" content="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/></head>
+<meta name="csrf-token" content="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/></head>
 <body>
 
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
@@ -250,15 +250,15 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Create Plan</h4>
-                    <form class="mt-4" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                    <form class="mt-4" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                         <input type="hidden" name="action" value="create"/>
-                        <div class="form-group"><label class="text-white">Name</label><input class="form-control" required name="name"/></div>
-                        <div class="form-group"><label class="text-white">Price (USD)</label><input class="form-control" type="number" step="0.01" min="0" required name="price"/></div>
-                        <div class="form-group"><label class="text-white">Duration</label><input class="form-control" type="number" min="1" required name="length"/><select class="form-control" name="unit"><option value="days">Days</option><option value="hours">Hours</option></select></div>
-                        <div class="form-group"><label class="text-white">Max Attack Time (s)</label><input class="form-control" type="number" min="1" required name="mbt"/></div>
-                        <div class="form-group"><label class="text-white">Concurrents</label><input class="form-control" type="number" min="1" required name="concurrents"/></div>
-                        <div class="form-group"><label class="text-white">VIP</label><select class="form-control" name="vip"><option value="0">No</option><option value="1">Yes</option></select></div>
-                        <div class="form-group"><label class="text-white">Private</label><select class="form-control" name="private"><option value="0">No</option><option value="1">Yes</option></select></div>
+                        <div class="form-group"><label class="text-white">Name</label><input aria-label="Name" class="form-control" required name="name"/></div>
+                        <div class="form-group"><label class="text-white">Price (USD)</label><input aria-label="Price (USD)" class="form-control" type="number" step="0.01" min="0" required name="price"/></div>
+                        <div class="form-group"><label class="text-white">Duration</label><input aria-label="Duration" class="form-control" type="number" min="1" required name="length"/><select aria-label="unit" class="form-control" name="unit"><option value="days">Days</option><option value="hours">Hours</option></select></div>
+                        <div class="form-group"><label class="text-white">Max Attack Time (s)</label><input aria-label="Max Attack Time (s)" class="form-control" type="number" min="1" required name="mbt"/></div>
+                        <div class="form-group"><label class="text-white">Concurrents</label><input aria-label="Concurrents" class="form-control" type="number" min="1" required name="concurrents"/></div>
+                        <div class="form-group"><label class="text-white">VIP</label><select aria-label="VIP" class="form-control" name="vip"><option value="0">No</option><option value="1">Yes</option></select></div>
+                        <div class="form-group"><label class="text-white">Private</label><select aria-label="Private" class="form-control" name="private"><option value="0">No</option><option value="1">Yes</option></select></div>
                         <button type="submit" class="btn btn-success">Create Plan</button>
                     </form>
                 </div>
@@ -281,24 +281,24 @@
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="1"/>
-                                                    <input class="form-control mb-1" name="name" value="Bronze" required/>
-                                                    <input class="form-control mb-1" type="number" step="0.01" name="price" value="5.99"/>
-                                                    <input class="form-control mb-1" type="number" name="length" value="7"/>
-                                                    <select class="form-control mb-1" name="unit">
+                                                    <input aria-label="name" class="form-control mb-1" name="name" value="Bronze" required/>
+                                                    <input aria-label="price" class="form-control mb-1" type="number" step="0.01" name="price" value="5.99"/>
+                                                    <input aria-label="length" class="form-control mb-1" type="number" name="length" value="7"/>
+                                                    <select aria-label="unit" class="form-control mb-1" name="unit">
                                                         <option value="days" selected>Days</option>
                                                         <option value="hours">Hours</option>
                                                     </select>
-                                                    <input class="form-control mb-1" type="number" name="mbt" value="1"/>
-                                                    <input class="form-control mb-1" type="number" name="concurrents" value="1"/>
-                                                    <select class="form-control mb-1" name="vip"><option value="0" selected>No VIP</option><option value="1">VIP</option></select>
-                                                    <select class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
+                                                    <input aria-label="mbt" class="form-control mb-1" type="number" name="mbt" value="1"/>
+                                                    <input aria-label="concurrents" class="form-control mb-1" type="number" name="concurrents" value="1"/>
+                                                    <select aria-label="vip" class="form-control mb-1" name="vip"><option value="0" selected>No VIP</option><option value="1">VIP</option></select>
+                                                    <select aria-label="private" class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="1"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
@@ -314,24 +314,24 @@
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="2"/>
-                                                    <input class="form-control mb-1" name="name" value="Silver" required/>
-                                                    <input class="form-control mb-1" type="number" step="0.01" name="price" value="14.99"/>
-                                                    <input class="form-control mb-1" type="number" name="length" value="30"/>
-                                                    <select class="form-control mb-1" name="unit">
+                                                    <input aria-label="name" class="form-control mb-1" name="name" value="Silver" required/>
+                                                    <input aria-label="price" class="form-control mb-1" type="number" step="0.01" name="price" value="14.99"/>
+                                                    <input aria-label="length" class="form-control mb-1" type="number" name="length" value="30"/>
+                                                    <select aria-label="unit" class="form-control mb-1" name="unit">
                                                         <option value="days" selected>Days</option>
                                                         <option value="hours">Hours</option>
                                                     </select>
-                                                    <input class="form-control mb-1" type="number" name="mbt" value="1"/>
-                                                    <input class="form-control mb-1" type="number" name="concurrents" value="3"/>
-                                                    <select class="form-control mb-1" name="vip"><option value="0" selected>No VIP</option><option value="1">VIP</option></select>
-                                                    <select class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
+                                                    <input aria-label="mbt" class="form-control mb-1" type="number" name="mbt" value="1"/>
+                                                    <input aria-label="concurrents" class="form-control mb-1" type="number" name="concurrents" value="3"/>
+                                                    <select aria-label="vip" class="form-control mb-1" name="vip"><option value="0" selected>No VIP</option><option value="1">VIP</option></select>
+                                                    <select aria-label="private" class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="2"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
@@ -347,24 +347,24 @@
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="3"/>
-                                                    <input class="form-control mb-1" name="name" value="Gold" required/>
-                                                    <input class="form-control mb-1" type="number" step="0.01" name="price" value="29.99"/>
-                                                    <input class="form-control mb-1" type="number" name="length" value="30"/>
-                                                    <select class="form-control mb-1" name="unit">
+                                                    <input aria-label="name" class="form-control mb-1" name="name" value="Gold" required/>
+                                                    <input aria-label="price" class="form-control mb-1" type="number" step="0.01" name="price" value="29.99"/>
+                                                    <input aria-label="length" class="form-control mb-1" type="number" name="length" value="30"/>
+                                                    <select aria-label="unit" class="form-control mb-1" name="unit">
                                                         <option value="days" selected>Days</option>
                                                         <option value="hours">Hours</option>
                                                     </select>
-                                                    <input class="form-control mb-1" type="number" name="mbt" value="1"/>
-                                                    <input class="form-control mb-1" type="number" name="concurrents" value="5"/>
-                                                    <select class="form-control mb-1" name="vip"><option value="0">No VIP</option><option value="1" selected>VIP</option></select>
-                                                    <select class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
+                                                    <input aria-label="mbt" class="form-control mb-1" type="number" name="mbt" value="1"/>
+                                                    <input aria-label="concurrents" class="form-control mb-1" type="number" name="concurrents" value="5"/>
+                                                    <select aria-label="vip" class="form-control mb-1" name="vip"><option value="0">No VIP</option><option value="1" selected>VIP</option></select>
+                                                    <select aria-label="private" class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="3"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
@@ -380,24 +380,24 @@
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                                <form class="mt-3" action="/web/api/admin/plans" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="4"/>
-                                                    <input class="form-control mb-1" name="name" value="Diamond" required/>
-                                                    <input class="form-control mb-1" type="number" step="0.01" name="price" value="74.99"/>
-                                                    <input class="form-control mb-1" type="number" name="length" value="90"/>
-                                                    <select class="form-control mb-1" name="unit">
+                                                    <input aria-label="name" class="form-control mb-1" name="name" value="Diamond" required/>
+                                                    <input aria-label="price" class="form-control mb-1" type="number" step="0.01" name="price" value="74.99"/>
+                                                    <input aria-label="length" class="form-control mb-1" type="number" name="length" value="90"/>
+                                                    <select aria-label="unit" class="form-control mb-1" name="unit">
                                                         <option value="days" selected>Days</option>
                                                         <option value="hours">Hours</option>
                                                     </select>
-                                                    <input class="form-control mb-1" type="number" name="mbt" value="1"/>
-                                                    <input class="form-control mb-1" type="number" name="concurrents" value="10"/>
-                                                    <select class="form-control mb-1" name="vip"><option value="0">No VIP</option><option value="1" selected>VIP</option></select>
-                                                    <select class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
+                                                    <input aria-label="mbt" class="form-control mb-1" type="number" name="mbt" value="1"/>
+                                                    <input aria-label="concurrents" class="form-control mb-1" type="number" name="concurrents" value="10"/>
+                                                    <select aria-label="vip" class="form-control mb-1" name="vip"><option value="0">No VIP</option><option value="1" selected>VIP</option></select>
+                                                    <select aria-label="private" class="form-control mb-1" name="private"><option value="0" selected>Public</option><option value="1">Private</option></select>
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                            <form action="/web/api/admin/plans" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="4"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>

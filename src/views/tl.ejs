@@ -9,7 +9,7 @@
         <div class="label" id="<%= strand.domainColumn %>">
             <input type="hidden" name="<%= strand.checkboxName %>" value="0"/>
             <span class="<%= strand.cssClass %>"><%= strand.label %>
-                <input type="checkbox" class="checkf" name="<%= strand.checkboxName %>"<%- checked[i] ? ' checked=""' : '' %> value="1"/>
+                <input type="checkbox" class="checkf" aria-label="<%= strand.label %>" name="<%= strand.checkboxName %>"<%- checked[i] ? ' checked=""' : '' %> value="1"/>
             </span>
             <div class="overlay"><% if (tl === 'tl3' && i === config.strands.length - 1) { %><%= strand.tooltip %><% } else { %> <%= strand.tooltip %> <% } %></div>
         </div>

@@ -80,8 +80,9 @@ math.
 - Attack hub: target validation (private/loopback/metadata ranges refused), DNS
   re-checks, URL-template origin pinning, manual redirect handling, per-user
   serialized quota checks. Public-target abuse is still the operator's risk.
-- Attack quotas use the plan's concurrency and max time; finished attacks are
-  marked stopped lazily by `date + time <= now`.
+- Attack quotas use the plan's concurrency and max time plus the admin-set
+  per-user cooldown and 24-hour cap; finished attacks are marked stopped lazily
+  by `date + time <= now`.
 - Strict CSP (`script-src 'self'`, `style-src 'self'`, `object-src 'none'`,
   `form-action 'self'`), COOP/CORP, HSTS in production.
 - `pnpm audit --audit-level=moderate` is a release gate; CI runs it plus tests,

@@ -371,7 +371,7 @@ a:hover {
     box-sizing: border-box;
     padding: 10px 12px;
     background: #0c1130;
-    border: 1px solid rgba(229, 244, 255, 0.14);
+    border: 1px solid var(--ip-input-border);
     border-radius: 9px;
     color: #e5f4ff;
     font: inherit;
@@ -551,7 +551,7 @@ button.dropdown-toggle {
 }
 [data-theme="light"] .form-control {
     background: #ffffff;
-    border-color: #cfd7e5;
+    border-color: #8a8f9c;
     color: #101a3a;
 }
 [data-theme="light"] .form-control::placeholder {

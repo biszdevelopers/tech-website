@@ -5,34 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gift Cards | IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=3febea60f0e1519e" />
+    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/dash.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/dash.css?v=9baaf329e2d162d8" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=3febea60f0e1519e"></script>
+    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=3febea60f0e1519e"></script>
-    <script src="/js/legacy/ie11.js?v=3febea60f0e1519e"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=3febea60f0e1519e" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
+    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/theme.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/menu.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/menu.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/menu.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/menu.js?v=9baaf329e2d162d8" defer></script>
     
-<meta name="csrf-token" content="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/></head>
+<meta name="csrf-token" content="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/></head>
 <body>
 
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
@@ -250,11 +250,11 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Generate Codes</h4>
-                    <form class="mt-4" action="/web/api/admin/giftcards" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                    <form class="mt-4" action="/web/api/admin/giftcards" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                         <input type="hidden" name="action" value="generate"/>
                         <div class="form-group">
                             <label class="text-white">Plan</label>
-                            <select class="form-control" name="planID" required>
+                            <select aria-label="Plan" class="form-control" name="planID" required>
                                 <option value="">Select a plan...</option>
                                 
                                     <option value="1">Bronze</option>
@@ -269,7 +269,7 @@
                         </div>
                         <div class="form-group">
                             <label class="text-white">Number of codes</label>
-                            <input class="form-control" type="number" min="1" max="100" required name="count" value="1"/>
+                            <input aria-label="Number of codes" class="form-control" type="number" min="1" max="100" required name="count" value="1"/>
                         </div>
                         <button type="submit" class="btn btn-success">Generate</button>
                     </form>

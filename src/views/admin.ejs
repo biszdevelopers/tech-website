@@ -25,8 +25,8 @@
         <table class="AdminTable_table__3iS2Y">
             <thead>
                 <tr>
-                    <th>ID</th><th>Name</th><th>Link</th><th>Display</th><th>TL1</th>
-                    <th>TL2</th><th>TL3</th><th>TL4</th><th class="AdminTable_status">Status</th><th>Actions</th>
+                    <th class="admin-col-id">ID</th><th class="admin-col-name">Name</th><th class="admin-col-link">Link</th><th class="admin-col-display">Display</th><th class="admin-col-desc">TL1</th>
+                    <th class="admin-col-desc">TL2</th><th class="admin-col-desc">TL3</th><th class="admin-col-desc">TL4</th><th class="AdminTable_status admin-col-status">Status</th><th class="admin-col-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,10 +36,10 @@
                         <td class="AdminTable_name__ZKSIb"><%= sub.techname %></td>
                         <td><a href="<%= sub.link %>" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j"><%= sub.link %></a></td>
                         <td><%= sub.displaytext %></td>
-                        <td class="AdminTable_desc__CgL_8"><%= String(sub.tl1_desc).slice(0, 90) %></td>
-                        <td class="AdminTable_desc__CgL_8"><%= String(sub.tl2_desc).slice(0, 90) %></td>
-                        <td class="AdminTable_desc__CgL_8"><%= String(sub.tl3_desc).slice(0, 90) %></td>
-                        <td class="AdminTable_desc__CgL_8"><%= String(sub.tl4_desc).slice(0, 90) %></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl1_desc).slice(0, 90) %></span></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl2_desc).slice(0, 90) %></span></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl3_desc).slice(0, 90) %></span></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl4_desc).slice(0, 90) %></span></td>
                         <td class="AdminTable_status">
                             <% if (sub.accepted) { %>
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>

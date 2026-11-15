@@ -673,7 +673,6 @@ export function registerWebAdminRoutes(app: Application): void {
                         cooldown: s?.cooldown ?? 60,
                         cooldownTime: s?.cooldownTime ?? 300,
                         maxattacks: s?.maxattacks ?? 5,
-                        testboots: s?.testboots ?? 1,
                         maintaince: String(s?.maintaince ?? "0"),
                         stripePubKey: s?.stripePubKey ?? "",
                         hasStripeSecret: Boolean(s?.stripeSecretKey),
@@ -699,7 +698,6 @@ export function registerWebAdminRoutes(app: Application): void {
                 "cooldown",
                 "cooldownTime",
                 "maxattacks",
-                "testboots",
                 "maintaince",
                 "stripePubKey",
             ] as const;

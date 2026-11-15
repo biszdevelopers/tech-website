@@ -1528,6 +1528,7 @@ body button:hover {
     --ip-text: #e5f4ff;
     --ip-muted: #9aa8d0;
     --ip-border: rgba(229, 244, 255, 0.12);
+    --ip-input-border: #5a6791;
     --ip-accent: #17d984;
     --ip-accent-strong: #0cf293;
     --ip-on-accent: #04121f;
@@ -1542,6 +1543,7 @@ body button:hover {
     --ip-text: #101a3a;
     --ip-muted: #5a6d92;
     --ip-border: #d8dde7;
+    --ip-input-border: #8a8f9c;
     --ip-accent: #0bb87a;
     --ip-accent-strong: #0a7d57;
     --ip-on-accent: #ffffff;
@@ -1644,7 +1646,7 @@ body a {
 }
 .form-control {
     background: var(--ip-bg);
-    border: 1px solid var(--ip-border);
+    border: 1px solid var(--ip-input-border);
     color: var(--ip-text);
     border-radius: 10px;
 }
@@ -2712,4 +2714,23 @@ textarea {
     background: rgba(46, 230, 166, 0.14);
     border-color: rgba(46, 230, 166, 0.35);
     color: #86f3c4;
+}
+
+/* Keyboard focus was suppressed above; restore a visible ring for keyboard
+ * users without showing it on mouse clicks. IE11 ignores :focus-visible, so
+ * the plain :focus rule keeps its outline there. */
+body a:focus,
+body button:focus,
+body .btn:focus,
+body summary:focus,
+body input[type="checkbox"]:focus {
+    outline: 2px solid var(--ip-accent-strong);
+    outline-offset: 2px;
+}
+body a:focus:not(:focus-visible),
+body button:focus:not(:focus-visible),
+body .btn:focus:not(:focus-visible),
+body summary:focus:not(:focus-visible),
+body input[type="checkbox"]:focus:not(:focus-visible) {
+    outline: none;
 }

@@ -5,34 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>API Server Management | IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=3febea60f0e1519e" />
+    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/dash.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/dash.css?v=9baaf329e2d162d8" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=3febea60f0e1519e"></script>
+    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=3febea60f0e1519e"></script>
-    <script src="/js/legacy/ie11.js?v=3febea60f0e1519e"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=3febea60f0e1519e" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
+    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/theme.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/menu.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/menu.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/menu.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/menu.js?v=9baaf329e2d162d8" defer></script>
     
-<meta name="csrf-token" content="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/></head>
+<meta name="csrf-token" content="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/></head>
 <body>
 
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
@@ -250,13 +250,13 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Add API Server</h4>
-                    <form class="mt-4" action="/web/api/admin/servers" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                    <form class="mt-4" action="/web/api/admin/servers" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                         <input type="hidden" name="action" value="create"/>
-                        <div class="form-group"><label class="text-white">Name</label><input class="form-control" required name="name"/></div>
-                        <div class="form-group"><label class="text-white">API URL template</label><input class="form-control" required name="api" placeholder="https://api.example.com/attack?host=[host]&amp;port=[port]&amp;time=[time]&amp;method=[method]"/></div>
-                        <div class="form-group"><label class="text-white">Slots</label><input class="form-control" type="number" min="1" required name="slots" value="10"/></div>
-                        <div class="form-group"><label class="text-white">Methods (comma separated)</label><input class="form-control" name="methods" value="UDP,TCP"/></div>
-                        <div class="form-group"><label class="text-white">VIP only</label><select class="form-control" name="vip"><option value="0">No</option><option value="1">Yes</option></select></div>
+                        <div class="form-group"><label class="text-white">Name</label><input aria-label="Name" class="form-control" required name="name"/></div>
+                        <div class="form-group"><label class="text-white">API URL template</label><input aria-label="API URL template" class="form-control" required name="api" placeholder="https://api.example.com/attack?host=[host]&amp;port=[port]&amp;time=[time]&amp;method=[method]"/></div>
+                        <div class="form-group"><label class="text-white">Slots</label><input aria-label="Slots" class="form-control" type="number" min="1" required name="slots" value="10"/></div>
+                        <div class="form-group"><label class="text-white">Methods (comma separated)</label><input aria-label="Methods (comma separated)" class="form-control" name="methods" value="UDP,TCP"/></div>
+                        <div class="form-group"><label class="text-white">VIP only</label><select aria-label="VIP only" class="form-control" name="vip"><option value="0">No</option><option value="1">Yes</option></select></div>
                         <button type="submit" class="btn btn-success">Add Server</button>
                     </form>
                 </div>
@@ -279,18 +279,18 @@
                                         <td>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
-                                                <form class="mt-3" action="/web/api/admin/servers" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                                <form class="mt-3" action="/web/api/admin/servers" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="1"/>
-                                                    <input class="form-control mb-1" name="name" value="api1" required/>
-                                                    <input class="form-control mb-1" name="api" value="https://example.test/attack?host=[host]&amp;port=[port]&amp;time=[time]&amp;method=[method]"/>
-                                                    <input class="form-control mb-1" type="number" name="slots" value="5"/>
-                                                    <input class="form-control mb-1" name="methods" value="UDP"/>
-                                                    <select class="form-control mb-1" name="vip"><option value="0" selected>Public</option><option value="1">VIP only</option></select>
+                                                    <input aria-label="name" class="form-control mb-1" name="name" value="api1" required/>
+                                                    <input aria-label="api" class="form-control mb-1" name="api" value="https://example.test/attack?host=[host]&amp;port=[port]&amp;time=[time]&amp;method=[method]"/>
+                                                    <input aria-label="slots" class="form-control mb-1" type="number" name="slots" value="5"/>
+                                                    <input aria-label="methods" class="form-control mb-1" name="methods" value="UDP"/>
+                                                    <select aria-label="vip" class="form-control mb-1" name="vip"><option value="0" selected>Public</option><option value="1">VIP only</option></select>
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>
                                                 </form>
                                             </details>
-                                            <form action="/web/api/admin/servers" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                                            <form action="/web/api/admin/servers" method="POST" class="mt-1"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="1"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>

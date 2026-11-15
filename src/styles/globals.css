@@ -44,7 +44,7 @@
     --color-footer-bg: #0d1440;
     --color-card-inverse: #1a237e;
     --color-input-bg: #ffffff;
-    --color-input-border: #cccccc;
+    --color-input-border: #8a8f9c;
 
     --space-1: 4px;
     --space-2: 8px;
@@ -560,7 +560,7 @@ footer a:hover {
     flex: 1 1 280px;
     min-width: 240px;
     padding: 10px 12px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-input-border);
     border-radius: var(--radius-md);
     font-size: 1rem;
     background: var(--color-input-bg);
@@ -1015,7 +1015,7 @@ footer a:hover {
     width: 100%;
     min-height: 80px;
     padding: 8px 10px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-input-border);
     border-radius: var(--radius-sm);
     font-family: var(--font-sans);
     font-size: 0.9rem;
@@ -1247,7 +1247,7 @@ footer a:hover {
     --color-accent: #0cf293;
     --color-accent-soft: rgba(12, 242, 147, 0.16);
     --color-input-bg: #101743;
-    --color-input-border: #3a4588;
+    --color-input-border: #5a6791;
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
     --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -1423,7 +1423,7 @@ footer a:hover {
         --color-accent-strong: #0cf293;
         --color-ink-on-accent: #04121f;
         --color-input-bg: #0c1329;
-        --color-input-border: #2a3560;
+        --color-input-border: #5a6791;
         --color-success: #4be3a4;
         --color-warning: #f0b44c;
         --color-danger: #ff7b72;
@@ -1455,7 +1455,7 @@ footer a:hover {
     --color-accent-strong: #0cf293;
     --color-ink-on-accent: #04121f;
     --color-input-bg: #0c1329;
-    --color-input-border: #2a3560;
+    --color-input-border: #5a6791;
     --color-success: #4be3a4;
     --color-warning: #f0b44c;
     --color-danger: #ff7b72;
@@ -1982,14 +1982,25 @@ footer #footer-copy a {
     }
 }
 
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-button:focus-visible,
-summary:focus-visible,
-a:focus-visible {
+input:focus,
+textarea:focus,
+select:focus,
+button:focus,
+summary:focus,
+a:focus {
     outline: 2px solid var(--color-focus);
     outline-offset: 2px;
+}
+
+/* Modern browsers hide it again unless the user is on the keyboard. IE11
+ * ignores this selector, which keeps its outline visible. */
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+summary:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* TL cards are full-card links; keep every child readable on the mint hover. */

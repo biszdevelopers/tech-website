@@ -256,7 +256,10 @@ export class Context {
     private send(text: string, status: number, contentType: string): void {
         if (this.finished) return; // one-response rule: see class docs
         let payload = text;
-        if (contentType.startsWith("text/html")) payload = this.injectCsrf(payload);
+        if (contentType.startsWith("text/html")) {
+            payload = this.injectCsrf(payload);
+            payload = this.injectAriaLabels(payload);
+        }
 
         const etag = `"${createHash("sha1").update(payload).digest("base64url")}"`;
         this.res.setHeader("ETag", etag);
@@ -308,6 +311,66 @@ export class Context {
             return `${tag}<input type="hidden" name="_csrf" value="${token}"/>`;
         });
     }
+
+    /**
+     * Every form control needs an accessible name. The templates already show
+     * a label next to most of them but rarely wire it with `for`/`id`, and the
+     * admin screens have hundreds of them. Derive the name once, here, from
+     * the nearest preceding label text, then placeholder, then field name.
+     */
+    private injectAriaLabels(html: string): string {
+        if (!html.includes("<form")) return html;
+        return html.replace(
+            /<(input|select|textarea)\b([^>]*)>/gi,
+            (tag: string, _element: string, attrs: string, offset: number) => {
+                if (/\b(aria-label|aria-labelledby)\b/i.test(attrs)) return tag;
+                if (/\btype="(hidden|submit|button|reset|image)"/i.test(attrs)) return tag;
+                const id = /\bid="([^"]+)"/i.exec(attrs)?.[1];
+                if (id && html.includes(`for="${id}"`)) return tag;
+
+                const before = html.slice(0, offset);
+                const labelOpen = before.lastIndexOf("<label");
+                const labelClose = before.lastIndexOf("</label>");
+                // Already inside a wrapping <label>: the label text names it.
+                if (labelOpen > labelClose) return tag;
+
+                let text = "";
+                if (labelClose !== -1 && offset - labelClose < 600) {
+                    const gap = before.slice(labelClose);
+                    // A control or another form between the label and this
+                    // field means that label belongs to something else.
+                    if (!/<(input|select|textarea|form)\b/i.test(gap)) {
+                        text = before.slice(before.lastIndexOf("<label", labelClose), labelClose);
+                    }
+                }
+                text = decodeLabel(text);
+                if (!text) {
+                    const placeholder = /\bplaceholder="([^"]*)"/i.exec(attrs)?.[1];
+                    text = decodeLabel(placeholder ?? "");
+                }
+                if (!text) {
+                    const name = /\bname="([^"]*)"/i.exec(attrs)?.[1];
+                    text = (name ?? "").replace(/[_-]+/g, " ").trim();
+                }
+                if (!text) return tag;
+                const safe = text.replace(/"/g, "&quot;").slice(0, 80);
+                return tag.replace(/^<(\w+)/, `<$1 aria-label="${safe}"`);
+            }
+        );
+    }
+}
+
+function decodeLabel(text: string): string {
+    return text
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 }
 
 function safeDecode(value: string): string {

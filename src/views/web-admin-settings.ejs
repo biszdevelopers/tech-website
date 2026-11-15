@@ -20,20 +20,19 @@
                             <textarea class="form-control" name="description" rows="3"><%= s.description %></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Cooldown</label>
-                            <input class="form-control" type="number" name="cooldown" value="<%= s.cooldown %>"/>
+                            <label class="text-white">Cooldown between attacks</label>
+                            <select class="form-control" name="cooldown">
+                                <option value="0"<%- !Number(s.cooldown) ? ' selected' : '' %>>Off</option>
+                                <option value="1"<%- Number(s.cooldown) ? ' selected' : '' %>>On</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Cooldown Time (seconds)</label>
-                            <input class="form-control" type="number" name="cooldownTime" value="<%= s.cooldownTime %>"/>
+                            <input class="form-control" type="number" min="0" name="cooldownTime" value="<%= s.cooldownTime %>"/>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Max Attacks Per User</label>
-                            <input class="form-control" type="number" name="maxattacks" value="<%= s.maxattacks %>"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">Test Boots</label>
-                            <input class="form-control" type="number" name="testboots" value="<%= s.testboots %>"/>
+                            <label class="text-white">Max Attacks Per User (per 24 hours, 0 = unlimited)</label>
+                            <input class="form-control" type="number" min="0" name="maxattacks" value="<%= s.maxattacks %>"/>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Maintenance mode</label>

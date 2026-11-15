@@ -5,34 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Settings | IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=3febea60f0e1519e" />
+    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=9baaf329e2d162d8" />
     
-    <link rel="stylesheet" href="/css/dash.css?v=3febea60f0e1519e" />
+    <link rel="stylesheet" href="/css/dash.css?v=9baaf329e2d162d8" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=3febea60f0e1519e"></script>
+    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
     <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=3febea60f0e1519e"></script>
-    <script src="/js/legacy/ie11.js?v=3febea60f0e1519e"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=3febea60f0e1519e" />
+    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
+    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
+    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
     <![endif]-->
     
-    <script type="module" src="/js/modern/theme.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/theme.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
     
-    <script type="module" src="/js/modern/menu.js?v=3febea60f0e1519e"></script>
-    <script nomodule src="/js/legacy/menu.js?v=3febea60f0e1519e" defer></script>
+    <script type="module" src="/js/modern/menu.js?v=9baaf329e2d162d8"></script>
+    <script nomodule src="/js/legacy/menu.js?v=9baaf329e2d162d8" defer></script>
     
-<meta name="csrf-token" content="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/></head>
+<meta name="csrf-token" content="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/></head>
 <body>
 
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
@@ -250,39 +250,38 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">General Settings</h4>
-                    <form class="mt-4" action="/web/api/admin/settings" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                    <form class="mt-4" action="/web/api/admin/settings" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                         <input type="hidden" name="action" value="update"/>
                         <div class="form-group">
                             <label class="text-white">Site Name</label>
-                            <input class="form-control" name="sitename" value="IPstress"/>
+                            <input aria-label="Site Name" class="form-control" name="sitename" value="IPstress"/>
                         </div>
                         <div class="form-group">
                             <label class="text-white">URL</label>
-                            <input class="form-control" name="url" value="http://localhost:3000"/>
+                            <input aria-label="URL" class="form-control" name="url" value="http://localhost:3000"/>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Description</label>
-                            <textarea class="form-control" name="description" rows="3">Premium IP stress testing service</textarea>
+                            <textarea aria-label="Description" class="form-control" name="description" rows="3">Premium IP stress testing service</textarea>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Cooldown</label>
-                            <input class="form-control" type="number" name="cooldown" value="60"/>
+                            <label class="text-white">Cooldown between attacks</label>
+                            <select aria-label="Cooldown between attacks" class="form-control" name="cooldown">
+                                <option value="0">Off</option>
+                                <option value="1" selected>On</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Cooldown Time (seconds)</label>
-                            <input class="form-control" type="number" name="cooldownTime" value="300"/>
+                            <input aria-label="Cooldown Time (seconds)" class="form-control" type="number" min="0" name="cooldownTime" value="300"/>
                         </div>
                         <div class="form-group">
-                            <label class="text-white">Max Attacks Per User</label>
-                            <input class="form-control" type="number" name="maxattacks" value="5"/>
-                        </div>
-                        <div class="form-group">
-                            <label class="text-white">Test Boots</label>
-                            <input class="form-control" type="number" name="testboots" value="1"/>
+                            <label class="text-white">Max Attacks Per User (per 24 hours, 0 = unlimited)</label>
+                            <input aria-label="Max Attacks Per User (per 24 hours, 0 = unlimited)" class="form-control" type="number" min="0" name="maxattacks" value="5"/>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Maintenance mode</label>
-                            <select class="form-control" name="maintaince">
+                            <select aria-label="Maintenance mode" class="form-control" name="maintaince">
                                 <option value="0" selected>Off</option>
                                 <option value="1">On</option>
                             </select>
@@ -296,27 +295,27 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Payment Settings</h4>
-                    <form class="mt-4" action="/web/api/admin/settings" method="POST"><input type="hidden" name="_csrf" value="353f4a30055ba4507f73b723fce7c638d2b1621e2a8d89f6b9921d009f4b1bc6"/>
+                    <form class="mt-4" action="/web/api/admin/settings" method="POST"><input type="hidden" name="_csrf" value="527d1746b28a256a683d6c8da57d8606fc58d0bae9874fe38d98389c38d749fa"/>
                         <input type="hidden" name="action" value="update"/>
                         <div class="form-group">
                             <label class="text-white">PayPal Email</label>
-                            <input class="form-control" name="paypal" value=""
+                            <input aria-label="PayPal Email" class="form-control" name="paypal" value=""
                                    placeholder="Not configured"/>
                             <label class="text-muted"><input type="checkbox" name="clear_paypal"/> Clear</label>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Bitcoin Address</label>
-                            <input class="form-control" name="bitcoin" value=""
+                            <input aria-label="Bitcoin Address" class="form-control" name="bitcoin" value=""
                                    placeholder="Not configured"/>
                             <label class="text-muted"><input type="checkbox" name="clear_bitcoin"/> Clear</label>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Stripe Public Key</label>
-                            <input class="form-control" name="stripePubKey" value=""/>
+                            <input aria-label="Stripe Public Key" class="form-control" name="stripePubKey" value=""/>
                         </div>
                         <div class="form-group">
                             <label class="text-white">Stripe Secret Key</label>
-                            <input class="form-control" type="password" name="stripeSecretKey" value=""
+                            <input aria-label="Stripe Secret Key" class="form-control" type="password" name="stripeSecretKey" value=""
                                    placeholder="Not configured"/>
                             <label class="text-muted"><input type="checkbox" name="clear_stripeSecretKey"/> Clear</label>
                         </div>

@@ -88,6 +88,7 @@ function initAdminPanel(): void {
 
     const th = document.createElement("th");
     th.setAttribute("data-bulk", "on");
+    th.className = "admin-col-bulk";
     const selectAll = document.createElement("input");
     selectAll.type = "checkbox";
     selectAll.setAttribute("aria-label", "Select all rows");
@@ -99,6 +100,10 @@ function initAdminPanel(): void {
         const box = document.createElement("input");
         box.type = "checkbox";
         box.className = "bulk-row";
+        box.setAttribute(
+            "aria-label",
+            "Select row " + ((row.cells[0].textContent || "").trim() || "entry")
+        );
         td.appendChild(box);
         row.insertBefore(td, row.cells[0]);
     });
