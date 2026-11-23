@@ -5,7 +5,7 @@ import { requireWebUser } from "./guards";
 import { features } from "../config/features";
 import { env } from "../config/env";
 import { randomBytes } from "node:crypto";
-import { webDb } from "../lib/db/web";
+import { webDb, webSqlite } from "../lib/db/web";
 import { openSecret } from "../lib/secrets";
 
 async function stripeClient(): Promise<any> {
@@ -59,6 +59,10 @@ export function registerPaymentRoutes(app: Application): void {
             if (!planId) throw new HttpError(400, "Invalid plan.");
             const plan = await webDb.plans.findUnique({ where: { ID: planId } });
             if (!plan || plan.price <= 0) throw new HttpError(404, "Plan not found.");
+            if (Number(plan.private) === 1 && Number(user.rank) < 1) {
+                throw new HttpError(404, "Plan not found.");
+            }
+            const amount = Math.round(Number(plan.price) * 100);
             const tid = genTid("STRIPE");
             const checkout = await stripe.checkout.sessions.create({
                 mode: "payment",
@@ -68,7 +72,7 @@ export function registerPaymentRoutes(app: Application): void {
                         quantity: 1,
                         price_data: {
                             currency: "usd",
-                            unit_amount: Math.round(plan.price * 100),
+                            unit_amount: amount,
                             product_data: { name: plan.name + " membership" },
                         },
                     },
@@ -85,6 +89,8 @@ export function registerPaymentRoutes(app: Application): void {
                     email,
                     tid,
                     date: Math.floor(Date.now() / 1000),
+                    amount,
+                    currency: "usd",
                 },
             });
             if (!acceptJson) {
@@ -105,8 +111,9 @@ export function registerPaymentRoutes(app: Application): void {
     // Stripe webhook: reads raw body BEFORE any parser touches it.
     app.post("/web/api/payments/stripe/webhook", async (ctx: Context) => {
         if (!features.payments) {
-            ctx.json({ received: true });
-            return;
+            // 503 keeps Stripe retrying, so a payment completed while the kill
+            // switch is on is granted after it is turned back on.
+            throw new HttpError(503, "Payments are temporarily disabled.");
         }
         const secret = process.env.STRIPE_WEBHOOK_SECRET;
         const stripe = await stripeClient();
@@ -114,18 +121,20 @@ export function registerPaymentRoutes(app: Application): void {
             throw new HttpError(400, "Webhook signature verification is not configured.");
         const signature = ctx.raw.headers["stripe-signature"] as string | undefined;
         if (!signature) throw new HttpError(400, "Missing signature.");
-        const raw = await new Promise<string>((resolve, reject) => {
-            let data = "";
-            ctx.raw.on("data", (c: Buffer) => {
-                data += c.toString();
-                if (data.length > 1_000_000) {
-                    ctx.raw.destroy();
-                    reject(new HttpError(413, "Webhook payload too large."));
-                }
-            });
-            ctx.raw.on("end", () => resolve(data));
-            ctx.raw.on("error", reject);
-        });
+
+        const chunks: Buffer[] = [];
+        let size = 0;
+        for await (const chunk of ctx.raw) {
+            const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as Uint8Array);
+            size += buffer.length;
+            if (size > 1_000_000) {
+                ctx.raw.destroy();
+                throw new HttpError(413, "Webhook payload too large.");
+            }
+            chunks.push(buffer);
+        }
+        const raw = Buffer.concat(chunks).toString("utf8");
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let event: any;
         try {
@@ -135,36 +144,60 @@ export function registerPaymentRoutes(app: Application): void {
             console.error("Stripe webhook signature FAILED");
             throw new HttpError(400, "Invalid signature.");
         }
-        if (event.type === "checkout.session.completed") {
+
+        const paidEvents = new Set([
+            "checkout.session.completed",
+            "checkout.session.async_payment_succeeded",
+        ]);
+        if (paidEvents.has(event.type)) {
             const sess = event.data.object;
-            const tid = sess.metadata?.tid;
+            const tid = String(sess.metadata?.tid ?? "");
             const userId = parseInt(sess.metadata?.userId || "0", 10);
             const planId = parseInt(sess.metadata?.planId || "0", 10);
             if (!tid || !userId || !planId) throw new HttpError(400, "Missing payment metadata.");
             if (sess.payment_status !== "paid")
                 throw new HttpError(400, "Payment is not complete.");
+
             const plan = await webDb.plans.findUnique({ where: { ID: planId } });
             if (!plan) throw new HttpError(400, "Plan no longer exists.");
-            const expected = Math.round(Number(plan.price) * 100);
-            if (Number(sess.amount_total ?? 0) < expected || sess.currency !== "usd") {
-                throw new HttpError(400, "Payment amount does not match the plan.");
-            }
             const payment = await webDb.payments.findFirst({ where: { tid } });
-            if (!payment || Number(payment.user) !== userId) {
+            if (!payment || Number(payment.user) !== userId || Number(payment.plan) !== planId) {
                 throw new HttpError(400, "Payment record not found.");
             }
-            if (Number(payment.paid) === 0) {
-                const days = Math.max(plan.length, 1);
-                const unit = plan.unit === "hours" ? 3600 : 86400;
-                await webDb.payments.update({
-                    where: { ID: payment.ID },
-                    data: { paid: Number(sess.amount_total ?? 0) / 100 },
-                });
-                await webDb.users.update({
-                    where: { ID: userId },
-                    data: { membership: planId, expire: now() + days * unit },
-                });
+            // Compare against the amount captured at checkout, not today's
+            // price; a price edit between checkout and webhook must not reject
+            // a legitimate payment.
+            const expected =
+                Number(payment.amount) > 0
+                    ? Number(payment.amount)
+                    : Math.round(Number(plan.price) * 100);
+            const charged = Number(sess.amount_total ?? 0);
+            if (charged < expected || String(sess.currency).toLowerCase() !== "usd") {
+                throw new HttpError(400, "Payment amount does not match the plan.");
             }
+
+            const nowSec = Math.floor(Date.now() / 1000);
+            webSqlite.transaction(() => {
+                const current = webSqlite
+                    .prepare("select paid, ID from payments where tid = ?")
+                    .get(tid) as { paid?: number; ID?: number } | undefined;
+                if (!current?.ID) throw new HttpError(400, "Payment record not found.");
+                if (Number(current.paid) > 0) return; // replay: already fulfilled
+                const user = webSqlite
+                    .prepare("select expire from users where ID = ?")
+                    .get(userId) as { expire?: number } | undefined;
+                if (!user) throw new HttpError(400, "User no longer exists.");
+                const term =
+                    Math.max(Number(plan.length), 1) * (plan.unit === "hours" ? 3600 : 86400);
+                const base = Math.max(nowSec, Number(user.expire) || 0);
+                const updated = webSqlite
+                    .prepare("update payments set paid = ? where ID = ? and paid = 0")
+                    .run(charged / 100, current.ID);
+                if (updated.changes !== 1) return; // another delivery won
+                webSqlite
+                    .prepare("update users set membership = ?, expire = ? where ID = ?")
+                    .run(planId, base + term, userId);
+            })();
         }
         ctx.json({ received: true });
     });
@@ -186,7 +219,4 @@ export function registerPaymentRoutes(app: Application): void {
         },
         { guard: "webUser" }
     );
-}
-function now(): number {
-    return Math.floor(Date.now() / 1000);
 }

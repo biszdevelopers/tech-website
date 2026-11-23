@@ -165,7 +165,7 @@ export class StaticFiles {
             ctx.res.setHeader("Vary", "Accept-Encoding");
             ctx.res.setHeader("Content-Length", info.brSize);
             if (ctx.method === "HEAD") return (ctx.res.end(), true);
-            createReadStream(`${absolute}.br`).pipe(ctx.res);
+            this.pipeFile(`${absolute}.br`, ctx);
             return true;
         }
         if (accept.includes("gzip") && info.gzSize > 0) {
@@ -173,7 +173,7 @@ export class StaticFiles {
             ctx.res.setHeader("Vary", "Accept-Encoding");
             ctx.res.setHeader("Content-Length", info.gzSize);
             if (ctx.method === "HEAD") return (ctx.res.end(), true);
-            createReadStream(`${absolute}.gz`).pipe(ctx.res);
+            this.pipeFile(`${absolute}.gz`, ctx);
             return true;
         }
 
@@ -182,8 +182,22 @@ export class StaticFiles {
             ctx.res.end();
             return true;
         }
-        createReadStream(absolute).pipe(ctx.res);
+        this.pipeFile(absolute, ctx);
         return true;
+    }
+
+    /** A file deleted mid-flight (deploy) must not reject as an unhandled stream error. */
+    private pipeFile(path: string, ctx: Context): void {
+        const stream = createReadStream(path);
+        stream.on("error", () => {
+            if (!ctx.res.headersSent) {
+                ctx.res.statusCode = 404;
+                ctx.res.end("Not found");
+            } else {
+                ctx.res.destroy();
+            }
+        });
+        stream.pipe(ctx.res);
     }
 }
 

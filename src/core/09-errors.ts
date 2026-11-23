@@ -65,7 +65,13 @@ export async function withErrorBoundary(
         }
         const status = err instanceof HttpError ? err.status : 500;
         const ref = randomBytes(4).toString("hex");
-        const isApi = ctx.path.startsWith("/api/") || ctx.path.startsWith("/web/api/");
+        const accept = String(ctx.raw.headers.accept ?? "");
+        // Browser form navigations advertise text/html; XHR/fetch/curl send
+        // */* or application/json. The path alone is not enough: admin and
+        // registration forms post to /api/* and must still get an HTML page.
+        const isApi =
+            !accept.includes("text/html") &&
+            (ctx.path.startsWith("/api/") || ctx.path.startsWith("/web/api/"));
         if (status >= 500) {
             logEvent("error", {
                 ref,

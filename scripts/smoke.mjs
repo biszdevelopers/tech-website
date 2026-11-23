@@ -1,7 +1,9 @@
 // Production smoke test. Run against a booted server:
-//   BASE=http://localhost:3000 node scripts/smoke.mjs
+//   BASE=https://example.com SMOKE_ADMIN_PASSWORD=... node scripts/smoke.mjs
 // Exits non-zero if any check fails.
 const BASE = process.env.BASE || "http://localhost:3000";
+const USER = process.env.SMOKE_ADMIN_USERNAME || "admin";
+const PASSWORD = process.env.SMOKE_ADMIN_PASSWORD || "";
 
 let failures = 0;
 function check(name, pass, detail = "") {
@@ -9,71 +11,106 @@ function check(name, pass, detail = "") {
     if (!pass) failures += 1;
 }
 
+async function pageToken(path) {
+    const res = await fetch(BASE + path);
+    const html = await res.text();
+    const token = (html.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+    const cookies = (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]);
+    return { token, cookies, html };
+}
+
 async function main() {
-    // 1. Health
     const health = await fetch(`${BASE}/api/health`);
     check("health endpoint", health.status === 200);
 
-    // 2. Home + TL page render
     const home = await fetch(`${BASE}/`);
     check("home renders", home.status === 200 && (await home.text()).includes("Tech Tools"));
-    const tl = await fetch(`${BASE}/tl1`);
-    check("tl1 renders", tl.status === 200);
+    check("tl1 renders", (await fetch(`${BASE}/tl1`)).status === 200);
 
-    // 3. Unauthenticated admin APIs are closed
-    const r1 = await fetch(`${BASE}/api/admin/accept`, {
+    // Portal routes are indistinguishable from a missing page.
+    const probe = await pageToken("/login");
+    const anon = await fetch(`${BASE}/api/admin/accept`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            Origin: BASE,
+            "Content-Type": "application/json",
+            "x-csrf-token": probe.token,
+            Cookie: probe.cookies.join("; "),
+        },
         body: JSON.stringify({ id: 1 }),
     });
-    check("main admin API blocked when unauth", r1.status === 401, String(r1.status));
+    check("main admin API hidden when anonymous", anon.status === 404, String(anon.status));
+    check(
+        "web admin page hidden when anonymous",
+        (await fetch(`${BASE}/web/admin/dashboard`)).status === 404
+    );
 
-    const r2 = await fetch(`${BASE}/web/api/admin/settings`);
-    check("web admin API blocked when unauth", r2.status === 401, String(r2.status));
-
-    const r3 = await fetch(`${BASE}/web/api/hub/stats`);
-    check("hub stats requires auth", r3.status === 401, String(r3.status));
-
-    // 4. CSRF: cross-origin mutation is blocked by middleware
-    const csrf = await fetch(`${BASE}/api/submission`, {
+    // CSRF: cross-origin refused; same-origin without a token refused.
+    const evil = await fetch(`${BASE}/api/submission`, {
         method: "POST",
         headers: { Origin: "http://evil.example" },
         body: new URLSearchParams({ techname: "x", link: "x", displaytext: "x" }),
     });
-    check("cross-origin POST blocked (CSRF)", csrf.status === 403, String(csrf.status));
+    check("cross-origin POST blocked", evil.status === 403, String(evil.status));
+    const noToken = await fetch(`${BASE}/api/submission`, {
+        method: "POST",
+        headers: { Origin: BASE, "Content-Type": "application/x-www-form-urlencoded" },
+        body: "techname=x&link=x&displaytext=x",
+    });
+    check("POST without token blocked", noToken.status === 403, String(noToken.status));
 
-    // 5. Login sets the session cookie
+    // Login requires the token from a real page.
     const login = await fetch(`${BASE}/api/auth/login`, {
         method: "POST",
         redirect: "manual",
-        headers: { Origin: BASE },
-        body: new URLSearchParams({
-            username: "admin",
-            password: process.env.SMOKE_ADMIN_PASSWORD || "admin123",
-        }),
+        headers: {
+            Origin: BASE,
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie: probe.cookies.join("; "),
+        },
+        body: `username=${encodeURIComponent(USER)}&password=${encodeURIComponent(PASSWORD)}&_csrf=${probe.token}`,
     });
-    const setCookie = login.headers.getSetCookie?.() ?? [];
-    const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
+    const sessionCookies = [
+        ...probe.cookies,
+        ...(login.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]),
+    ];
+    const cookie = sessionCookies.join("; ");
     check("login redirects", [302, 303, 307, 308].includes(login.status), String(login.status));
-    check("login issues session cookie", !!cookie);
+    check("login issues session cookie", sessionCookies.length > 0);
 
-    // 6. Authenticated admin call passes the guard
-    if (cookie) {
+    if (PASSWORD && cookie) {
+        const adminPage = await fetch(`${BASE}/admin`, { headers: { Cookie: cookie } });
+        const adminHtml = await adminPage.text();
+        const adminToken =
+            (adminHtml.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+        check("admin page reachable with session", adminPage.status === 200);
         const ok = await fetch(`${BASE}/api/admin/reject`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Cookie: cookie, Origin: BASE },
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: cookie,
+                Origin: BASE,
+                "x-csrf-token": adminToken,
+            },
             body: JSON.stringify({ id: 99999 }),
         });
-        check("authed admin request allowed", ok.status === 200, String(ok.status));
+        check("authed admin API allowed", ok.status === 200, String(ok.status));
+    } else if (!PASSWORD) {
+        console.log("SKIP  admin session checks (SMOKE_ADMIN_PASSWORD not set)");
     }
 
-    // 7. Rate limiting kicks in on the login route
+    // Rate limit still fires after the CSRF gate.
     let got429 = false;
     for (let i = 0; i < 12; i += 1) {
         const res = await fetch(`${BASE}/api/auth/login`, {
             method: "POST",
-            headers: { Origin: BASE },
-            body: new URLSearchParams({ username: "nobody", password: "wrong" }),
+            headers: {
+                Origin: BASE,
+                Accept: "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+                Cookie: probe.cookies.join("; "),
+            },
+            body: `username=nobody&password=wrong&_csrf=${probe.token}`,
         });
         if (res.status === 429) {
             got429 = true;
@@ -82,14 +119,20 @@ async function main() {
     }
     check("login rate limit returns 429", got429);
 
-    // 8. SEO endpoints
+    // Crawler files.
     const robots = await fetch(`${BASE}/robots.txt`);
-    check("robots.txt served", robots.status === 200 && (await robots.text()).includes("Disallow"));
+    const robotsBody = await robots.text();
+    check(
+        "robots.txt served without portal hints",
+        robots.status === 200 && !/admin|\/login/i.test(robotsBody)
+    );
     const sitemap = await fetch(`${BASE}/sitemap.xml`);
     const sitemapBody = await sitemap.text();
     check(
         "sitemap.xml valid",
-        sitemap.status === 200 && /<urlset[\s>]/.test(sitemapBody),
+        sitemap.status === 200 &&
+            /<urlset[\s>]/.test(sitemapBody) &&
+            !/admin|\/login/.test(sitemapBody),
         `${sitemap.status}, ${sitemapBody.length} bytes`
     );
 

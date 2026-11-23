@@ -5,34 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Panel | BIBS-C Tech Tools</title>
     
-    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
+    <link rel="icon" href="/images/favicon.png?v=096c8b6adc345de0" />
     
-    <link rel="stylesheet" href="/css/globals.css?v=9baaf329e2d162d8" />
+    <link rel="stylesheet" href="/css/globals.css?v=096c8b6adc345de0" />
     
-    <link rel="stylesheet" href="/css/admintable.css?v=9baaf329e2d162d8" />
+    <link rel="stylesheet" href="/css/admintable.css?v=096c8b6adc345de0" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
-    <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
-    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
-    <![endif]-->
+    <script src="/js/legacy/theme-boot.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=096c8b6adc345de0"></script>
     
-    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/theme.js?v=096c8b6adc345de0" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=096c8b6adc345de0" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=096c8b6adc345de0" defer></script>
     
-    <script type="module" src="/js/modern/admin.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/admin.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/admin.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/admin.js?v=096c8b6adc345de0" defer></script>
     
-<meta name="csrf-token" content="9fdd21d9919e61638503c23825bbdd9133301608ef9448f10a877fb66b694c54"/></head>
+<meta name="csrf-token" content="2709087aa99b8724368d7f7a4ab2167924309a7a6d3dd700a6702e97630c437d"/></head>
 <body>
 
 <div id="cover">
@@ -81,7 +79,7 @@
     </ul>
 </div>
 <section id="submissions" class="section-anchor">
-    <form method="get" action="/admin" class="admin-filters"><input type="hidden" name="_csrf" value="9fdd21d9919e61638503c23825bbdd9133301608ef9448f10a877fb66b694c54"/>
+    <form method="get" action="/admin" class="admin-filters">
         <input aria-label="Search name, link, display" type="search" name="q" value="" placeholder="Search name, link, display"/>
         <select aria-label="status" name="status">
             <option value="all" selected>All</option>
@@ -89,7 +87,7 @@
             <option value="accepted">Accepted</option>
         </select>
         <button type="submit">Filter</button>
-        <span class="admin-count">23 result(s)</span>
+        <span class="admin-count">24 result(s)</span>
     </form>
     <div class="AdminTable_wrap__1AlVX">
         <table class="AdminTable_table__3iS2Y">
@@ -100,6 +98,29 @@
                 </tr>
             </thead>
             <tbody>
+                
+                    <tr>
+                        <td class="AdminTable_mono__EqBH0">24</td>
+                        <td class="AdminTable_name__ZKSIb">ZZ Csrf Test</td>
+                        <td><a href="https://example.com/zz-csrf" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://example.com/zz-csrf</a></td>
+                        <td>Csrf</td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">desc</span></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+                        <td class="AdminTable_status">
+                            
+                                <span class="AdminTable_badgeOk__o19q_">Accepted</span>
+                            
+                        </td>
+                        <td class="AdminTable_actions__k8lIU">
+                            
+                                <button type="button" data-action="/api/admin/reject" data-id="24" class="AdminTable_btnReject__w9wZ7">Reject</button>
+                            
+                            <button type="button" data-edit="24" class="AdminTable_btnEdit__zHqfB">Edit</button>
+                            <button type="button" data-action="/api/admin/delete" data-id="24" class="AdminTable_btnDelete__KFKXJ">Delete</button>
+                        </td>
+                    </tr>
                 
                     <tr>
                         <td class="AdminTable_mono__EqBH0">23</td>

@@ -67,10 +67,24 @@ function dispositionOf(headerBlock: string): {
 }
 
 /**
- * Parse ctx.raw into fields + at most one file.
- * Throws HttpError(400/413) on malformed or oversized input.
+ * Parse ctx.raw into fields + at most one file, once per request. The CSRF
+ * middleware and the route both call this; the promise is memoized so the
+ * stream is never read twice and every multipart endpoint gets the same token
+ * check even if its handler forgets one.
+ * Throws HttpError(400/403/413) on malformed, forged or oversized input.
  */
-export async function readMultipart(ctx: Context): Promise<MultipartResult> {
+const parsedByRequest = new WeakMap<Context, Promise<MultipartResult>>();
+
+export function readMultipart(ctx: Context): Promise<MultipartResult> {
+    let pending = parsedByRequest.get(ctx);
+    if (!pending) {
+        pending = parseMultipart(ctx);
+        parsedByRequest.set(ctx, pending);
+    }
+    return pending;
+}
+
+async function parseMultipart(ctx: Context): Promise<MultipartResult> {
     const contentType = String(ctx.raw.headers["content-type"] ?? "");
     const boundary = boundaryOf(contentType);
     if (!boundary) throw new HttpError(400, "Expected multipart/form-data.");
@@ -118,6 +132,11 @@ export async function readMultipart(ctx: Context): Promise<MultipartResult> {
         }
         pos = next;
         // Terminal "--boundary--" has no following part; loop exits naturally.
+    }
+    // Every multipart form carries the token; nothing may bypass the check by
+    // choosing a body type the middleware cannot inspect.
+    if (!ctx.verifyCsrf(result.fields._csrf ?? "")) {
+        throw new HttpError(403, "Invalid CSRF token");
     }
     return result;
 }

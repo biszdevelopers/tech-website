@@ -1,7 +1,7 @@
 import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
 
-// Mirrors prisma/schema-main.prisma. Column/property names match the Prisma
-// fields exactly so the Prisma-compatible query layer (prisma-shim) and all
+// Mirrors src/lib/db/schema-main.ts. Column/property names match the
+// fields exactly so the model shim (model-shim.ts) and all
 // existing call sites keep working unchanged.
 export const submission = sqliteTable(
     "submission",

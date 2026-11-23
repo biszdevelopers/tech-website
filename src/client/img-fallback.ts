@@ -4,7 +4,10 @@ const FALLBACK_IMAGE =
 
 const brokenImages = document.querySelectorAll<HTMLImageElement>("img[data-fallback]");
 Array.prototype.forEach.call(brokenImages, function (img: HTMLImageElement) {
-    img.addEventListener("error", function () {
+    function swap(): void {
         img.src = FALLBACK_IMAGE;
-    });
+    }
+    img.addEventListener("error", swap);
+    // Errors that fired before this deferred script ran never reach the handler.
+    if (img.complete && img.naturalWidth === 0) swap();
 });

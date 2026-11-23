@@ -167,7 +167,11 @@ function tryMatch(segments: string[], parts: string[]): Record<string, string> |
     for (let i = 0; i < segments.length; i += 1) {
         const seg = segments[i];
         if (seg.startsWith(":")) {
-            params[seg.slice(1)] = decodeURIComponent(parts[i]);
+            try {
+                params[seg.slice(1)] = decodeURIComponent(parts[i]);
+            } catch {
+                return null; // malformed percent-encoding is simply not a route
+            }
         } else if (seg !== parts[i]) {
             return null;
         }

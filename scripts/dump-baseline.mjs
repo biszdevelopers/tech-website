@@ -5,13 +5,24 @@ const BASE = process.env.BASE ?? "http://localhost:3000";
 mkdirSync("tests/baseline", { recursive: true });
 
 async function jar(loginPath, body) {
+    const pagePath = loginPath.startsWith("/web/") ? "/web/login" : "/login";
+    const page = await fetch(BASE + pagePath);
+    const html = await page.text();
+    const token = (html.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+    const cookies = page.headers.getSetCookie?.() ?? [];
     const res = await fetch(BASE + loginPath, {
         method: "POST",
         redirect: "manual",
-        headers: { Origin: BASE, "Content-Type": "application/x-www-form-urlencoded" },
-        body,
+        headers: {
+            Origin: BASE,
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie: cookies.map((c) => c.split(";")[0]).join("; "),
+        },
+        body: `${body}&_csrf=${encodeURIComponent(token)}`,
     });
-    return (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+    return [...cookies, ...(res.headers.getSetCookie?.() ?? [])]
+        .map((c) => c.split(";")[0])
+        .join("; ");
 }
 
 const anonRoutes = [

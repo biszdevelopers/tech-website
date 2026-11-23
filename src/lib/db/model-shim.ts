@@ -123,21 +123,31 @@ export function createModel(db: Db, table: any, opts: ModelOptions = {}) {
             return args.data;
         },
         async update(args: { where: Where; data: any }): Promise<any> {
+            if (!args.where || Object.keys(args.where).length === 0) {
+                throw new Error("update() requires a where filter");
+            }
             const w = buildWhere(table, args.where);
-            db.update(table)
+            const result = db
+                .update(table)
                 .set(args.data)
                 .where(w as any)
                 .run();
-            const row = db
-                .select()
-                .from(table)
-                .where(w as any)
-                .get();
-            return row ?? args.data;
+            if (result.changes === 0) return null;
+            return (
+                db
+                    .select()
+                    .from(table)
+                    .where(w as any)
+                    .get() ?? args.data
+            );
         },
         async delete(args: { where: Where }): Promise<any> {
+            if (!args.where || Object.keys(args.where).length === 0) {
+                throw new Error("delete() requires a where filter");
+            }
             const w = buildWhere(table, args.where);
-            db.delete(table)
+            return db
+                .delete(table)
                 .where(w as any)
                 .run();
         },

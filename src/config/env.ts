@@ -39,6 +39,9 @@ function requiredString(name: string, minLength = 1): string {
             `Missing environment variable ${name}${suffix}. Generate with: openssl rand -base64 32`
         );
     }
+    if (isProd && /change-me|example|placeholder|test-secret/i.test(value)) {
+        throw new Error(`${name} still contains a placeholder value. Generate a real secret.`);
+    }
     return value;
 }
 
@@ -69,6 +72,45 @@ function requiredInProd(name: string): string {
     return `http://localhost:${port}`;
 }
 
+/** Parsed once: every URL/origin comparison uses the same canonical value. */
+function parseSiteOrigin(): { value: string; https: boolean } {
+    const raw = requiredInProd("SITE_ORIGIN").replace(/\/+$/, "");
+    let url: URL;
+    try {
+        url = new URL(raw);
+    } catch {
+        throw new Error(`SITE_ORIGIN must be an absolute URL, got "${raw}".`);
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error(`SITE_ORIGIN must use http or https, got "${raw}".`);
+    }
+    if (isProd && url.protocol !== "https:") {
+        throw new Error(
+            "SITE_ORIGIN must be https in production. Cookie security and Stripe redirects depend on it."
+        );
+    }
+    if (url.pathname !== "/" || url.search || url.hash) {
+        throw new Error(`SITE_ORIGIN must be an origin only (no path/query), got "${raw}".`);
+    }
+    return { value: url.origin, https: url.protocol === "https:" };
+}
+
+const site = parseSiteOrigin();
+const tlsCert = process.env.TLS_CERT?.trim() || "";
+const tlsKey = process.env.TLS_KEY?.trim() || "";
+if (Boolean(tlsCert) !== Boolean(tlsKey)) {
+    throw new Error("TLS_CERT and TLS_KEY must be set together (or both left empty).");
+}
+const settingsKey = process.env.SETTINGS_KEY?.trim() || "";
+if (settingsKey && Buffer.from(settingsKey, "base64").length !== 32) {
+    throw new Error("SETTINGS_KEY must be a base64-encoded 32-byte key.");
+}
+if (isProd && !settingsKey) {
+    console.warn(
+        "WARNING: SETTINGS_KEY is not set. Stripe secrets will be stored unencrypted in SQLite."
+    );
+}
+
 export const env = Object.freeze({
     isProd,
     port,
@@ -78,7 +120,9 @@ export const env = Object.freeze({
      * Canonical public origin. Redirects, Stripe URLs and CSRF checks use this
      * instead of the attacker-controlled Host header.
      */
-    siteOrigin: requiredInProd("SITE_ORIGIN").replace(/\/$/, ""),
+    siteOrigin: site.value,
+    /** True only when the public site is served over TLS. */
+    isHttps: site.https,
     /** Trust X-Forwarded-For only when explicitly deployed behind a proxy. */
     trustProxy: process.env.TRUST_PROXY === "true",
 
@@ -91,9 +135,9 @@ export const env = Object.freeze({
     uploadsDir: process.env.UPLOADS_DIR?.trim() || "var/uploads",
 
     /** Optional in-process TLS. Leave both empty when a proxy terminates TLS. */
-    tlsCert: process.env.TLS_CERT?.trim() || "",
-    tlsKey: process.env.TLS_KEY?.trim() || "",
+    tlsCert,
+    tlsKey,
 
     /** Optional 32-byte base64 key for encrypting secrets stored in SQLite. */
-    settingsKey: process.env.SETTINGS_KEY?.trim() || "",
+    settingsKey,
 });

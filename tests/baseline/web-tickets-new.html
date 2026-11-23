@@ -3,31 +3,29 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>New Ticket | IPstress</title>
+    <title>Login | IPstress</title>
     
-    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
+    <link rel="icon" href="/images/favicon.png?v=096c8b6adc345de0" />
     
-    <link rel="stylesheet" href="/css/webtheme.css?v=9baaf329e2d162d8" />
+    <link rel="stylesheet" href="/css/webtheme.css?v=096c8b6adc345de0" />
     
     
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
-    <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
-    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
-    <![endif]-->
+    <script src="/js/legacy/theme-boot.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=096c8b6adc345de0"></script>
     
-    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/theme.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/theme.js?v=096c8b6adc345de0" defer></script>
     
-    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/img-fallback.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=096c8b6adc345de0" defer></script>
     
-    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
+    <script type="module" src="/js/modern/scroll-top.js?v=096c8b6adc345de0"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=096c8b6adc345de0" defer></script>
     
-<meta name="csrf-token" content="9279546c818c2e451f22f374fca230a572e4c493544f3f9c6d9a0e85a4c2fec8"/></head>
+<meta name="csrf-token" content="20dcb24464cb7e7a455ef558be02dd278aae185975809e890d2aa2778e0aabc0"/></head>
 <body>
 
 <header class="web-header">
@@ -77,44 +75,48 @@
     </div>
 </header>
 
-<div class="page-breadcrumb">
-    <div class="d-flex align-items-center">
-        <h4 class="page-title text-truncate text-white font-weight-medium mb-0"> New Ticket </h4>
-        <div class="ml-auto">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb m-0 p-0">
-                    <li class="breadcrumb-item text-sql" aria-current="page">IPstress</li>
-                    <li class="breadcrumb-item text-muted" aria-current="page"> New Ticket </li>
-                </ol>
-            </nav>
-        </div>
-    </div>
-</div>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8 col-lg-6 mx-auto">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Create Support Ticket</h4>
-                    <div class="mt-4 activity">
-                        <form action="/web/api/tickets" method="post"><input type="hidden" name="_csrf" value="9279546c818c2e451f22f374fca230a572e4c493544f3f9c6d9a0e85a4c2fec8"/>
-                            <div class="form-group">
-                                <label class="text-white" for="subject">Subject</label>
-                                <input class="form-control" id="subject" type="text"
-                                       placeholder="Enter ticket subject" required name="subject"/>
+
+<div class="auth-wrapper d-flex no-block justify-content-center align-items-center position-relative">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="p-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center">IPstress</h2>
+                        <h3 class="card-title text-center">Login</h3>
+                        
+                        <form class="mt-4" method="post" action="/web/api/auth/login"><input type="hidden" name="_csrf" value="20dcb24464cb7e7a455ef558be02dd278aae185975809e890d2aa2778e0aabc0"/>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="text-white" for="username">Username</label>
+                                        <input type="text" class="form-control" id="username" placeholder="enter your username"
+                                               required name="username"/>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="text-white" for="password">Password</label>
+                                        <input type="password" class="form-control" id="password" placeholder="enter your password"
+                                               required name="password"/>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-block btn-primary" name="doLogin"> Sign In </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label class="text-white" for="content">Message</label>
-                                <textarea class="form-control" id="content" name="content" rows="6"
-                                          placeholder="Describe your issue..." required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block"> Create Ticket </button>
                         </form>
                     </div>
+                </div>
+                <div class="col-lg-12 text-center mt-3">
+                    Don&#39;t have an account? <a href="/web/register" class="text-primary">Sign Up</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 </body>
 </html>

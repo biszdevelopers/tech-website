@@ -150,9 +150,19 @@ async function tlRender(tl: string, query: Record<string, string>): Promise<stri
 let toolIndex: Array<{ id: number; techname: string }> = [];
 
 function refreshToolIndex(): void {
-    void getAcceptedSubmissions().then((subs) => {
-        toolIndex = subs.map((s) => ({ id: s.id, techname: s.techname }));
-    });
+    void getAcceptedSubmissions()
+        .then((subs) => {
+            toolIndex = subs.map((s) => ({ id: s.id, techname: s.techname }));
+        })
+        .catch((error: unknown) => {
+            console.error(
+                JSON.stringify({
+                    level: "error",
+                    msg: "tool index refresh failed",
+                    reason: error instanceof Error ? error.message : String(error),
+                })
+            );
+        });
 }
 
 const notFoundPage = (url: string): string => {
@@ -188,6 +198,30 @@ const app = new Application({
 app.get("/api/health", async (ctx) => {
     await Promise.all([mainDb.submission.count(), webDb.users.count()]);
     ctx.json({ status: "ok", time: new Date().toISOString() });
+});
+
+// Crawler files. They intentionally never mention the operator portals.
+app.get("/robots.txt", async (ctx) => {
+    ctx.text(`User-agent: *\nAllow: /\nSitemap: ${env.siteOrigin}/sitemap.xml\n`);
+});
+app.get("/sitemap.xml", async (ctx) => {
+    const pages = [
+        "/",
+        "/tl1",
+        "/tl2",
+        "/tl3",
+        "/tl4",
+        "/search",
+        "/submission",
+        "/docs",
+        "/web",
+        "/web/plan",
+        "/web/register",
+    ];
+    const urls = pages.map((path) => `  <url><loc>${env.siteOrigin}${path}</loc></url>`).join("\n");
+    ctx.xml(
+        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
+    );
 });
 
 // Home page: cached as finished HTML in production (bust via
@@ -259,17 +293,29 @@ registerPaymentRoutes(app);
 // Maintenance gate: reads settings.maintaince flag.
 // Web user pages.
 app.get("/web/plan", async (ctx) => {
+    const session = webSessions.load(ctx);
+    const viewer = session?.userId
+        ? await webDb.users.findUnique({ where: { ID: session.userId }, select: { rank: true } })
+        : null;
     const plans = await webDb.plans.findMany({ orderBy: { price: "asc" } });
+    const visible =
+        viewer && Number(viewer.rank) >= 1
+            ? plans
+            : plans.filter((plan) => Number(plan.private) !== 1);
     ctx.htmlRaw(
         render("web-plan", {
-            plans,
+            plans: visible,
             signedIn: isWebSignedIn(ctx),
             error: ctx.query.get("error") ?? "",
         })
     );
 });
 app.get("/web/tickets/new", async (ctx) => {
-    ctx.htmlRaw(render("web-tickets-new", { signedIn: isWebSignedIn(ctx) }));
+    if (!isWebSignedIn(ctx)) {
+        ctx.redirect("/web/login", 303);
+        return;
+    }
+    ctx.htmlRaw(render("web-tickets-new", { signedIn: true }));
 });
 app.get("/web/giftcards", async (ctx) => {
     ctx.htmlRaw(
@@ -297,7 +343,11 @@ app.get("/web/affiliate", async (ctx) => {
     ctx.htmlRaw(render("web-affiliate", { signedIn: Boolean(user), stats }));
 });
 app.get("/web/wheel", async (ctx) => {
-    ctx.htmlRaw(render("web-wheel", { signedIn: isWebSignedIn(ctx) }));
+    if (!isWebSignedIn(ctx)) {
+        ctx.redirect("/web/login", 303);
+        return;
+    }
+    ctx.htmlRaw(render("web-wheel", { signedIn: true }));
 });
 app.get("/web/maintenance", async (ctx) => {
     const settings = await getWebSettings();

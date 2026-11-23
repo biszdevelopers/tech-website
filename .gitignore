@@ -15,10 +15,10 @@ next-env.d.ts
 .env*.local
 
 # Databases (SQLite + WAL sidecars)
-prisma/*.db
-prisma/*.db-journal
-prisma/*.db-shm
-prisma/*.db-wal
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
 
 # Runtime uploads (never inside dist/, never in git)
 /var/uploads/

@@ -71,14 +71,25 @@ const MANIFEST = [
 
 async function cookieFor(kind) {
     if (!kind) return "";
-    const path = kind === "main" ? "/api/auth/login" : "/web/api/auth/login";
-    const res = await fetch(BASE + path, {
+    const pagePath = kind === "main" ? "/login" : "/web/login";
+    const loginPath = kind === "main" ? "/api/auth/login" : "/web/api/auth/login";
+    const page = await fetch(BASE + pagePath);
+    const html = await page.text();
+    const token = (html.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+    const cookies = page.headers.getSetCookie?.() ?? [];
+    const res = await fetch(BASE + loginPath, {
         method: "POST",
         redirect: "manual",
-        headers: { Origin: BASE, "Content-Type": "application/x-www-form-urlencoded" },
-        body: "username=admin&password=admin123",
+        headers: {
+            Origin: BASE,
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie: cookies.map((c) => c.split(";")[0]).join("; "),
+        },
+        body: `username=admin&password=admin123&_csrf=${encodeURIComponent(token)}`,
     });
-    return (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+    return [...cookies, ...(res.headers.getSetCookie?.() ?? [])]
+        .map((c) => c.split(";")[0])
+        .join("; ");
 }
 
 function bodyOf(html) {

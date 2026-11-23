@@ -1,4 +1,4 @@
-<%- include('partials/dash-head', { title: 'Ticket #' + ticket.id, crumb: '<a href="/web/admin/tickets">Tickets</a> | #' + ticket.id }) %>
+<%- include('partials/dash-head', { title: 'Ticket #' + ticket.id, crumb: 'Tickets | #' + ticket.id }) %>
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-9 mx-auto">
@@ -31,11 +31,11 @@
                         </div>
                         <button class="btn btn-primary" type="submit" name="action" value="reply">Send Reply</button>
                         <% if (ticket.status === 'Closed') { %>
-                        <button class="btn btn-secondary" type="submit" name="action" value="reopen">Reopen</button>
+                        <button class="btn btn-secondary" type="submit" name="action" value="reopen" formnovalidate>Reopen</button>
                         <% } else { %>
-                        <button class="btn btn-warning" type="submit" name="action" value="close">Close</button>
+                        <button class="btn btn-warning" type="submit" name="action" value="close" formnovalidate>Close</button>
                         <% } %>
-                        <button class="btn btn-danger" type="submit" name="action" value="delete">Delete</button>
+                        <button class="btn btn-danger" type="submit" name="action" value="delete" formnovalidate>Delete</button>
                     </form>
                 </div>
             </div>

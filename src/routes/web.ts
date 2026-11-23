@@ -13,7 +13,7 @@ import { webSessions, requireWebUser } from "./guards";
 import { features } from "../config/features";
 import { env } from "../config/env";
 import { rateLimit } from "../lib/rate-limit";
-import { webDb, expireFinishedAttacks } from "../lib/db/web";
+import { webDb, webSqlite, expireFinishedAttacks } from "../lib/db/web";
 import { webLoginSchema, webRegisterSchema } from "../lib/validations/web-auth";
 import { render } from "../core/views";
 import { randomInt } from "node:crypto";
@@ -32,6 +32,7 @@ async function currentUser(ctx: Context) {
     const session = await requireWebUser(ctx);
     const user = await webDb.users.findUnique({ where: { ID: session.userId! } });
     if (!user) ctx.throw(404, "User not found");
+    if (Number(user.status) === 1) ctx.throw(403, "Your account has been banned.");
     return user;
 }
 
@@ -253,7 +254,7 @@ export function registerWebRoutes(app: Application): void {
                 return;
             }
             const now = Math.floor(Date.now() / 1000);
-            if (user.expire && user.expire < now) {
+            if (Number(user.expire) <= now) {
                 fail(403, "Your membership has expired.");
                 return;
             }
@@ -268,7 +269,11 @@ export function registerWebRoutes(app: Application): void {
             try {
                 const result = await launchAttack({
                     username: user.username,
-                    plan: { mbt: Number(plan.mbt), concurrents: Number(plan.concurrents) },
+                    plan: {
+                        mbt: Number(plan.mbt),
+                        concurrents: Number(plan.concurrents),
+                        vip: Number(plan.vip) === 1,
+                    },
                     input: {
                         host: form.host,
                         port: form.port || "80",
@@ -408,17 +413,27 @@ export function registerWebRoutes(app: Application): void {
                         );
                     }
                     const now = Math.floor(Date.now() / 1000);
-                    await webDb.giftcards.update({
-                        where: { ID: card.ID },
-                        data: { claimedby: user.ID, dateClaimed: now },
-                    });
-                    await webDb.users.update({
-                        where: { ID: user.ID },
-                        data: {
-                            membership: plan.ID,
-                            expire: now + plan.length * (plan.unit === "hours" ? 3600 : 86400),
-                        },
-                    });
+                    const term =
+                        Math.max(Number(plan.length), 1) * (plan.unit === "hours" ? 3600 : 86400);
+                    webSqlite.transaction(() => {
+                        const claim = webSqlite
+                            .prepare(
+                                "update giftcards set claimedby = ?, dateClaimed = ? where ID = ? and claimedby = 0"
+                            )
+                            .run(user.ID, now, card.ID);
+                        if (claim.changes !== 1) {
+                            throw new HttpError(400, "Invalid or already claimed gift card code.");
+                        }
+                        const fresh = webSqlite
+                            .prepare("select expire from users where ID = ?")
+                            .get(user.ID) as { expire?: number } | undefined;
+                        if (!fresh) throw new HttpError(404, "User not found");
+                        // Extend the remaining paid time instead of replacing it.
+                        const base = Math.max(now, Number(fresh.expire) || 0);
+                        webSqlite
+                            .prepare("update users set membership = ?, expire = ? where ID = ?")
+                            .run(plan.ID, base + term, user.ID);
+                    })();
                     return plan.name;
                 });
                 if (acceptJson) {

@@ -37,24 +37,16 @@ function initAdminPanel(): void {
     }
 
     function selectedIds(): string {
-        const picked: number[] = [];
+        const picked: string[] = [];
         Array.prototype.forEach.call(
             document.querySelectorAll<HTMLInputElement>(".bulk-row"),
-            function (box: HTMLInputElement, i: number) {
-                if (box.checked) picked.push(i);
+            function (box: HTMLInputElement) {
+                if (!box.checked) return;
+                const id = box.getAttribute("data-id") || "";
+                if (id) picked.push(id);
             }
         );
-        return picked
-            .map(function (i) {
-                const row = table!.rows[i];
-                // After the checkbox column insert: 0=box, 1=the id cell.
-                const cell = row && row.cells[1];
-                return cell ? (cell.textContent || "").trim() : "";
-            })
-            .filter(function (idText) {
-                return idText !== "";
-            })
-            .join(",");
+        return picked.join(",");
     }
 
     // ---- single-row actions ----------------------------------------------
@@ -100,10 +92,9 @@ function initAdminPanel(): void {
         const box = document.createElement("input");
         box.type = "checkbox";
         box.className = "bulk-row";
-        box.setAttribute(
-            "aria-label",
-            "Select row " + ((row.cells[0].textContent || "").trim() || "entry")
-        );
+        const rowId = (row.cells[0].textContent || "").trim();
+        box.setAttribute("data-id", rowId);
+        box.setAttribute("aria-label", "Select row " + (rowId || "entry"));
         td.appendChild(box);
         row.insertBefore(td, row.cells[0]);
     });

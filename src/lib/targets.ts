@@ -1,37 +1,69 @@
-import { isIP } from "node:net";
+import { BlockList, isIP } from "node:net";
 import { lookup } from "node:dns/promises";
 import { HttpError } from "../core/09-errors";
 
 const HOSTNAME = /^(?=.{1,253}$)(?!-)[a-z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-z0-9-]{1,63}(?<!-))*$/i;
+const IPV4 = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 
-function ipv4Private(ip: string): boolean {
-    const parts = ip.split(".").map(Number);
-    const [a, b] = parts;
-    if (a === 10 || a === 127 || a === 0) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a === 192 && b === 0) return true;
-    if (a === 198 && (b === 18 || b === 19)) return true;
-    if (a >= 224) return true;
-    return false;
+// Everything that must never be reachable through the attack API: loopback,
+// RFC1918, CGNAT, link-local, documentation, multicast/reserved, and the IPv6
+// equivalents including mapped/NAT64/6to4 forms.
+const blocked = new BlockList();
+for (const [base, prefix] of [
+    ["0.0.0.0", 8],
+    ["10.0.0.0", 8],
+    ["100.64.0.0", 10],
+    ["127.0.0.0", 8],
+    ["169.254.0.0", 16],
+    ["172.16.0.0", 12],
+    ["192.0.0.0", 24],
+    ["192.0.2.0", 24],
+    ["192.168.0.0", 16],
+    ["198.18.0.0", 15],
+    ["198.51.100.0", 24],
+    ["203.0.113.0", 24],
+    ["224.0.0.0", 4],
+    ["240.0.0.0", 4],
+] as Array<[string, number]>) {
+    blocked.addSubnet(base, prefix, "ipv4");
 }
-
-function ipv6Private(ip: string): boolean {
-    const value = ip.toLowerCase();
-    if (value === "::" || value === "::1") return true;
-    if (value.startsWith("fe80") || value.startsWith("fc") || value.startsWith("fd")) return true;
-    if (value.startsWith("ff")) return true;
-    if (value.startsWith("::ffff:")) return ipv4Private(value.slice(7));
-    return false;
+for (const [base, prefix] of [
+    ["::", 128],
+    ["::1", 128],
+    ["64:ff9b::", 96],
+    ["2001:db8::", 32],
+    ["2002::", 16],
+    ["fc00::", 7],
+    ["fe80::", 10],
+    ["ff00::", 8],
+] as Array<[string, number]>) {
+    blocked.addSubnet(base, prefix, "ipv6");
 }
 
 function isPrivateAddress(ip: string): boolean {
+    const value = ip.toLowerCase();
+    if (value === "::" || value === "::1") return true;
+    // IPv4-mapped/compatible forms must be judged by their IPv4 part. Adding
+    // ::ffff:0:0/96 to the block list would (incorrectly) block every IPv4.
+    const mapped = /^::(?:ffff:)?(.+)$/.exec(value);
+    if (mapped) {
+        const tail = mapped[1];
+        if (tail.includes(".")) return isPrivateAddress(tail);
+        const hex = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(tail);
+        if (hex) {
+            const high = parseInt(hex[1], 16);
+            const low = parseInt(hex[2], 16);
+            const v4 = [high >> 8, high & 255, low >> 8, low & 255].join(".");
+            return isPrivateAddress(v4);
+        }
+    }
     const version = isIP(ip);
-    if (version === 4) return ipv4Private(ip);
-    if (version === 6) return ipv6Private(ip);
-    return false;
+    if (!version) return true;
+    try {
+        return blocked.check(ip, version === 4 ? "ipv4" : "ipv6");
+    } catch {
+        return true; // unparsable address is never a valid public target
+    }
 }
 
 /**
@@ -42,7 +74,12 @@ function isPrivateAddress(ip: string): boolean {
 export async function assertPublicTarget(raw: string): Promise<string> {
     const host = raw.trim().toLowerCase().replace(/\.$/, "");
     if (!host || host.length > 253) throw new HttpError(400, "Invalid target host.");
-    if (host.includes("/") || host.includes("@") || /\s/.test(host)) {
+    if (host.includes("/") || host.includes("@") || host.includes("%") || /\s/.test(host)) {
+        throw new HttpError(400, "Invalid target host.");
+    }
+    // Reject octal/hex-looking IPv4 (0177.0.0.1, 0x7f.0.0.1) before DNS can
+    // reinterpret it as loopback.
+    if (/^[0-9a-fx.]+$/i.test(host) && !IPV4.test(host) && !isIP(host)) {
         throw new HttpError(400, "Invalid target host.");
     }
     if (

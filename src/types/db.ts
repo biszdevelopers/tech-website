@@ -1,4 +1,4 @@
-// Shared Prisma row interfaces. These mirror the SQLite schemas under prisma/.
+// Shared database row interfaces. These mirror the SQLite schemas under src/lib/db/.
 // Keep them in sync if the schema changes.
 
 // ─── main.db ──────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export interface LoginRow {
 }
 
 // ─── web.db ───────────────────────────────────────────────────────────────────
-// These mirror schema-web.prisma exactly. Some fields use unconventional casing
+// These mirror schema-web.ts exactly. Some fields use unconventional casing
 // or names — that's how the original schema was written.
 
 export interface UserRow {

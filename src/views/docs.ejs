@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Docs | BIBS-C Tech Tools' }) %>
+﻿<%- include('partials/head', { title: 'Docs | BIBS-C Tech Tools' }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead"><h1 id="docs-heading">Project Docs</h1></div>
@@ -12,7 +12,7 @@
             <code>&lt;%= variable %&gt;</code> holes) that compile once at boot and auto-escape
             every interpolated value, so XSS-safe output is the default. Data lives in two SQLite
             files accessed through Drizzle ORM with a Prisma-style query surface. Client scripts are
-            TypeScript built twice: ES5 plus polyfills for IE11, and an ES2015 bundle for modern
+            TypeScript built twice: ES5 plus polyfills for IE11, and an ES5 bundle for modern
             browsers.
         </p>
 
@@ -25,7 +25,7 @@
             <li><b>src/styles/</b> - CSS sources; design tokens and light/dark themes</li>
             <li><b>src/lib/db/</b> - Drizzle schemas + query clients (main.db = tech tools, web.db = SaaS)</li>
             <li><b>src/server/queries/</b> - data access used by routes</li>
-            <li><b>src/client/</b> - browser scripts, compiled to ES5 and ES2015 at build</li>
+            <li><b>src/client/</b> - browser scripts, both bundles compiled to ES5 at build</li>
         </ul>
 
         <h2>Commands</h2>

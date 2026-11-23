@@ -1,4 +1,4 @@
-# Tech-Website (v4)
+﻿# Tech-Website (v4)
 
 Server-rendered Node 24 app: plain `node:http` core, EJS views, SQLite via
 Drizzle, and a small TypeScript client. No React, no hydration.
@@ -8,10 +8,10 @@ Drizzle, and a small TypeScript client. No React, no hydration.
 - Node 24 + TypeScript, CommonJS server build, ESM source for tooling.
 - pnpm (single lockfile, `pnpm-lock.yaml`).
 - EJS compiled at boot; pages work without JavaScript.
-- Drizzle ORM + better-sqlite3 (WAL), two databases: `main.db` (tech tools) and
-  `web.db` (IPstress SaaS).
-- Dual client build: ES5 + polyfills for IE11 via `nomodule` conditionals, and
-  an ES2015 bundle for modern browsers via `<script type="module">`.
+- Drizzle ORM + better-sqlite3 (WAL), two databases under `data/`: `main.db`
+  (tech tools) and `web.db` (IPstress SaaS).
+- Dual client build: both bundles are ES5 (IE11 polyfills via `nomodule`; modern
+  browsers load the same code with module semantics).
 - Build: `tsc` (server and legacy client) + esbuild (modern/minify) +
   PostCSS/autoprefixer + precompressed `.br`/`.gz` siblings.
 
@@ -47,8 +47,10 @@ them. Set `TRUST_PROXY=true` only when a trusted reverse proxy supplies
 secrets stored in SQLite. `FEATURE_*` flags disable payments, the wheel,
 affiliate, gift cards, reCAPTCHA or the IPstress hub without a code change.
 
-Seed credentials (`admin` / `admin123`) exist only after `pnpm run db:seed`.
-Use `pnpm run setup` with a 10+ character password for any real deployment.
+Demo seed data (`pnpm run db:seed`) never overwrites an existing operator
+account or an edited plan. Seed credentials (`admin` / `admin123`) exist only
+on a database that had no operator yet. Use `pnpm run setup` with a 10+
+character password for any real deployment.
 Re-running `pnpm run setup` rotates the existing operator account: the password
 is replaced and a new `ADMIN_USERNAME` renames that account in both databases
 (no duplicate admin rows, existing sessions keep their user id).
@@ -99,7 +101,14 @@ math.
 
 ## Deploy
 
-`deploy.sh` installs from the lockfile, syncs the schema, builds and restarts
-the systemd unit. The app works standalone with `pnpm start` (compression,
-caching and security headers are in-process). Nginx is optional; if used, set
-`TRUST_PROXY=true` and do not double-compress.
+`deploy.sh` asserts the branch, stops the service, backs up both databases with
+SQLite's online backup API, syncs the schema, builds with the previous `dist/`
+kept for rollback, fixes ownership, restarts, and polls `/api/health`. A failed
+health check restores the previous build. Fresh databases require
+`ADMIN_USERNAME`/`ADMIN_PASSWORD` (in `.env` or the environment) so a deploy
+never ships the demo credentials.
+
+The app works standalone with `pnpm start` (production mode, in-process
+compression, caching and security headers). Nginx is optional; if used, set
+`TRUST_PROXY=true`, forward only `X-Forwarded-For $remote_addr`, and do not
+double-compress. Backups live under `backups/<timestamp>/` on the server.

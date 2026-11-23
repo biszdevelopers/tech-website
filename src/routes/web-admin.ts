@@ -535,6 +535,9 @@ export function registerWebAdminRoutes(app: Application): void {
             const ticket = await webDb.tickets.findUnique({ where: { id } });
             if (!ticket) throw new HttpError(404, "Ticket not found.");
             if (action === "reply") {
+                if (ticket.status === "Closed") {
+                    throw new HttpError(400, "Reopen the ticket before replying.");
+                }
                 const content = str(body, "content").trim();
                 if (!content) throw new HttpError(400, "Reply content is required.");
                 await webDb.messages.create({

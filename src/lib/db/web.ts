@@ -2,14 +2,14 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { isAbsolute, resolve } from "node:path";
 import * as schema from "./schema-web";
-import { createModel } from "./prisma-shim";
+import { createModel } from "./model-shim";
 
 function absoluteDbPath(envKey: string, fallback: string): string {
     const raw = (process.env[envKey] ?? fallback).replace(/^file:/, "");
     return isAbsolute(raw) ? raw : resolve(process.cwd(), raw);
 }
 
-const sqlite = new Database(absoluteDbPath("DATABASE_URL_WEB", "prisma/web.db"));
+const sqlite = new Database(absoluteDbPath("DATABASE_URL_WEB", "data/web.db"));
 sqlite.pragma("journal_mode = WAL");
 const db = drizzle(sqlite, { schema });
 
@@ -43,6 +43,7 @@ export const webDb = {
 };
 
 export type WebDb = typeof webDb;
+export { sqlite as webSqlite };
 
 /**
  * Mark attacks whose duration has elapsed as stopped. Nothing else advances the

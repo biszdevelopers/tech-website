@@ -1,9 +1,9 @@
-try {
+﻿try {
     process.loadEnvFile();
 } catch {
     /* real environment wins */
 }
-import { mainDb as prisma } from "../src/lib/db/main";
+import { mainDb } from "../src/lib/db/main";
 import * as bcrypt from "bcryptjs";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -140,15 +140,17 @@ function splitSection(block: string): ParsedTool[] {
 async function main(): Promise<void> {
     console.log("Seeding main database...");
 
-    const hashedPW = await bcrypt.hash("admin123", 12);
-    await prisma.login.upsert({
-        where: { User: "admin" },
-        update: { PW: hashedPW },
-        create: { User: "admin", PW: hashedPW },
-    });
-    console.log("  ✓ Admin login (admin / admin123)");
+    // Demo login only. Never overwrite an existing operator password.
+    const existingLogin = await mainDb.login.findFirst();
+    if (!existingLogin) {
+        const hashedPW = await bcrypt.hash("admin123", 12);
+        await mainDb.login.create({ data: { User: "admin", PW: hashedPW } });
+        console.log("  鉁?demo admin login (admin / admin123)");
+    } else {
+        console.log("  = operator login exists, left untouched");
+    }
 
-    // Per-tool upsert. We assign a stable, sequential id (1, 2, 3, …) so the
+    // Per-tool upsert. We assign a stable, sequential id (1, 2, 3, 鈥? so the
     // /testuploads/<id>.png filenames line up with the rows.
     const tools = loadTools();
     console.log(`  | Parsed ${tools.length} tools from tools.txt`);
@@ -156,7 +158,7 @@ async function main(): Promise<void> {
     // First, wipe any existing domain rows so we don't accumulate stale tags
     // when a tool is removed from the workbook. Submission rows will be
     // upserted in place.
-    await prisma.domains.deleteMany({});
+    await mainDb.domains.deleteMany({});
 
     let i = 0;
     for (const tool of tools) {
@@ -174,12 +176,12 @@ async function main(): Promise<void> {
             username: "seed",
             contact: "seed@bibs-c.local",
         };
-        await prisma.submission.upsert({
+        await mainDb.submission.upsert({
             where: { id: i },
             update: submissionData,
             create: submissionData,
         });
-        await prisma.domains.create({
+        await mainDb.domains.create({
             data: {
                 id: i,
                 ...tool.domains,
@@ -187,7 +189,7 @@ async function main(): Promise<void> {
         });
     }
 
-    console.log(`  ✓ ${tools.length} submissions + domains populated`);
+    console.log(`  鉁?${tools.length} submissions + domains populated`);
     console.log("Main database seeded successfully!");
 }
 
@@ -197,5 +199,5 @@ main()
         process.exit(1);
     })
     .finally(async () => {
-        await prisma.$disconnect();
+        await mainDb.$disconnect();
     });

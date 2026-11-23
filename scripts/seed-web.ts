@@ -1,9 +1,9 @@
-try {
+﻿try {
     process.loadEnvFile();
 } catch {
     /* real environment wins */
 }
-import { webDb as prisma } from "../src/lib/db/web";
+import { webDb } from "../src/lib/db/web";
 import bcrypt from "bcryptjs";
 
 function hashPassword(password: string): string {
@@ -14,7 +14,7 @@ async function main() {
     console.log("Seeding web database...");
 
     // Upsert settings (sitename is the @id field)
-    await prisma.settings.upsert({
+    await webDb.settings.upsert({
         where: { sitename: "IPstress" },
         update: {},
         create: {
@@ -49,7 +49,7 @@ async function main() {
             stripeSecretKey: "",
         },
     });
-    console.log("  ✓ Default settings created");
+    console.log("  鉁?Default settings created");
 
     // Insert demo plans
     const plans = [
@@ -100,44 +100,40 @@ async function main() {
     ];
 
     for (const plan of plans) {
-        await prisma.plans.upsert({
-            where: { ID: plan.ID },
-            update: plan,
-            create: plan,
-        });
+        const existing = await webDb.plans.findUnique({ where: { ID: plan.ID } });
+        if (!existing) await webDb.plans.create({ data: plan });
     }
-    console.log("  ✓ 4 demo plans created");
+    console.log("  鉁?4 demo plans present");
 
-    // Insert admin user
-    const hashedPassword = hashPassword("admin123");
-    await prisma.users.upsert({
-        where: { ID: 1 },
-        update: {
-            username: "admin",
-            password: hashedPassword,
-            rank: 2,
-            status: 0,
-        },
-        create: {
-            ID: 1,
-            username: "admin",
-            password: hashedPassword,
-            rank: 2,
-            membership: 0,
-            expire: 9999999999,
-            status: 0,
-            referral: "",
-            referralbalance: 0,
-            testattack: 1,
-            activity: 0,
-            twoauth: 0,
-            referedBy: 0,
-        },
-    });
-    console.log("  ✓ Admin user created (admin / admin123)");
+    // Insert the demo admin only when no operator account exists. Re-running a
+    // seed must never reset a live password.
+    const hasAdmin = await webDb.users.findFirst({ where: { rank: { gte: 1 } } });
+    if (!hasAdmin) {
+        const hashedPassword = hashPassword("admin123");
+        await webDb.users.create({
+            data: {
+                ID: 1,
+                username: "admin",
+                password: hashedPassword,
+                rank: 2,
+                membership: 0,
+                expire: 9999999999,
+                status: 0,
+                referral: "",
+                referralbalance: 0,
+                testattack: 1,
+                activity: 0,
+                twoauth: 0,
+                referedBy: 0,
+            },
+        });
+        console.log("  鉁?demo admin created (admin / admin123)");
+    } else {
+        console.log("  = operator account exists, left untouched");
+    }
 
     // Insert smtp settings
-    await prisma.smtpsettings.upsert({
+    await webDb.smtpsettings.upsert({
         where: { host: "smtp.example.com" },
         update: {},
         create: {
@@ -148,7 +144,7 @@ async function main() {
             port: 587,
         },
     });
-    console.log("  ✓ SMTP settings created");
+    console.log("  鉁?SMTP settings created");
 
     // Insert sample FAQ entries
     const faqs = [
@@ -180,13 +176,13 @@ async function main() {
     ];
 
     for (const faq of faqs) {
-        await prisma.faq.upsert({
+        await webDb.faq.upsert({
             where: { id: faq.id },
             update: faq,
             create: faq,
         });
     }
-    console.log("  ✓ 5 FAQ entries created");
+    console.log("  鉁?5 FAQ entries created");
 
     console.log("Web database seeded successfully!");
 }
@@ -197,5 +193,5 @@ main()
         process.exit(1);
     })
     .finally(async () => {
-        await prisma.$disconnect();
+        await webDb.$disconnect();
     });

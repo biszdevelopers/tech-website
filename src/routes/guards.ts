@@ -26,7 +26,7 @@ export const mainSessions = new SessionManager(
     "main-session",
     env.sessionSecretMain,
     env.sessionTtlSeconds,
-    env.isProd,
+    env.isHttps,
     "Strict"
 );
 
@@ -34,7 +34,7 @@ export const webSessions = new SessionManager(
     "web-session",
     env.sessionSecretWeb,
     env.sessionTtlSeconds,
-    env.isProd
+    env.isHttps
 );
 
 /** Main-site admin session (public directory back office).
@@ -53,6 +53,18 @@ export async function requireMainAdmin(ctx: Context): Promise<void> {
 export async function requireWebUser(ctx: Context): Promise<SessionData> {
     const session = webSessions.load(ctx);
     if (!session?.userId) ctx.throw(401, "Not authenticated.");
+    const user = await webDb.users.findUnique({
+        where: { ID: session.userId },
+        select: { status: true },
+    });
+    if (!user) {
+        webSessions.destroy(ctx);
+        ctx.throw(401, "Not authenticated.");
+    }
+    if (Number(user.status) === 1) {
+        webSessions.destroy(ctx);
+        ctx.throw(403, "Your account has been banned.");
+    }
     return session;
 }
 
@@ -63,9 +75,11 @@ export async function requireWebAdmin(ctx: Context): Promise<void> {
     if (!session?.userId) ctx.throw(404, "Page not found.");
     const user = await webDb.users.findUnique({
         where: { ID: session.userId },
-        select: { rank: true },
+        select: { rank: true, status: true },
     });
-    if (!user || Number(user.rank) < 1) ctx.throw(404, "Page not found.");
+    if (!user || Number(user.rank) < 1 || Number(user.status) === 1) {
+        ctx.throw(404, "Page not found.");
+    }
 }
 
 /** Map consumed by Application - names used in route options resolve here. */

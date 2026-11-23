@@ -45,8 +45,19 @@ async function main(): Promise<void> {
         await mainDb.login.create({ data: { User: username, PW: hash } });
     }
 
+    const namedAdmin = await webDb.users.findFirst({
+        where: { username, rank: { gte: 1 } },
+    });
+    const namedUser = namedAdmin ? null : await webDb.users.findFirst({ where: { username } });
+    if (namedUser && process.env.ADMIN_FORCE_PROMOTE !== "1") {
+        console.error(
+            `"${username}" belongs to a normal user. Set ADMIN_FORCE_PROMOTE=1 to promote it, or choose another username.`
+        );
+        process.exit(1);
+    }
     const webUser =
-        (await webDb.users.findFirst({ where: { username } })) ??
+        namedAdmin ??
+        namedUser ??
         (await webDb.users.findFirst({
             where: { rank: { gte: 1 } },
             orderBy: { ID: "asc" },

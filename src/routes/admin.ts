@@ -130,22 +130,35 @@ export function registerAdminRoutes(app: Application): void {
             // Spreadsheet-friendly dump of every submission (accepted flag
             // included). Quoting per RFC 4180 so commas/quotes survive Excel.
             const subs = await getAllSubmissions();
-            const head = "id,name,link,display,tl1,tl2,tl3,tl4,accepted";
-            const rows = subs.map((s) =>
-                [
-                    s.id,
-                    s.techname,
-                    s.link,
-                    s.displaytext,
-                    s.tl1_desc,
-                    s.tl2_desc,
-                    s.tl3_desc,
-                    s.tl4_desc,
-                    s.accepted ? 1 : 0,
-                ]
-                    .map(csvCell)
-                    .join(",")
-            );
+            const domainCols = DOMAIN_FIELDS.map((f) => f.toLowerCase());
+            const head = ["id", "name", "link", "display", "tl1", "tl2", "tl3", "tl4", "accepted"]
+                .concat(domainCols)
+                .join(",");
+            const rows: string[] = [];
+            for (const s of subs) {
+                const domain = await getDomainById(s.id);
+                const flags = domainCols.map((field) =>
+                    domain
+                        ? Number(Boolean((domain as unknown as Record<string, number>)[field]))
+                        : 0
+                );
+                rows.push(
+                    [
+                        s.id,
+                        s.techname,
+                        s.link,
+                        s.displaytext,
+                        s.tl1_desc,
+                        s.tl2_desc,
+                        s.tl3_desc,
+                        s.tl4_desc,
+                        s.accepted ? 1 : 0,
+                        ...flags,
+                    ]
+                        .map(csvCell)
+                        .join(",")
+                );
+            }
             ctx.res.writeHead(200, {
                 "content-type": "text/csv; charset=utf-8",
                 "content-disposition": 'attachment; filename="submissions.csv"',
@@ -183,7 +196,6 @@ export function registerAdminRoutes(app: Application): void {
         "/api/admin/create",
         async (ctx) => {
             const { fields, file } = await readMultipart(ctx);
-            if (fields._csrf !== ctx.csrfToken) throw new HttpError(403, "Invalid CSRF token");
             const techname = String(fields.techname ?? "").trim();
             const link = String(fields.link ?? "").trim();
             const displaytext = String(fields.displaytext ?? "").trim();
@@ -255,11 +267,16 @@ export function registerAdminRoutes(app: Application): void {
                         tl4_desc: cell(row, index("tl4")),
                     };
                     if (!data.techname || !data.displaytext) continue;
-                    let id = existingId;
-                    if (id > 0 && (await getSubmissionById(id))) {
+
+                    const existed = existingId > 0 && Boolean(await getSubmissionById(existingId));
+                    const id = existed ? existingId : await getNextSubmissionId();
+                    if (existed) {
                         await updateSubmission(id, data);
+                        if (index("accepted") >= 0) {
+                            if (cell(row, index("accepted")) === "1") await acceptSubmission(id);
+                            else await rejectSubmission(id);
+                        }
                     } else {
-                        id = await getNextSubmissionId();
                         await createSubmission({
                             id,
                             ...data,
@@ -268,11 +285,26 @@ export function registerAdminRoutes(app: Application): void {
                             accepted: cell(row, index("accepted")) === "1",
                         });
                     }
+
+                    // Only touch strand columns that are actually present, and
+                    // merge onto the existing row instead of wiping it.
+                    const current = await getDomainById(id);
                     const flags: Record<string, boolean> = {};
                     for (const field of DOMAIN_FIELDS) {
-                        flags[field] = cell(row, index(field.toLowerCase())) === "1";
+                        const col = index(field.toLowerCase());
+                        if (col === -1) {
+                            if (current) {
+                                flags[field] = Boolean(
+                                    (current as unknown as Record<string, number>)[
+                                        field.toLowerCase()
+                                    ]
+                                );
+                            }
+                            continue;
+                        }
+                        flags[field] = cell(row, col) === "1";
                     }
-                    if (existingId > 0) {
+                    if (current) {
                         await updateDomain(id, flags);
                     } else {
                         await createDomain({ id, ...flags } as Parameters<typeof createDomain>[0]);
@@ -293,7 +325,6 @@ export function registerAdminRoutes(app: Application): void {
         "/api/admin/screenshot",
         async (ctx) => {
             const { fields, file } = await readMultipart(ctx);
-            if (fields._csrf !== ctx.csrfToken) throw new HttpError(403, "Invalid CSRF token");
             const id = Number(fields.id);
             if (!Number.isFinite(id) || id <= 0) throw new HttpError(400, "Missing id.");
             if (!file || file.data.length === 0) throw new HttpError(400, "Choose an image.");

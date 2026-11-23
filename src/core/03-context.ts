@@ -30,7 +30,7 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { brotliCompressSync, constants as zlibConstants, gzipSync } from "node:zlib";
 import type { ZodType } from "zod";
 import { renderToString, type Html } from "./04-html";
@@ -55,11 +55,13 @@ export class Context {
     public readonly params: Record<string, string> = {};
 
     readonly url: URL;
+    /** True when the raw request target could not be parsed as a URL. */
+    readonly invalidTarget: boolean;
     /** Per-request CSRF token, filled by the security middleware. */
     csrfToken = "";
     private readonly cookieBag = new Map<string, string>();
     private finished = false;
-    private cachedBody: unknown;
+    private parsedBody: unknown;
 
     constructor(
         public readonly raw: IncomingMessage,
@@ -67,7 +69,19 @@ export class Context {
     ) {
         // Canonical origin: the Host header is attacker-controlled, so it is
         // never used to build absolute URLs or CSRF checks.
-        this.url = new URL(this.raw.url ?? "/", env.siteOrigin);
+        let url: URL;
+        let invalidTarget = false;
+        try {
+            url = new URL(this.raw.url ?? "/", env.siteOrigin);
+        } catch {
+            // A target like "//" is scheme-relative and throws. Treat it as a
+            // missing page instead of letting the constructor reject outside
+            // the error boundary and crash the process.
+            url = new URL("/", env.siteOrigin);
+            invalidTarget = true;
+        }
+        this.url = url;
+        this.invalidTarget = invalidTarget;
         const rawCookie = this.raw.headers.cookie;
         if (rawCookie) {
             for (const pair of rawCookie.split(";")) {
@@ -98,9 +112,12 @@ export class Context {
      */
     get ip(): string {
         if (env.trustProxy) {
+            // nginx appends the real peer to the end. The leftmost entries are
+            // client-supplied and therefore spoofable; trust only the last hop.
             const forwarded = String(this.raw.headers["x-forwarded-for"] ?? "")
-                .split(",")[0]
-                .trim();
+                .split(",")
+                .pop()
+                ?.trim();
             if (forwarded) return forwarded;
         }
         return this.raw.socket.remoteAddress || "unknown";
@@ -114,6 +131,18 @@ export class Context {
             this.cookie("__Host-main-session") ||
             this.cookie("__Host-web-session")
         );
+    }
+
+    /**
+     * Constant-time double-submit token check. The expected token is generated
+     * by the CSRF middleware on this same request, so an empty token can never
+     * match an empty field.
+     */
+    verifyCsrf(provided: string): boolean {
+        if (!this.csrfToken || provided.length !== this.csrfToken.length) return false;
+        const left = Buffer.from(provided);
+        const right = Buffer.from(this.csrfToken);
+        return timingSafeEqual(left, right);
     }
 
     cookie(name: string): string | undefined {
@@ -141,36 +170,38 @@ export class Context {
 
     /**
      * Read and validate the request body ONCE (results are memoized).
-     * Without a schema you get the raw object; WITH a zod schema you get typed,
-     * validated data or an automatic 400 - callers never hand-write validation ifs.
+     * The raw parse is cached separately from validation so a schema is
+     * ALWAYS applied, even when middleware has already read the body.
      */
     async body<T>(schema?: ZodType<T>): Promise<T> {
-        if (this.cachedBody !== undefined) return this.cachedBody as T;
-        const chunks: Buffer[] = [];
-        let size = 0;
-        for await (const chunk of this.raw) {
-            size += (chunk as Buffer).length;
-            if (size > MAX_BODY_BYTES) throw new HttpError(413, "Request body too large.");
-            chunks.push(chunk as Buffer);
-        }
-        const rawText = Buffer.concat(chunks).toString("utf8");
-        const contentType = String(this.raw.headers["content-type"] ?? "");
-        let parsed: unknown;
-        if (contentType.includes("application/json")) {
-            try {
-                parsed = JSON.parse(rawText || "{}");
-            } catch {
-                throw new HttpError(400, "Malformed JSON body.");
+        let parsed = this.parsedBody;
+        if (parsed === undefined) {
+            const chunks: Buffer[] = [];
+            let size = 0;
+            for await (const chunk of this.raw) {
+                size += (chunk as Buffer).length;
+                if (size > MAX_BODY_BYTES) throw new HttpError(413, "Request body too large.");
+                chunks.push(chunk as Buffer);
             }
-        } else {
-            parsed = Object.fromEntries(new URLSearchParams(rawText));
+            const rawText = Buffer.concat(chunks).toString("utf8");
+            const contentType = String(this.raw.headers["content-type"] ?? "");
+            if (contentType.includes("application/json")) {
+                try {
+                    parsed = JSON.parse(rawText || "{}");
+                } catch {
+                    throw new HttpError(400, "Malformed JSON body.");
+                }
+            } else {
+                parsed = Object.fromEntries(new URLSearchParams(rawText));
+            }
+            this.parsedBody = parsed;
         }
-        if (!schema) return (this.cachedBody = parsed) as T;
+        if (!schema) return parsed as T;
         const result = schema.safeParse(parsed);
         if (!result.success) {
             throw new HttpError(400, result.error.issues[0]?.message ?? "Validation failed.");
         }
-        return (this.cachedBody = result.data) as T;
+        return result.data;
     }
 
     /** Convenience for classic HTML <form> posts (urlencoded fields as strings). */
@@ -213,6 +244,11 @@ export class Context {
     /** Plain-text reply (tiny utilities, health checks). */
     text(body: string, status = 200): void {
         this.send(body, status, "text/plain; charset=utf-8");
+    }
+
+    /** XML reply (sitemap). */
+    xml(body: string, status = 200): void {
+        this.send(body, status, "application/xml; charset=utf-8");
     }
 
     /**
@@ -273,6 +309,11 @@ export class Context {
         this.finished = true;
         this.res.statusCode = status;
         this.res.setHeader("Content-Type", contentType);
+        // HTML embeds per-request CSRF tokens and user data; never let a proxy
+        // or CDN store it.
+        if (contentType.startsWith("text/html")) {
+            this.res.setHeader("Cache-Control", "no-store");
+        }
 
         const bytes = Buffer.from(payload);
         const accept = String(this.raw.headers["accept-encoding"] ?? "");
@@ -308,6 +349,7 @@ export class Context {
         }
         return out.replace(/<form\b[^>]*>/gi, (tag) => {
             if (tag.includes('name="_csrf"')) return tag;
+            if (/\bmethod\s*=\s*["']?get\b/i.test(tag)) return tag;
             return `${tag}<input type="hidden" name="_csrf" value="${token}"/>`;
         });
     }
