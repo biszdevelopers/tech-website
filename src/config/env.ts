@@ -85,8 +85,8 @@ function parseSiteOrigin(): { value: string; https: boolean } {
         throw new Error(`SITE_ORIGIN must use http or https, got "${raw}".`);
     }
     if (isProd && url.protocol !== "https:") {
-        throw new Error(
-            "SITE_ORIGIN must be https in production. Cookie security and Stripe redirects depend on it."
+        console.warn(
+            "WARNING: SITE_ORIGIN is HTTP in production. Cookies will not be Secure and Stripe checkout should not be used."
         );
     }
     if (url.pathname !== "/" || url.search || url.hash) {

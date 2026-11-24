@@ -115,7 +115,7 @@ health check restores the previous build. Fresh databases require
 never ships the demo credentials.
 
 The app works standalone with `pnpm start` (production mode, in-process
-compression, caching and security headers). `pnpm start` expects an HTTPS
-`SITE_ORIGIN` in production; use `pnpm run dev` for local HTTP work. Nginx is optional; if used, set
+compression, caching and security headers). `pnpm start` works with either HTTP or HTTPS
+`SITE_ORIGIN`. Use HTTPS for any deployment that handles real accounts or payments. Nginx is optional; if used, set
 `TRUST_PROXY=true`, forward only `X-Forwarded-For $remote_addr`, and do not
 double-compress. Backups live under `backups/<timestamp>/` on the server.

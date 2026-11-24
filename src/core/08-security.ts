@@ -36,7 +36,7 @@ export function applySecurityHeaders(ctx: Context): void {
     h("Cross-Origin-Opener-Policy", "same-origin");
     h("Cross-Origin-Resource-Policy", "same-origin");
     h("X-Crafted-By", "richie-rich90454");
-    if (env.isProd) {
+    if (env.isProd && env.isHttps) {
         h("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
     }
     h(
@@ -54,7 +54,7 @@ export function applySecurityHeaders(ctx: Context): void {
             "form-action 'self'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
-            env.isProd ? "upgrade-insecure-requests" : "",
+            env.isHttps ? "upgrade-insecure-requests" : "",
         ]
             .filter(Boolean)
             .join("; ")
