@@ -4,19 +4,40 @@
  * Run: npm run check:views
  */
 
-import { loadViews, render } from "../src/core/views";
+import { loadViews, render, setViewHelpers } from "../src/core/views";
+import { tlList } from "../src/lib/tl-config";
 
 const SAMPLES: Record<string, Record<string, unknown>> = {
     home: {
         cards: [
-            { id: "tl1", href: "/tl1", title: "TL1: Knowing", strands: ["Relationships"] },
-            { id: "tl2", href: "/tl2", title: "TL2: Strategies", strands: ["Understanding"] },
+            {
+                id: "tl1",
+                href: "/tl1",
+                title: "TL1: Knowing",
+                shortLabel: "Knowing",
+                strands: ["Relationships"],
+                items: ["Relationships"],
+            },
+            {
+                id: "tl2",
+                href: "/tl2",
+                title: "TL2: Strategies",
+                shortLabel: "Strategies",
+                strands: ["Understanding"],
+                items: ["Understanding"],
+            },
         ],
     },
     tl: {
         tl: "tl1",
         config: {
+            id: "tl1",
             title: "Knowing (TL1)",
+            shortLabel: "Knowing",
+            navLabel: "Knowing (TL1)",
+            description: "Know students.",
+            standards: ["Standard one."],
+            topics: ["Relationships"],
             strands: [
                 {
                     domainColumn: "R",
@@ -24,10 +45,13 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                     label: "Relationships",
                     cssClass: "n1",
                     tooltip: "Relationships tooltip",
+                    slug: "relationships",
                 },
             ],
         },
         checked: [true],
+        activeStrand: null,
+        strandLinks: [{ label: "Relationships", href: "/tl1/relationships" }],
         filtered: [
             {
                 id: 1,
@@ -35,6 +59,9 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                 link: "https://kahoot.com",
                 displaytext: "Kahoot!",
                 desc: "Quiz platform.",
+                updatedAt: 1,
+                path: "/tool/1/kahoot",
+                resources: [],
                 tags: { R: true },
             },
         ],
@@ -53,7 +80,20 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                 tl2_desc: "",
                 tl3_desc: "",
                 tl4_desc: "",
-                activeTags: [{ col: "R", label: "Relationships", tl: "tl1", css: "n1" }],
+                updatedAt: 1,
+                path: "/tool/2/kahoot",
+                resources: [],
+                tl5_desc: "",
+                tl6_desc: "",
+                activeTags: [
+                    {
+                        col: "R",
+                        label: "Relationships",
+                        tl: "tl1",
+                        slug: "relationships",
+                        css: "n1",
+                    },
+                ],
             },
         ],
     },
@@ -65,6 +105,8 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         page: 1,
         total: 1,
         perPage: 50,
+        pages: 1,
+        descriptionColumns: tlList.map((c) => ({ field: `${c.id}_desc`, label: c.title })),
         subs: [
             {
                 id: 3,
@@ -75,6 +117,11 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                 tl2_desc: "",
                 tl3_desc: "",
                 tl4_desc: "",
+                tl5_desc: "",
+                tl6_desc: "",
+                username: "",
+                contact: "",
+                updatedAt: 1,
                 accepted: false,
             },
         ],
@@ -89,11 +136,19 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             tl2_desc: "",
             tl3_desc: "",
             tl4_desc: "",
+            tl5_desc: "",
+            tl6_desc: "",
+            username: "",
+            contact: "",
+            updatedAt: 1,
         },
         strands: [
             { name: "R", label: "Relationship", checked: true },
             { name: "TP", label: "Teacher Planning", checked: false },
         ],
+        descriptionColumns: tlList.map((c) => ({ field: `${c.id}_desc`, label: c.title })),
+        resourceText: "",
+        hasUpload: false,
     },
     "web-landing": {},
     "web-login": {},
@@ -209,7 +264,10 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         },
         messages: [],
     },
-    "admin-new": { strands: [{ name: "R", label: "Relationship", checked: false }] },
+    "admin-new": {
+        strands: [{ name: "R", label: "Relationship", checked: false }],
+        descriptionColumns: tlList.map((c) => ({ field: `${c.id}_desc`, label: c.title })),
+    },
     "admin-import": {},
     "web-admin-attacklogs": {
         logs: [
@@ -257,14 +315,36 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             tl2_desc: "",
             tl3_desc: "",
             tl4_desc: "",
+            tl5_desc: "",
+            tl6_desc: "",
+            updatedAt: 1,
         },
-        strands: [{ col: "R", label: "Relationships", tl: "tl1", css: "n1" }],
+        strands: [
+            { col: "R", label: "Relationships", tl: "tl1", slug: "relationships", css: "n1" },
+        ],
+        tlSections: tlList.map((c) => ({
+            id: c.id,
+            title: c.title,
+            shortLabel: c.shortLabel,
+            description: "",
+        })),
+        resources: [],
+        meta: {
+            title: "IXL",
+            description: "Tool",
+            canonical: "https://example.test/tool/1/ixl",
+            robots: "index",
+            ogType: "article",
+            image: "https://example.test/images/og-default.png",
+            jsonLd: [],
+        },
     },
 };
 
 let failures = 0;
 
 loadViews();
+setViewHelpers({ tlList });
 for (const [name, data] of Object.entries(SAMPLES)) {
     try {
         const html = render(name, data);

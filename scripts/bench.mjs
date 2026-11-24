@@ -14,7 +14,7 @@
 import { request } from "node:http";
 
 const BASE = new URL(process.env.BASE ?? "http://localhost:3000");
-const PATH = process.env.PATH ?? "/";
+const PATH = process.env.BENCH_PATH ?? "/";
 const DURATION_S = Number(process.env.DURATION ?? 5);
 const CONCURRENCY = Number(process.env.CONCURRENCY ?? 20);
 

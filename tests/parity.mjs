@@ -29,6 +29,9 @@ const MANIFEST = [
     ["tl2.html", "/tl2"],
     ["tl3.html", "/tl3"],
     ["tl4.html", "/tl4"],
+    ["tl5.html", "/tl5"],
+    ["tl6.html", "/tl6"],
+    ["tl1-relationships.html", "/tl1/relationships"],
     ["search.html", "/search"],
     ["login.html", "/login"],
     ["submission.html", "/submission"],
@@ -75,7 +78,7 @@ async function cookieFor(kind) {
     const loginPath = kind === "main" ? "/api/auth/login" : "/web/api/auth/login";
     const page = await fetch(BASE + pagePath);
     const html = await page.text();
-    const token = (html.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+    const token = (html.match(/name="csrf-token" content="([^"]+)"/) ?? [])[1] ?? "";
     const cookies = page.headers.getSetCookie?.() ?? [];
     const res = await fetch(BASE + loginPath, {
         method: "POST",
@@ -85,7 +88,7 @@ async function cookieFor(kind) {
             "Content-Type": "application/x-www-form-urlencoded",
             Cookie: cookies.map((c) => c.split(";")[0]).join("; "),
         },
-        body: `username=admin&password=admin123&_csrf=${encodeURIComponent(token)}`,
+        body: `username=admin&password=admin12345&_csrf=${encodeURIComponent(token)}`,
     });
     return [...cookies, ...(res.headers.getSetCookie?.() ?? [])]
         .map((c) => c.split(";")[0])

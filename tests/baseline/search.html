@@ -3,36 +3,64 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Search Tech Tools | BIBS-C Tech Tools</title>
-    
-    <meta name="description" content="Search tech tools by name, description, or strand tag." />
-    
-    <link rel="icon" href="/images/favicon.png?v=096c8b6adc345de0" />
-    
-    <link rel="stylesheet" href="/css/globals.css?v=096c8b6adc345de0" />
-    
-    
+
+    <title>Search Tech Tools</title>
+    <meta name="description" content="Search accepted teaching technology tools by name, description, strand or submitter." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href="http://localhost:3280/search" />
+    <link rel="icon" href="/images/favicon.png?v=eccb1a320ddd684d" />
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Search Tech Tools" />
+    <meta property="og:description" content="Search accepted teaching technology tools by name, description, strand or submitter." />
+    <meta property="og:url" content="http://localhost:3280/search" />
+    <meta property="og:image" content="http://localhost:3280/images/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Search Tech Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Search Tech Tools" />
+    <meta name="twitter:description" content="Search accepted teaching technology tools by name, description, strand or submitter." />
+    <meta name="twitter:image" content="http://localhost:3280/images/og-default.png" />
+    <meta name="twitter:image:alt" content="Search Tech Tools" />
+
+    <script type="application/ld+json" nonce="SayqPr513GSDDsuvygXNZAma">{"@context":"https://schema.org","@type":"WebSite","name":"BIBS-C Tech Tools","alternateName":"BIBS-C","url":"http://localhost:3280/","description":"A curated catalog of teaching technology tools, organized by domain and strand.","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"http://localhost:3280/search?query={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+
+
+    <link rel="stylesheet" href="/css/tokens.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/site.css?v=eccb1a320ddd684d" />
+
+
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/ie11.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/ie-detect.js?v=096c8b6adc345de0"></script>
-    
-    <script type="module" src="/js/modern/theme.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/theme.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/img-fallback.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/scroll-top.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=096c8b6adc345de0" defer></script>
-    
-<meta name="csrf-token" content="8778873a9d8b32b745d288f51446c036d7eab7ba083eaf71dac5dfba024f7286"/></head>
+    <script src="/js/legacy/theme-boot.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=eccb1a320ddd684d"></script>
+
+    <script type="module" src="/js/modern/theme.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/theme.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/img-fallback.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/scroll-top.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/extras.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/extras.js?v=eccb1a320ddd684d" defer></script>
+
+<meta name="csrf-token" content="1795616569359.4c6d2df9ef73faee457f3a292ff32337.02844bb3f85d673f69c0b2f5f74ee433960ccc83cbe7d8f685b33f45d5cfd833"/></head>
 <body>
 
 <div id="cover">
     <div id="topbar">
-        <h1>BIBS-C Tech Tools</h1>
+        <p class="site-brand">BIBS-C Tech Tools</p>
         <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
                 aria-pressed="false" title="Toggle dark mode (Alt+T)">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -56,26 +84,36 @@
     <nav id="navbar" aria-label="Primary">
         <ul id="nav">
             <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
+            <li><a href="/tl5"><span>Growth (TL5)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
+            <li><a href="/tl6"><span>Positivity (TL6)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
         </ul>
     </nav>
 </div>
 
 
-<div id="search"></div>
-
 <div id="subhead">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">/</span>
+        <span aria-current="page">Search</span>
+    </nav>
     <h1 id="search-results">Search Tech Tools</h1>
     <form id="search-form" class="search-form" action="/search" method="get">
-        <input type="text" id="search-input" placeholder="Search tech tools by name, description, or tag…"
-               aria-label="Search tech tools" name="query" value=""/>
+        <input type="text" id="search-input" placeholder="Search tech tools by name, description, strand or tag..." aria-label="Search tech tools" name="query" value="" maxlength="200"/>
         <button type="submit" id="search-submit">Search</button>
     </form>
-    
+
     <p class="jump-menu">
         Jump to: <a href="#search-results">Results</a>
         | <a href="/#front">Home</a>
@@ -86,9 +124,9 @@
 
 <div id="all">
     <div class="techtip-wrap" id="results">
-        
-        <div><h4>Type a search term above to look up a tool.</h4></div>
-        
+
+        <div class="empty-state"><h2>Type a search term above to look up a tool.</h2></div>
+
     </div>
 </div>
 
@@ -96,10 +134,19 @@
 
 <footer id="footer" data-built-by="richie-rich90454">
     <p id="footer-nav">
+
         <a href="/tl1">Knowing (TL1)</a>
+
         <a href="/tl2">Strategies (TL2)</a>
+
         <a href="/tl3">Evidence (TL3)</a>
+
         <a href="/tl4">Crafting (TL4)</a>
+
+        <a href="/tl5">Growth (TL5)</a>
+
+        <a href="/tl6">Positivity (TL6)</a>
+
         <a href="/search">Search</a>
         <a href="/submission">Submit a Tool</a>
         <a href="/docs">Docs</a>

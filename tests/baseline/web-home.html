@@ -3,37 +3,65 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IPstress</title>
-    
-    <meta name="description" content="Premium IP stress testing service" />
-    
-    <link rel="icon" href="/images/favicon.png?v=096c8b6adc345de0" />
-    
-    <link rel="stylesheet" href="/css/webtheme.css?v=096c8b6adc345de0" />
-    
-    
+
+    <title>IPstress | L4 and L7 Stress Testing</title>
+    <meta name="description" content="IP stress testing with clear concurrency, duration and support terms." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href="http://localhost:3280/web" />
+    <link rel="icon" href="/images/favicon.png?v=eccb1a320ddd684d" />
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="IPstress | L4 and L7 Stress Testing" />
+    <meta property="og:description" content="IP stress testing with clear concurrency, duration and support terms." />
+    <meta property="og:url" content="http://localhost:3280/web" />
+    <meta property="og:image" content="http://localhost:3280/og/site.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="IPstress | L4 and L7 Stress Testing" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="IPstress | L4 and L7 Stress Testing" />
+    <meta name="twitter:description" content="IP stress testing with clear concurrency, duration and support terms." />
+    <meta name="twitter:image" content="http://localhost:3280/og/site.png" />
+    <meta name="twitter:image:alt" content="IPstress | L4 and L7 Stress Testing" />
+
+    <script type="application/ld+json" nonce="iGf/6s4QWhmHe/unjPx+E1mY">{"@context":"https://schema.org","@type":"WebSite","name":"BIBS-C Tech Tools","alternateName":"BIBS-C","url":"http://localhost:3280/","description":"A curated catalog of teaching technology tools, organized by domain and strand.","inLanguage":"en","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"http://localhost:3280/search?query={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
+
+
+    <link rel="stylesheet" href="/css/tokens.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/web.css?v=eccb1a320ddd684d" />
+
+
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/ie11.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/ie-detect.js?v=096c8b6adc345de0"></script>
-    
-    <script type="module" src="/js/modern/theme.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/theme.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/img-fallback.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/scroll-top.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/tabs.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/tabs.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/menu.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/menu.js?v=096c8b6adc345de0" defer></script>
-    
-<meta name="csrf-token" content="743268e0dc14ae55daf0024b944018f4ddbfeeb7573842f2a841bd147dec4871"/></head>
+    <script src="/js/legacy/theme-boot.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=eccb1a320ddd684d"></script>
+
+    <script type="module" src="/js/modern/theme.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/theme.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/img-fallback.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/scroll-top.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/extras.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/extras.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/tabs.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/tabs.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/menu.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/menu.js?v=eccb1a320ddd684d" defer></script>
+
+<meta name="csrf-token" content="1795616569372.77c4066d6f8ba7c0515d472058805335.e357a113eb3fb9dabf20433ad3656a706da3ea0051229dd11a1e10c5da191918"/></head>
 <body>
 
 <header class="web-header">
@@ -76,9 +104,9 @@
                     <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
                 </svg>
             </button>
-            
+
             <a class="web-header__btn web-header__btn--ghost" href="/web/register">Register</a>
-            
+
         </div>
     </div>
 </header>
@@ -113,7 +141,7 @@
         <div class="row">
             <div class="col-lg-3 col-md-6 wow fadeInUp animated">
                 <div class="mission_text"><h5>Security</h5>
-                    <p> The tests you initiate are never shared with a 3rd party and 100% safe system. </p></div>
+                    <p> Every launch is validated and only public targets are accepted. Your account data stays on our servers. </p></div>
             </div>
             <div class="col-lg-3 col-md-6 wow fadeInUp animated" data-wow-delay="0.3s">
                 <div class="mission_text mt_1"><h5>Best power</h5><p> If you want to get the best service at very affordable prices, make the right choice here, register and buy now. </p></div>
@@ -124,23 +152,6 @@
             <div class="col-lg-3 col-md-6 wow fadeInUp animated" data-wow-delay="0.9s">
                 <div class="mission_text"><h5>Support</h5><p>All plans have a 7/24 support, easily contact.</p></div>
             </div>
-        </div>
-    </div>
-</section>
-
-<section class="mining_invest_area make_bitcoin">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-5 col-md-6">
-                <div class="mining_text">
-                    <div class="title ti_2">
-                        <h2>How to use <span>IPstress</span></h2>
-                        <p>Watch the video and learn to use with ease.</p>
-                    </div>
-                    <ul class="btn_list"><a class="btn btn-primary" href="https://www.youtube.com/watch?v=" role="button">Watch Video</a></ul>
-                </div>
-            </div>
-            <div class="col-lg-7 col-md-6"><img src="/web/images/invest/mac1.png" alt="" class="right_img up_animat"/></div>
         </div>
     </div>
 </section>
@@ -163,23 +174,23 @@
                 <div data-faq-panel="regular" class="faq_desc">
                     <div class="faq_desc">
                         <h5>How does IPstress work?</h5>
-                        <p> Pick a plan that fits the capacity you need, top up your balance, and launch tests from the Hub. Our backends handle the routing and concurrency so you can focus on the target. </p>
+                        <p> Pick a plan that fits the capacity you need, pay by card through Stripe, and launch tests from the Hub while your plan is active. Our backends handle the routing and concurrency so you can focus on the target. </p>
                     </div>
                     <div class="faq_desc">
                         <h5>What payment methods do you accept?</h5>
-                        <p> Stripe, PayPal, and Bitcoin. Crypto payments credit automatically once one confirmation lands. Card payments are instant. </p>
+                        <p> Card payments are handled securely by Stripe. Your card details never touch our servers. </p>
                     </div>
                     <div class="faq_desc">
                         <h5>How long does support take?</h5>
-                        <p> Tickets are answered around the clock. Most replies land within 20 minutes during business hours and within 2 hours overnight. </p>
+                        <p> Tickets are answered around the clock. Most replies land within a few hours. </p>
                     </div>
                     <div class="faq_desc">
                         <h5>Can I cancel or get a refund?</h5>
-                        <p> Subscriptions are non-recurring by default &mdash; they expire at the end of the term. If a plan is unusable due to a fault on our side, we issue a prorated refund to your balance. </p>
+                        <p> Plans are non-recurring &mdash; they expire at the end of the term. If a plan is unusable due to a fault on our side, we issue a prorated refund through support. </p>
                     </div>
                     <div class="faq_desc">
                         <h5>Is my account safe?</h5>
-                        <p> All launches are routed through isolated infrastructure. We do not log target metadata, and your payment details are tokenised by the gateway &mdash; we never store raw card data. </p>
+                        <p> Passwords are hashed, and card payments are handled by Stripe. We keep only the account and plan data needed to run the panel. </p>
                     </div>
                 </div>
             </div>
@@ -215,7 +226,7 @@
                 </div>
             </div>
         </div>
-        <div class="copy_right"><a>&copy; 2026 IPstress - All rights reserved</a></div>
+        <div class="copy_right"><p>&copy; 2026 IPstress - All rights reserved</p></div>
     </div>
 </footer>
 <button class="scroll-top" aria-label="Scroll to top">

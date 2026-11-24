@@ -6,8 +6,7 @@ import { Context as ContextClass } from "../../src/core/03-context";
 import { HttpError } from "../../src/core/09-errors";
 import { isAllowedOrigin, normalizeOrigin } from "../../src/core/08-security";
 import { readMultipart } from "../../src/lib/multipart";
-
-const TOKEN = "a".repeat(64);
+import { createCsrfToken, verifyCsrfToken } from "../../src/lib/csrf";
 
 test("normalizeOrigin canonicalizes schemes, ports and trailing slashes", () => {
     assert.equal(normalizeOrigin("https://Example.com:443/"), "https://example.com");
@@ -17,26 +16,29 @@ test("normalizeOrigin canonicalizes schemes, ports and trailing slashes", () => 
     assert.equal(normalizeOrigin(undefined), null);
 });
 
-test("isAllowedOrigin accepts the canonical origin and the host actually hit", () => {
+test("isAllowedOrigin accepts canonical, actual host and proxy scheme changes", () => {
     assert.equal(isAllowedOrigin(undefined, null), true);
     assert.equal(isAllowedOrigin("http://localhost:3000", null), true);
     assert.equal(isAllowedOrigin("http://localhost:3000/", null), true);
     assert.equal(isAllowedOrigin("http://127.0.0.1:3000", "http://127.0.0.1:3000"), true);
+    assert.equal(isAllowedOrigin("https://example.com", "http://example.com"), true);
     assert.equal(isAllowedOrigin("http://evil.example", "http://localhost:3000"), false);
     assert.equal(isAllowedOrigin("http://localhost:3001", "http://localhost:3000"), false);
     assert.equal(isAllowedOrigin("null", "http://localhost:3000"), false);
 });
 
-test("verifyCsrf rejects empty, short and mismatched tokens", () => {
-    const ctx = Object.create(ContextClass.prototype) as Context;
-    (ctx as unknown as { csrfToken: string }).csrfToken = TOKEN;
-    assert.equal(ctx.verifyCsrf(TOKEN), true);
-    assert.equal(ctx.verifyCsrf(""), false);
-    assert.equal(ctx.verifyCsrf("a".repeat(32)), false);
-    assert.equal(ctx.verifyCsrf("b".repeat(64)), false);
+test("signed CSRF tokens reject empty, tampered and expired values", () => {
+    const token = createCsrfToken();
+    assert.equal(verifyCsrfToken(token), true);
+    assert.equal(verifyCsrfToken(""), false);
+    assert.equal(verifyCsrfToken(token.slice(0, -1) + (token.endsWith("a") ? "b" : "a")), false);
+    assert.equal(verifyCsrfToken(createCsrfToken(Date.now() - 25 * 60 * 60 * 1000)), false);
+});
 
-    const empty = Object.create(ContextClass.prototype) as Context;
-    assert.equal(empty.verifyCsrf(""), false);
+test("verifyCsrf uses the signed token", () => {
+    const ctx = Object.create(ContextClass.prototype) as Context;
+    assert.equal(ctx.verifyCsrf(createCsrfToken()), true);
+    assert.equal(ctx.verifyCsrf("a".repeat(64)), false);
 });
 
 function multipartContext(token: string): Context {
@@ -52,12 +54,12 @@ function multipartContext(token: string): Context {
     stream.headers = { "content-type": `multipart/form-data; boundary=${boundary}` };
     const ctx = Object.create(ContextClass.prototype) as Context;
     (ctx as unknown as { raw: Readable }).raw = stream;
-    (ctx as unknown as { csrfToken: string }).csrfToken = TOKEN;
+    (ctx as unknown as { csrfToken: string }).csrfToken = token;
     return ctx;
 }
 
 test("multipart bodies are parsed once and must carry the CSRF token", async () => {
-    const good = await readMultipart(multipartContext(TOKEN));
+    const good = await readMultipart(multipartContext(createCsrfToken()));
     assert.equal(good.fields.techname, "Tool");
 
     await assert.rejects(

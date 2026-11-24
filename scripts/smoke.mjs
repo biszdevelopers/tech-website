@@ -14,7 +14,7 @@ function check(name, pass, detail = "") {
 async function pageToken(path) {
     const res = await fetch(BASE + path);
     const html = await res.text();
-    const token = (html.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+    const token = (html.match(/name="csrf-token" content="([^"]+)"/) ?? [])[1] ?? "";
     const cookies = (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]);
     return { token, cookies, html };
 }
@@ -81,10 +81,9 @@ async function main() {
     if (PASSWORD && cookie) {
         const adminPage = await fetch(`${BASE}/admin`, { headers: { Cookie: cookie } });
         const adminHtml = await adminPage.text();
-        const adminToken =
-            (adminHtml.match(/name="csrf-token" content="([a-f0-9]+)"/) ?? [])[1] ?? "";
+        const adminToken = (adminHtml.match(/name="csrf-token" content="([^"]+)"/) ?? [])[1] ?? "";
         check("admin page reachable with session", adminPage.status === 200);
-        const ok = await fetch(`${BASE}/api/admin/reject`, {
+        const ok = await fetch(`${BASE}/api/admin/account`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -92,9 +91,9 @@ async function main() {
                 Origin: BASE,
                 "x-csrf-token": adminToken,
             },
-            body: JSON.stringify({ id: 99999 }),
+            body: JSON.stringify({ current: "definitely-wrong", username: "admin" }),
         });
-        check("authed admin API allowed", ok.status === 200, String(ok.status));
+        check("authed admin API reachable", ok.status === 403, String(ok.status));
     } else if (!PASSWORD) {
         console.log("SKIP  admin session checks (SMOKE_ADMIN_PASSWORD not set)");
     }

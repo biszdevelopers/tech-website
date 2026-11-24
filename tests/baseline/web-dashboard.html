@@ -3,29 +3,57 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Dashboard | IPstress</title>
-    
-    <link rel="icon" href="/images/favicon.png?v=096c8b6adc345de0" />
-    
-    <link rel="stylesheet" href="/css/webtheme.css?v=096c8b6adc345de0" />
-    
-    
+    <meta name="description" content="IPstress account area." />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href="http://localhost:3280/web/dashboard" />
+    <link rel="icon" href="/images/favicon.png?v=eccb1a320ddd684d" />
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dashboard | IPstress" />
+    <meta property="og:description" content="IPstress account area." />
+    <meta property="og:url" content="http://localhost:3280/web/dashboard" />
+    <meta property="og:image" content="http://localhost:3280/images/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Dashboard | IPstress" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Dashboard | IPstress" />
+    <meta name="twitter:description" content="IPstress account area." />
+    <meta name="twitter:image" content="http://localhost:3280/images/og-default.png" />
+    <meta name="twitter:image:alt" content="Dashboard | IPstress" />
+
+
+    <link rel="stylesheet" href="/css/tokens.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/web.css?v=eccb1a320ddd684d" />
+
+
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/ie11.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/ie-detect.js?v=096c8b6adc345de0"></script>
-    
-    <script type="module" src="/js/modern/theme.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/theme.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/img-fallback.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=096c8b6adc345de0" defer></script>
-    
-    <script type="module" src="/js/modern/scroll-top.js?v=096c8b6adc345de0"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=096c8b6adc345de0" defer></script>
-    
-<meta name="csrf-token" content="4ac274234ab37e2d9c45d131011cc9c6921f925acdbe90093b2eca9eaa6bc712"/></head>
+    <script src="/js/legacy/theme-boot.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=eccb1a320ddd684d"></script>
+
+    <script type="module" src="/js/modern/theme.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/theme.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/img-fallback.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/scroll-top.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/extras.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/extras.js?v=eccb1a320ddd684d" defer></script>
+
+<meta name="csrf-token" content="1795616569760.64c40d88075e4b2f2ab72c6de0e5c12d.7a5088d363b0dbe418da97c66d2c48a152c30ce59d068544194404989fc97c02"/></head>
 <body>
 
 <header class="web-header">
@@ -68,17 +96,18 @@
                     <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
                 </svg>
             </button>
-            
+
             <a class="web-header__btn web-header__btn--ghost" href="/web/dashboard">Dashboard</a>
-            <a class="web-header__btn web-header__btn--solid" href="/web/api/auth/logout">Log out</a>
-            
+            <form method="post" action="/web/api/auth/logout" class="web-header__logout"><input type="hidden" name="_csrf" value="1795616569760.64c40d88075e4b2f2ab72c6de0e5c12d.7a5088d363b0dbe418da97c66d2c48a152c30ce59d068544194404989fc97c02"/><button type="submit" class="web-header__btn web-header__btn--solid">Log out</button></form>
+
         </div>
     </div>
 </header>
 
+
 <div class="page-breadcrumb">
     <div class="d-flex align-items-center">
-        <h4 class="page-title text-truncate text-white font-weight-medium mb-0"> Dashboard </h4>
+        <h1 class="page-title text-truncate text-white font-weight-medium mb-0"> Dashboard </h1>
         <div class="ml-auto">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb m-0 p-0">
@@ -90,7 +119,7 @@
     </div>
 </div>
 <div class="container-fluid">
-    
+
     <div class="card-group">
         <div class="card border-right">
             <div class="card-body">
@@ -127,10 +156,10 @@
                             <div class="table-responsive">
                                 <table class="table">
                                     <tbody>
-                                        <tr><td>Plan</td><td>No membership</td></tr>
-                                        <tr><td>Max Attack Time</td><td>No membership</td></tr>
-                                        <tr><td>Max Concurrents</td><td>-</td></tr>
-                                        <tr><td>Expiry</td><td>11/21/2286</td></tr>
+                                        <tr><td>Plan</td><td>No active plan</td></tr>
+                                        <tr><td>Max Attack Time</td><td>No active plan</td></tr>
+                                        <tr><td>Max Concurrents</td><td>No active plan</td></tr>
+                                        <tr><td>Expiry</td><td>No active plan</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -143,9 +172,24 @@
                     <div class="card-body">
                         <h4 class="card-title">Quick Actions</h4>
                         <div class="mt-4 activity">
+
                             <a href="/web/hub" class="btn btn-danger btn-block mb-2">Launch Attack</a>
+
+
                             <a href="/web/plan" class="btn btn-primary btn-block mb-2">Upgrade Plan</a>
-                            <a href="/web/tickets/new" class="btn btn-secondary btn-block">Create Ticket</a>
+
+                            <a href="/web/tickets/new" class="btn btn-secondary btn-block mb-2">Create Ticket</a>
+                            <a href="/web/profile" class="btn btn-secondary btn-block mb-2">Profile</a>
+                            <a href="/web/tickets" class="btn btn-secondary btn-block mb-2">Tickets</a>
+
+                            <a href="/web/giftcards" class="btn btn-secondary btn-block mb-2">Gift Cards</a>
+
+
+                            <a href="/web/wheel" class="btn btn-secondary btn-block mb-2">Wheel</a>
+
+
+                            <a href="/web/affiliate" class="btn btn-secondary btn-block">Affiliate</a>
+
                         </div>
                     </div>
                 </div>
