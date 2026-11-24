@@ -37,6 +37,10 @@ if [ ! -f .env ]; then
     exit 1
 fi
 chmod 600 .env
+set -a
+# shellcheck disable=SC1091
+. ./.env
+set +a
 
 echo "==> Stopping service (builds must not replace files under a running process)"
 sudo systemctl stop "$SERVICE"
@@ -49,9 +53,13 @@ BACKUP_DIR="$APP_DIR/backups/$STAMP" node - <<'NODE'
 const fs = require("fs");
 const Database = require("better-sqlite3");
 const dir = process.env.BACKUP_DIR;
+const paths = {
+    main: (process.env.DATABASE_URL_MAIN || "file:./data/main.db").replace(/^file:/, ""),
+    web: (process.env.DATABASE_URL_WEB || "file:./data/web.db").replace(/^file:/, ""),
+};
 (async () => {
     for (const name of ["main", "web"]) {
-        const src = `data/${name}.db`;
+        const src = paths[name];
         if (!fs.existsSync(src)) continue;
         const db = new Database(src, { readonly: true });
         await db.backup(`${dir}/${name}.db`);
@@ -65,7 +73,11 @@ const dir = process.env.BACKUP_DIR;
 NODE
 
 FRESH=0
-if [ ! -f data/main.db ] || [ ! -f data/web.db ]; then
+MAIN_DB="${DATABASE_URL_MAIN:-file:./data/main.db}"
+WEB_DB="${DATABASE_URL_WEB:-file:./data/web.db}"
+MAIN_DB="${MAIN_DB#file:}"
+WEB_DB="${WEB_DB#file:}"
+if [ ! -f "$MAIN_DB" ] || [ ! -f "$WEB_DB" ]; then
     FRESH=1
 fi
 
@@ -75,10 +87,6 @@ pnpm run db:init
 
 if [ "$FRESH" = "1" ]; then
     echo "==> Fresh database: operator credentials are required"
-    set -a
-    # shellcheck disable=SC1091
-    . ./.env
-    set +a
     if [ -z "${ADMIN_USERNAME:-}" ] || [ -z "${ADMIN_PASSWORD:-}" ]; then
         echo "!! Set ADMIN_USERNAME and ADMIN_PASSWORD in .env or the environment, then rerun."
         exit 1

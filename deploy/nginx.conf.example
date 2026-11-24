@@ -1,5 +1,6 @@
 # /etc/nginx/sites-available/tech-website
-# Optional reverse proxy. The Node app also works standalone (`pnpm start`)
+# Optional reverse proxy. The Node app also works standalone (`pnpm start`).
+# When using this proxy, set TRUST_PROXY=true in the app's .env.
 # and performs its own compression, caching and security headers.
 
 server {

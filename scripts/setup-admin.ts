@@ -1,16 +1,12 @@
-try {
-    process.loadEnvFile();
-} catch {
-    /* real environment wins */
-}
+import "./load-env";
 import bcrypt from "bcryptjs";
 import { mainDb } from "../src/lib/db/main";
 import { webDb } from "../src/lib/db/web";
 
 // Creates, rotates or renames the operator credentials for BOTH subprojects.
 // Re-running after `db:init` is supported: the existing account is updated in
-// place (session ids survive), so the username and password can change at any
-// time. Usage:
+// place, and every existing session is invalidated by bumping the version.
+// Usage:
 //   ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 10 chars> pnpm run setup
 
 async function main(): Promise<void> {
@@ -33,22 +29,35 @@ async function main(): Promise<void> {
     const hash = await bcrypt.hash(password, 12);
 
     const loginRows = await mainDb.login.findMany();
-    const named = loginRows.find((row) => row.User === username);
+    const named = loginRows.find(
+        (row) => String(row.User).toLowerCase() === username.toLowerCase()
+    );
     if (named) {
-        await mainDb.login.update({ where: { User: named.User }, data: { PW: hash } });
+        await mainDb.login.update({
+            where: { User: named.User },
+            data: { User: username, PW: hash, sessionVersion: Number(named.sessionVersion) + 1 },
+        });
     } else if (loginRows.length > 0) {
         await mainDb.login.update({
             where: { User: loginRows[0].User },
-            data: { User: username, PW: hash },
+            data: {
+                User: username,
+                PW: hash,
+                sessionVersion: Number(loginRows[0].sessionVersion) + 1,
+            },
         });
     } else {
-        await mainDb.login.create({ data: { User: username, PW: hash } });
+        await mainDb.login.create({ data: { User: username, PW: hash, sessionVersion: 0 } });
     }
 
-    const namedAdmin = await webDb.users.findFirst({
-        where: { username, rank: { gte: 1 } },
-    });
-    const namedUser = namedAdmin ? null : await webDb.users.findFirst({ where: { username } });
+    const webUsers = await webDb.users.findMany();
+    const namedAdmin = webUsers.find(
+        (row) =>
+            Number(row.rank) >= 1 && String(row.username).toLowerCase() === username.toLowerCase()
+    );
+    const namedUser = namedAdmin
+        ? null
+        : webUsers.find((row) => String(row.username).toLowerCase() === username.toLowerCase());
     if (namedUser && process.env.ADMIN_FORCE_PROMOTE !== "1") {
         console.error(
             `"${username}" belongs to a normal user. Set ADMIN_FORCE_PROMOTE=1 to promote it, or choose another username.`
@@ -69,6 +78,7 @@ async function main(): Promise<void> {
                 username,
                 password: hash,
                 rank: Math.max(1, Number(webUser.rank)),
+                sessionVersion: Number(webUser.sessionVersion) + 1,
             },
         });
     } else {
@@ -86,6 +96,7 @@ async function main(): Promise<void> {
                 activity: 0,
                 twoauth: 0,
                 referedBy: 0,
+                sessionVersion: 0,
             },
         });
     }

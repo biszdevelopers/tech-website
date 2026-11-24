@@ -1,4 +1,4 @@
-<%- include('head', { title: title + ' | IPstress', css: ['webtheme.css', 'dash.css'], scripts: ['menu.js'] }) %>
+<%- include('head', { title: title + ' | IPstress', css: ['web.css', 'dash.css'], scripts: ['menu.js'], robots: 'noindex,nofollow' }) %>
 <div id="main-wrapper" data-layout="vertical" data-navbarbg="skin6"
      data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed" data-boxed-layout="full">
     <header class="topbar" data-navbarbg="skin6">
@@ -37,14 +37,14 @@
                     <li class="nav-item dropdown">
                         <button type="button" class="nav-link dropdown-toggle" data-toggle="dropdown">
                             <img src="/images/logo-icon.png" alt="homepage" class="dark-logo" width="29"/>
-                            <span class="ml-2 d-none d-lg-inline-block"><span class="text-white">Hello, Admin!</span></span>
+                            <span class="ml-2 d-none d-lg-inline-block"><span class="text-white">Operator</span></span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
                             <a class="dropdown-item" href="/web/admin/tickets">Inbox</a>
                             <a class="dropdown-item" href="/web/profile">Profile</a>
                             <a class="dropdown-item" href="/web">View site</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="/web/api/auth/logout">Logout</a>
+                            <form method="post" action="/web/api/auth/logout" class="dropdown-logout"><button type="submit" class="dropdown-item">Logout</button></form>
                         </div>
                     </li>
                 </ul>
@@ -84,7 +84,7 @@
     <div class="page-wrapper">
         <div class="page-breadcrumb">
             <div class="d-flex align-items-center">
-                <h4 class="page-title text-truncate text-white font-weight-medium mb-0"> <%= title %> </h4>
+                <h1 class="page-title text-truncate text-white font-weight-medium mb-0"> <%= title %> </h1>
                 <div class="ml-auto">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb m-0 p-0">

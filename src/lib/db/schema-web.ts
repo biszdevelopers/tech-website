@@ -75,6 +75,7 @@ export const giftcards = sqliteTable("giftcards", {
     dateClaimed: integer("dateClaimed").notNull().default(0),
     date: integer("date").notNull().default(0),
     user: text("user"),
+    termSeconds: integer("termSeconds").notNull().default(0),
 });
 
 export const iplogs = sqliteTable("iplogs", {
@@ -162,6 +163,7 @@ export const payments = sqliteTable(
         date: integer("date").notNull().default(0),
         amount: integer("amount").notNull().default(0),
         currency: text("currency").notNull().default("usd"),
+        termSeconds: integer("termSeconds").notNull().default(0),
     },
     (t) => [uniqueIndex("payments_tid_unique").on(t.tid)]
 );
@@ -273,4 +275,5 @@ export const users = sqliteTable("users", {
     login_useragent: text("login_useragent"),
     cark: text("cark"),
     ban_sbp: text("ban_sbp"),
+    sessionVersion: integer("sessionVersion").notNull().default(0),
 });

@@ -1,7 +1,6 @@
 // Shared database row interfaces. These mirror the SQLite schemas under src/lib/db/.
-// Keep them in sync if the schema changes.
 
-// ─── main.db ──────────────────────────────────────────────────────────────────
+// main.db
 
 export interface SubmissionRow {
     id: number;
@@ -12,9 +11,12 @@ export interface SubmissionRow {
     tl2_desc: string;
     tl3_desc: string;
     tl4_desc: string;
+    tl5_desc: string;
+    tl6_desc: string;
     accepted: boolean;
     username: string;
     contact: string;
+    updatedAt: number;
 }
 
 export interface DomainRow {
@@ -36,14 +38,21 @@ export interface DomainRow {
     RaAoC: boolean;
 }
 
+export interface ResourceRow {
+    id: number;
+    submissionId: number;
+    label: string;
+    url: string;
+    sort: number;
+}
+
 export interface LoginRow {
     User: string;
     PW: string;
+    sessionVersion: number;
 }
 
-// ─── web.db ───────────────────────────────────────────────────────────────────
-// These mirror schema-web.ts exactly. Some fields use unconventional casing
-// or names — that's how the original schema was written.
+// web.db
 
 export interface UserRow {
     ID: number;
@@ -63,6 +72,7 @@ export interface UserRow {
     login_useragent: string | null;
     cark: string | null;
     ban_sbp: string | null;
+    sessionVersion: number;
 }
 
 export interface LogRow {
@@ -127,6 +137,9 @@ export interface PaymentRow {
     email: string;
     tid: string;
     date: number;
+    amount: number;
+    currency: string;
+    termSeconds: number;
 }
 
 export interface NewsRow {
@@ -144,6 +157,7 @@ export interface GiftCardRow {
     dateClaimed: number;
     date: number;
     user: string | null;
+    termSeconds: number;
 }
 
 export interface ServerRow {

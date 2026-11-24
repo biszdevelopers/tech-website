@@ -6,7 +6,7 @@
 
 import { Application } from "../core/01-application";
 import { HttpError } from "../core/09-errors";
-import { webDb, expireFinishedAttacks } from "../lib/db/web";
+import { webDb, webSqlite, expireFinishedAttacks } from "../lib/db/web";
 import { render } from "../core/views";
 import { webSessions } from "./guards";
 import { launchAttack } from "../server/attacks";
@@ -18,6 +18,9 @@ import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 
 type Body = Record<string, unknown>;
+
+const PLAN_TERM_MAX = 10_000;
+const EXPIRY_MAX = 9_999_999_999;
 
 function actor(ctx: { cookie: (name: string) => string | undefined }): string {
     return webSessions.load(ctx as never)?.username ?? "admin";
@@ -38,11 +41,6 @@ async function audit(
     });
 }
 
-function money(value: unknown): number {
-    const n = Number(value);
-    return Number.isFinite(n) && n >= 0 ? n : 0;
-}
-
 async function actorIsSuper(ctx: Parameters<typeof actor>[0]): Promise<boolean> {
     const session = webSessions.load(ctx as never);
     if (!session?.userId) return false;
@@ -56,8 +54,131 @@ async function actorIsSuper(ctx: Parameters<typeof actor>[0]): Promise<boolean> 
 function str(body: Body, key: string, fallback = ""): string {
     return String(body[key] ?? fallback);
 }
-function num(body: Body, key: string, fallback = 0): number {
-    return Number(body[key] ?? fallback) || fallback;
+
+function intValue(
+    body: Body,
+    key: string,
+    min: number,
+    max: number,
+    label: string,
+    fallback?: number
+): number {
+    const raw = body[key] ?? fallback;
+    const value = Number(raw);
+    if (raw === undefined || !Number.isInteger(value) || value < min || value > max) {
+        throw new HttpError(400, `${label} must be a whole number between ${min} and ${max}.`);
+    }
+    return value;
+}
+
+/** Usernames are unique case-insensitively; SQLite's UNIQUE is not. */
+function usernameTaken(username: string, exceptId = 0): boolean {
+    const row = webSqlite
+        .prepare("select ID from users where lower(username) = lower(?) limit 1")
+        .get(username) as { ID?: number } | undefined;
+    return Boolean(row?.ID && Number(row.ID) !== exceptId);
+}
+
+async function requirePlan(planId: number): Promise<void> {
+    if (!Number.isInteger(planId) || planId < 0) throw new HttpError(400, "Invalid plan id.");
+    if (planId === 0) return;
+    const plan = await webDb.plans.findUnique({ where: { ID: planId }, select: { ID: true } });
+    if (!plan) throw new HttpError(400, "That plan does not exist.");
+}
+
+function planPayload(body: Body) {
+    const name = str(body, "name").trim();
+    if (!name || name.length > 60) {
+        throw new HttpError(400, "Plan name must be 1-60 characters.");
+    }
+    const price = Number(body.price);
+    if (!Number.isFinite(price) || price <= 0) {
+        throw new HttpError(400, "Plan price must be greater than 0.");
+    }
+    const unit = str(body, "unit", "days") || "days";
+    if (unit !== "days" && unit !== "hours") {
+        throw new HttpError(400, "Plan unit must be days or hours.");
+    }
+    return {
+        name,
+        price: Math.round(price * 100) / 100,
+        length: intValue(body, "length", 1, PLAN_TERM_MAX, "Plan length"),
+        mbt: intValue(body, "mbt", 1, 3600, "Max attack time"),
+        concurrents: intValue(body, "concurrents", 1, 1000, "Concurrent attacks"),
+        vip: Number(body.vip) === 1 ? 1 : 0,
+        unit,
+        private: Number(body.private) === 1 ? 1 : 0,
+    };
+}
+
+function methodPayload(body: Body) {
+    const name = str(body, "name").trim();
+    if (!/^[A-Za-z0-9_.-]{2,32}$/.test(name)) {
+        throw new HttpError(400, "Method name must be 2-32 letters, numbers, dots or dashes.");
+    }
+    const fullname = str(body, "fullname").trim();
+    if (!fullname || fullname.length > 100) {
+        throw new HttpError(400, "Method full name must be 1-100 characters.");
+    }
+    const type = str(body, "type");
+    if (type !== "layer4" && type !== "layer7") {
+        throw new HttpError(400, "Method type must be layer4 or layer7.");
+    }
+    const command = str(body, "command").trim();
+    if (!command || command.length > 500) {
+        throw new HttpError(400, "Method command must be 1-500 characters.");
+    }
+    return { name, fullname, type, command };
+}
+
+async function serverPayload(body: Body) {
+    const name = str(body, "name").trim();
+    if (!name || name.length > 60) {
+        throw new HttpError(400, "Server name must be 1-60 characters.");
+    }
+    const apiUrl = str(body, "api").trim();
+    if (!apiUrl) {
+        throw new HttpError(400, "API URL template is required.");
+    }
+    if (!/^https?:\/\//i.test(apiUrl)) {
+        throw new HttpError(400, "API URL must start with http:// or https://.");
+    }
+    try {
+        new URL(apiUrl);
+    } catch {
+        throw new HttpError(400, "API URL is invalid.");
+    }
+    const slots = intValue(body, "slots", 1, 100_000, "Slots");
+    const rawMethods = str(body, "methods").trim();
+    const tokens = rawMethods
+        ? rawMethods
+              .split(",")
+              .map((token) => token.trim())
+              .filter(Boolean)
+        : [];
+    const known = (await webDb.methods.findMany({ select: { name: true } })) as Array<{
+        name: string;
+    }>;
+    const canonical: string[] = [];
+    for (const token of tokens) {
+        const match = known.find((m) => m.name.toLowerCase() === token.toLowerCase());
+        if (!match) throw new HttpError(400, `Unknown method: ${token}.`);
+        if (!canonical.includes(match.name)) canonical.push(match.name);
+    }
+    if (canonical.length === 0) {
+        throw new HttpError(400, "Select at least one method for this server.");
+    }
+    return {
+        name,
+        api: apiUrl,
+        slots,
+        methods: canonical.join(","),
+        vip: Number(body.vip) === 1 ? 1 : 0,
+    };
+}
+
+function planTerm(plan: { length: number; unit: string }): number {
+    return Math.max(Number(plan.length) || 0, 1) * (plan.unit === "hours" ? 3600 : 86400);
 }
 
 export function registerWebAdminRoutes(app: Application): void {
@@ -121,26 +242,32 @@ export function registerWebAdminRoutes(app: Application): void {
             if (action === "create") {
                 const username = str(body, "username").trim();
                 const password = str(body, "password");
-                if (username.length < 3 || username.length > 20) {
-                    throw new HttpError(400, "Username must be 3-20 characters.");
+                if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) {
+                    throw new HttpError(
+                        400,
+                        "Username must be 3-20 letters, numbers, dots, dashes or underscores."
+                    );
                 }
                 if (password.length < 10) {
                     throw new HttpError(400, "Password must be at least 10 characters.");
                 }
-                const rank = Math.min(Math.max(num(body, "rank"), 0), 2);
+                const rank = intValue(body, "rank", 0, 2, "Rank", 0);
                 if (rank >= 2 && !(await actorIsSuper(ctx))) {
                     throw new HttpError(403, "Only a super admin can create another super admin.");
                 }
+                const membership = Number(body.membership ?? 0);
+                await requirePlan(membership);
+                const expire = intValue(body, "expire", 0, EXPIRY_MAX, "Expiry", 0);
                 const created = await withLock("user:" + username.toLowerCase(), async () => {
-                    const exists = await webDb.users.findFirst({ where: { username } });
-                    if (exists) throw new HttpError(409, "Username is already taken.");
+                    if (usernameTaken(username))
+                        throw new HttpError(409, "Username is already taken.");
                     return webDb.users.create({
                         data: {
                             username,
                             password: await bcrypt.hash(password, 12),
                             rank,
-                            membership: num(body, "membership"),
-                            expire: num(body, "expire"),
+                            membership,
+                            expire,
                             status: 0,
                             referral: "0",
                             referralbalance: 0,
@@ -148,6 +275,7 @@ export function registerWebAdminRoutes(app: Application): void {
                             activity: 0,
                             twoauth: 0,
                             referedBy: 0,
+                            sessionVersion: 0,
                         },
                     });
                 });
@@ -158,20 +286,22 @@ export function registerWebAdminRoutes(app: Application): void {
                 return;
             }
 
-            const id = num(body, "id");
-            if (!id) throw new HttpError(400, "Missing user id.");
+            const id = Number(body.id);
+            if (!Number.isInteger(id) || id <= 0) throw new HttpError(400, "Missing user id.");
             if (action === "update") {
                 const target = await webDb.users.findUnique({ where: { ID: id } });
                 if (!target) throw new HttpError(404, "User not found.");
                 const username = str(body, "username").trim();
-                if (username.length < 3 || username.length > 20) {
-                    throw new HttpError(400, "Username must be 3-20 characters.");
+                if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) {
+                    throw new HttpError(
+                        400,
+                        "Username must be 3-20 letters, numbers, dots, dashes or underscores."
+                    );
                 }
-                const duplicate = await webDb.users.findFirst({ where: { username } });
-                if (duplicate && duplicate.ID !== id) {
+                if (usernameTaken(username, id)) {
                     throw new HttpError(409, "Username is already taken.");
                 }
-                const rank = Math.min(Math.max(num(body, "rank"), 0), 2);
+                const rank = intValue(body, "rank", 0, 2, "Rank", Number(target.rank));
                 if ((rank >= 2 || Number(target.rank) >= 2) && !(await actorIsSuper(ctx))) {
                     throw new HttpError(403, "Only a super admin can modify a super admin.");
                 }
@@ -180,21 +310,89 @@ export function registerWebAdminRoutes(app: Application): void {
                     if (supers <= 1)
                         throw new HttpError(400, "Cannot demote the last super admin.");
                 }
-                const data: Record<string, string | number> = {
-                    username,
-                    rank,
-                    status: num(body, "status") === 1 ? 1 : 0,
-                    membership: num(body, "membership"),
-                    expire: num(body, "expire"),
-                };
+                const membership = Number(body.membership ?? target.membership);
+                await requirePlan(membership);
+                const expire = intValue(
+                    body,
+                    "expire",
+                    0,
+                    EXPIRY_MAX,
+                    "Expiry",
+                    Number(target.expire)
+                );
+                const status =
+                    body.status === undefined
+                        ? Number(target.status) === 1
+                            ? 1
+                            : 0
+                        : Number(body.status) === 1
+                          ? 1
+                          : 0;
                 const pw = str(body, "password");
+                let hashed = "";
                 if (pw) {
                     if (pw.length < 10)
                         throw new HttpError(400, "Password must be at least 10 characters.");
-                    data.password = await bcrypt.hash(pw, 12);
+                    hashed = await bcrypt.hash(pw, 12);
                 }
-                await webDb.users.update({ where: { ID: id }, data });
+                const oldUsername = String(target.username);
+                await withLock("user:" + username.toLowerCase(), async () => {
+                    webSqlite.transaction(() => {
+                        const sets = [
+                            "username = ?",
+                            "rank = ?",
+                            "status = ?",
+                            "membership = ?",
+                            "expire = ?",
+                        ];
+                        const values: Array<string | number> = [
+                            username,
+                            rank,
+                            status,
+                            membership,
+                            expire,
+                        ];
+                        if (hashed) {
+                            sets.push("password = ?", "sessionVersion = sessionVersion + 1");
+                            values.push(hashed);
+                        }
+                        values.push(id);
+                        webSqlite
+                            .prepare(`update users set ${sets.join(", ")} where ID = ?`)
+                            .run(...values);
+                        if (oldUsername !== username) {
+                            // Every username-keyed table follows the rename so a
+                            // recycled name cannot inherit the old identity.
+                            webSqlite
+                                .prepare("update tickets set username = ? where username = ?")
+                                .run(username, oldUsername);
+                            webSqlite
+                                .prepare("update messages set sender = ? where sender = ?")
+                                .run(username, oldUsername);
+                            webSqlite
+                                .prepare("update logs set user = ? where user = ?")
+                                .run(username, oldUsername);
+                            webSqlite
+                                .prepare("update actions set client = ? where client = ?")
+                                .run(username, oldUsername);
+                            webSqlite
+                                .prepare("update loginlogs set username = ? where username = ?")
+                                .run(username, oldUsername);
+                        }
+                    })();
+                });
                 await audit(ctx, "user.update", username);
+                if (session?.userId === id) {
+                    const fresh = await webDb.users.findUnique({ where: { ID: id } });
+                    if (fresh) {
+                        webSessions.save(ctx, {
+                            userId: Number(fresh.ID),
+                            username: fresh.username,
+                            rank: Number(fresh.rank),
+                            sv: Number(fresh.sessionVersion),
+                        });
+                    }
+                }
                 if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                     ctx.json({ success: "User updated." });
                 } else ctx.redirect("/web/admin/users", 303);
@@ -211,8 +409,29 @@ export function registerWebAdminRoutes(app: Application): void {
                     if (supers <= 1)
                         throw new HttpError(400, "Cannot delete the last super admin.");
                 }
-                await webDb.users.delete({ where: { ID: id } });
-                await audit(ctx, "user.delete", target.username);
+                const username = String(target.username);
+                webSqlite.transaction(() => {
+                    webSqlite
+                        .prepare(
+                            "delete from messages where ticketid in (select id from tickets where username = ?)"
+                        )
+                        .run(username);
+                    webSqlite.prepare("delete from tickets where username = ?").run(username);
+                    webSqlite
+                        .prepare("update messages set sender = '[deleted]' where sender = ?")
+                        .run(username);
+                    webSqlite
+                        .prepare("update logs set user = '[deleted]' where user = ?")
+                        .run(username);
+                    webSqlite
+                        .prepare("update actions set client = '[deleted]' where client = ?")
+                        .run(username);
+                    webSqlite
+                        .prepare("update loginlogs set username = '[deleted]' where username = ?")
+                        .run(username);
+                    webSqlite.prepare("delete from users where ID = ?").run(id);
+                })();
+                await audit(ctx, "user.delete", username);
                 if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                     ctx.json({ success: "User deleted." });
                 } else ctx.redirect("/web/admin/users", 303);
@@ -235,31 +454,36 @@ export function registerWebAdminRoutes(app: Application): void {
         async (ctx) => {
             const body = (await ctx.body()) as Body;
             const action = str(body, "action");
-            const payload = {
-                name: str(body, "name").trim(),
-                price: money(body.price),
-                length: num(body, "length"),
-                mbt: num(body, "mbt"),
-                concurrents: num(body, "concurrents"),
-                vip: num(body, "vip") ? 1 : 0,
-                unit: str(body, "unit", "days") || "days",
-                private: num(body, "private") ? 1 : 0,
-            };
             if (action === "create") {
-                if (!payload.name) throw new HttpError(400, "Plan name is required.");
+                const payload = planPayload(body);
                 const created = await webDb.plans.create({ data: payload });
                 await audit(ctx, "plan.create", String(created.ID));
             } else if (action === "update") {
-                const id = num(body, "id");
-                if (!id) throw new HttpError(400, "Missing plan id.");
-                if (!payload.name) throw new HttpError(400, "Plan name is required.");
-                await webDb.plans.update({ where: { ID: id }, data: payload });
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0) throw new HttpError(400, "Missing plan id.");
+                const payload = planPayload(body);
+                const updated = await webDb.plans.update({ where: { ID: id }, data: payload });
+                if (!updated) throw new HttpError(404, "Plan not found.");
                 await audit(ctx, "plan.update", String(id));
             } else if (action === "delete") {
-                const id = num(body, "id");
-                const inUse = await webDb.users.count({ where: { membership: id } });
-                if (inUse > 0)
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0) throw new HttpError(400, "Missing plan id.");
+                const plan = await webDb.plans.findUnique({ where: { ID: id } });
+                if (!plan) throw new HttpError(404, "Plan not found.");
+                const [members, pending, cards] = await Promise.all([
+                    webDb.users.count({ where: { membership: id } }),
+                    webDb.payments.count({ where: { plan: id, paid: 0 } }),
+                    webDb.giftcards.count({ where: { planID: id } }),
+                ]);
+                if (members > 0)
                     throw new HttpError(400, "Plan is assigned to users; reassign them first.");
+                if (pending > 0)
+                    throw new HttpError(400, "Plan has unpaid checkouts; resolve them first.");
+                if (cards > 0)
+                    throw new HttpError(
+                        400,
+                        "Plan is referenced by gift cards; remove them first."
+                    );
                 await webDb.plans.delete({ where: { ID: id } });
                 await audit(ctx, "plan.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
@@ -284,36 +508,70 @@ export function registerWebAdminRoutes(app: Application): void {
         async (ctx) => {
             const body = (await ctx.body()) as Body;
             const action = str(body, "action");
-            const payload = {
-                name: str(body, "name").trim(),
-                fullname: str(body, "fullname").trim(),
-                type: str(body, "type") === "layer7" ? "layer7" : "layer4",
-                command: str(body, "command").trim(),
+            const payload = methodPayload(body);
+            const duplicateMethod = (exceptId = 0): boolean => {
+                const row = webSqlite
+                    .prepare("select id from methods where lower(name) = lower(?) limit 1")
+                    .get(payload.name) as { id?: number } | undefined;
+                return Boolean(row?.id && Number(row.id) !== exceptId);
             };
             if (action === "create") {
-                if (!payload.name || !payload.fullname)
-                    throw new HttpError(400, "Name and full name are required.");
+                if (duplicateMethod())
+                    throw new HttpError(409, "A method with that name already exists.");
                 await webDb.methods.create({ data: payload });
                 await audit(ctx, "method.create", payload.name);
             } else if (action === "update") {
-                const id = num(body, "id");
-                if (!id) throw new HttpError(400, "Missing method id.");
-                if (!payload.name || !payload.fullname)
-                    throw new HttpError(400, "Name and full name are required.");
-                await webDb.methods.update({ where: { id }, data: payload });
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing method id.");
+                const existing = await webDb.methods.findUnique({ where: { id } });
+                if (!existing) throw new HttpError(404, "Method not found.");
+                if (duplicateMethod(id)) {
+                    throw new HttpError(409, "A method with that name already exists.");
+                }
+                const oldName = String(existing.name);
+                webSqlite.transaction(() => {
+                    webSqlite
+                        .prepare(
+                            "update methods set name = ?, fullname = ?, type = ?, command = ? where id = ?"
+                        )
+                        .run(payload.name, payload.fullname, payload.type, payload.command, id);
+                    if (oldName.toLowerCase() !== payload.name.toLowerCase()) {
+                        const servers = webSqlite
+                            .prepare("select id, methods from api")
+                            .all() as Array<{ id: number; methods?: string }>;
+                        const update = webSqlite.prepare("update api set methods = ? where id = ?");
+                        for (const server of servers) {
+                            const tokens = String(server.methods ?? "")
+                                .split(",")
+                                .map((token) => token.trim());
+                            let changed = false;
+                            const next = tokens.map((token) => {
+                                if (token.toLowerCase() === oldName.toLowerCase()) {
+                                    changed = true;
+                                    return payload.name;
+                                }
+                                return token;
+                            });
+                            if (changed) update.run(next.join(","), server.id);
+                        }
+                    }
+                })();
                 await audit(ctx, "method.update", String(id));
             } else if (action === "delete") {
-                const id = num(body, "id");
-                const servers = await webDb.api.findMany({ select: { methods: true, name: true } });
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing method id.");
                 const method = await webDb.methods.findUnique({ where: { id } });
+                if (!method) throw new HttpError(404, "Method not found.");
+                const servers = await webDb.api.findMany({ select: { methods: true } });
                 if (
-                    method &&
                     servers.some((s) =>
                         String(s.methods)
                             .toUpperCase()
                             .split(",")
                             .map((m) => m.trim())
-                            .includes(method.name.toUpperCase())
+                            .includes(String(method.name).toUpperCase())
                     )
                 ) {
                     throw new HttpError(
@@ -357,15 +615,19 @@ export function registerWebAdminRoutes(app: Application): void {
                 });
                 await audit(ctx, "news.create", payload.title);
             } else if (action === "update") {
-                const id = num(body, "id");
-                if (!id) throw new HttpError(400, "Missing announcement id.");
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing announcement id.");
                 if (!payload.title || !payload.content)
                     throw new HttpError(400, "Title and content are required.");
                 await webDb.news.update({ where: { ID: id }, data: payload });
                 await audit(ctx, "news.update", String(id));
             } else if (action === "delete") {
-                await webDb.news.delete({ where: { ID: num(body, "id") } });
-                await audit(ctx, "news.delete", String(body.id));
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing announcement id.");
+                await webDb.news.delete({ where: { ID: id } });
+                await audit(ctx, "news.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
@@ -388,36 +650,57 @@ export function registerWebAdminRoutes(app: Application): void {
         async (ctx) => {
             const body = (await ctx.body()) as Body;
             const action = str(body, "action");
-            const apiUrl = str(body, "api").trim();
-            if (apiUrl && !/^https?:\/\//i.test(apiUrl)) {
-                throw new HttpError(400, "API URL must start with http:// or https://.");
-            }
-            if (apiUrl) {
-                try {
-                    new URL(apiUrl);
-                } catch {
-                    throw new HttpError(400, "API URL is invalid.");
-                }
-            }
-            const payload = {
-                name: str(body, "name").trim(),
-                api: apiUrl,
-                slots: num(body, "slots", 10),
-                methods: str(body, "methods", "").trim(),
-                vip: num(body, "vip") ? 1 : 0,
+            const payload = await serverPayload(body);
+            const duplicateName = async (exceptId = 0): Promise<boolean> => {
+                const row = webSqlite
+                    .prepare("select id from api where lower(name) = lower(?) limit 1")
+                    .get(payload.name) as { id?: number } | undefined;
+                return Boolean(row?.id && Number(row.id) !== exceptId);
             };
             if (action === "create") {
-                if (!payload.name) throw new HttpError(400, "Server name is required.");
+                if (await duplicateName())
+                    throw new HttpError(409, "A server with that name already exists.");
                 await webDb.api.create({ data: payload });
                 await audit(ctx, "server.create", payload.name);
             } else if (action === "update") {
-                const id = num(body, "id");
-                if (!id) throw new HttpError(400, "Missing server id.");
-                if (!payload.name) throw new HttpError(400, "Server name is required.");
-                await webDb.api.update({ where: { id }, data: payload });
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing server id.");
+                const existing = await webDb.api.findUnique({ where: { id } });
+                if (!existing) throw new HttpError(404, "Server not found.");
+                if (await duplicateName(id))
+                    throw new HttpError(409, "A server with that name already exists.");
+                if (String(existing.name) !== payload.name) {
+                    expireFinishedAttacks();
+                    const running = await webDb.logs.count({
+                        where: { handler: existing.name, stopped: 0, time: { gt: 0 } },
+                    });
+                    if (running > 0) {
+                        throw new HttpError(
+                            400,
+                            "Server is handling running attacks; wait for them to finish."
+                        );
+                    }
+                }
+                const updated = await webDb.api.update({ where: { id }, data: payload });
+                if (!updated) throw new HttpError(404, "Server not found.");
                 await audit(ctx, "server.update", String(id));
             } else if (action === "delete") {
-                const id = num(body, "id");
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing server id.");
+                const server = await webDb.api.findUnique({ where: { id } });
+                if (!server) throw new HttpError(404, "Server not found.");
+                expireFinishedAttacks();
+                const running = await webDb.logs.count({
+                    where: { handler: server.name, stopped: 0, time: { gt: 0 } },
+                });
+                if (running > 0) {
+                    throw new HttpError(
+                        400,
+                        "Server is handling running attacks; wait for them to finish."
+                    );
+                }
                 await webDb.api.delete({ where: { id } });
                 await audit(ctx, "server.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
@@ -446,9 +729,13 @@ export function registerWebAdminRoutes(app: Application): void {
             const body = (await ctx.body()) as Body;
             const action = str(body, "action");
             if (action === "generate") {
-                const planID = num(body, "planID");
-                if (!planID) throw new HttpError(400, "Choose a plan.");
-                const count = Math.min(Math.max(num(body, "count", 1), 1), 100);
+                const planID = Number(body.planID);
+                if (!Number.isInteger(planID) || planID <= 0)
+                    throw new HttpError(400, "Choose a plan.");
+                const plan = await webDb.plans.findUnique({ where: { ID: planID } });
+                if (!plan) throw new HttpError(400, "That plan does not exist.");
+                const termSeconds = planTerm(plan);
+                const count = Math.min(Math.max(Number(body.count) || 1, 1), 100);
                 const now = Math.floor(Date.now() / 1000);
                 await withLock("giftcards", async () => {
                     for (let i = 0; i < count; i += 1) {
@@ -462,26 +749,59 @@ export function registerWebAdminRoutes(app: Application): void {
                         if (!code)
                             throw new HttpError(500, "Could not generate a unique gift card code.");
                         await webDb.giftcards.create({
-                            data: { code, planID, claimedby: 0, dateClaimed: 0, date: now },
+                            data: {
+                                code,
+                                planID,
+                                claimedby: 0,
+                                dateClaimed: 0,
+                                date: now,
+                                termSeconds,
+                            },
                         });
                     }
                 });
                 await audit(ctx, "giftcard.generate", String(count));
             } else if (action === "update") {
-                const id = num(body, "id");
-                const planID = num(body, "planID");
-                if (!id || !planID) throw new HttpError(400, "Gift card and plan are required.");
-                await webDb.giftcards.update({ where: { ID: id }, data: { planID } });
+                const id = Number(body.id);
+                const planID = Number(body.planID);
+                if (!Number.isInteger(id) || id <= 0 || !Number.isInteger(planID) || planID <= 0)
+                    throw new HttpError(400, "Gift card and plan are required.");
+                const card = await webDb.giftcards.findUnique({ where: { ID: id } });
+                if (!card) throw new HttpError(404, "Gift card not found.");
+                if (Number(card.claimedby) !== 0)
+                    throw new HttpError(400, "Claimed gift cards cannot be edited.");
+                const plan = await webDb.plans.findUnique({ where: { ID: planID } });
+                if (!plan) throw new HttpError(400, "That plan does not exist.");
+                await webDb.giftcards.update({
+                    where: { ID: id },
+                    data: { planID, termSeconds: planTerm(plan) },
+                });
                 await audit(ctx, "giftcard.update", String(id));
             } else if (action === "revoke") {
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing gift card id.");
+                const card = await webDb.giftcards.findUnique({ where: { ID: id } });
+                if (!card) throw new HttpError(404, "Gift card not found.");
+                if (Number(card.claimedby) !== 0)
+                    throw new HttpError(400, "Only unclaimed gift cards can be revoked.");
                 await webDb.giftcards.update({
-                    where: { ID: num(body, "id") },
+                    where: { ID: id },
                     data: { claimedby: -1 },
                 });
-                await audit(ctx, "giftcard.revoke", String(body.id));
+                await audit(ctx, "giftcard.revoke", String(id));
             } else if (action === "delete") {
-                await webDb.giftcards.delete({ where: { ID: num(body, "id") } });
-                await audit(ctx, "giftcard.delete", String(body.id));
+                const id = Number(body.id);
+                if (!Number.isInteger(id) || id <= 0)
+                    throw new HttpError(400, "Missing gift card id.");
+                const card = await webDb.giftcards.findUnique({ where: { ID: id } });
+                if (!card) throw new HttpError(404, "Gift card not found.");
+                // A claimed card granted real plan time; deleting it without a
+                // recorded reversal would erase the audit trail.
+                if (Number(card.claimedby) > 0)
+                    throw new HttpError(400, "Claimed gift cards cannot be deleted.");
+                await webDb.giftcards.delete({ where: { ID: id } });
+                await audit(ctx, "giftcard.delete", String(id));
             } else throw new HttpError(400, "Unknown action.");
             if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
                 ctx.json({ success: "Saved." });
@@ -530,7 +850,7 @@ export function registerWebAdminRoutes(app: Application): void {
         "/web/api/admin/tickets",
         async (ctx) => {
             const body = (await ctx.body()) as Body;
-            const id = num(body, "id");
+            const id = Number(body.id);
             const action = str(body, "action");
             const ticket = await webDb.tickets.findUnique({ where: { id } });
             if (!ticket) throw new HttpError(404, "Ticket not found.");
@@ -679,8 +999,6 @@ export function registerWebAdminRoutes(app: Application): void {
                         maintaince: String(s?.maintaince ?? "0"),
                         stripePubKey: s?.stripePubKey ?? "",
                         hasStripeSecret: Boolean(s?.stripeSecretKey),
-                        hasPaypal: Boolean(s?.paypal),
-                        hasBitcoin: Boolean(s?.bitcoin),
                     },
                 })
             );
@@ -704,7 +1022,7 @@ export function registerWebAdminRoutes(app: Application): void {
                 "maintaince",
                 "stripePubKey",
             ] as const;
-            const secrets = ["paypal", "bitcoin", "stripeSecretKey"] as const;
+            const secrets = ["stripeSecretKey"] as const;
             const update: Record<string, string | number> = {};
             for (const key of general) {
                 if (body[key] !== undefined) update[key] = body[key];

@@ -43,6 +43,7 @@
                                         <td><%= c.claimedby > 0 ? c.claimedby : (c.claimedby === -1 ? 'Revoked' : '-') %></td>
                                         <td><%= new Date(Number(c.date) * 1000).toLocaleDateString('en-US') %></td>
                                         <td>
+                                            <% if (Number(c.claimedby) === 0) { %>
                                             <details>
                                                 <summary class="btn btn-sm btn-primary">Edit</summary>
                                                 <form class="mt-2" action="/web/api/admin/giftcards" method="POST">
@@ -61,11 +62,16 @@
                                                 <input type="hidden" name="id" value="<%= c.ID %>"/>
                                                 <button class="btn btn-sm btn-warning" type="submit">Revoke</button>
                                             </form>
+                                            <% } %>
+                                            <% if (Number(c.claimedby) <= 0) { %>
                                             <form action="/web/api/admin/giftcards" method="POST" class="mt-1">
                                                 <input type="hidden" name="action" value="delete"/>
                                                 <input type="hidden" name="id" value="<%= c.ID %>"/>
                                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
                                             </form>
+                                            <% } else { %>
+                                            <span class="text-muted">Claimed</span>
+                                            <% } %>
                                         </td>
                                     </tr>
                                 <% }) } %>

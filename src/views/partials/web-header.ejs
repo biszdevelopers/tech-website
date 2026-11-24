@@ -40,7 +40,7 @@
             </button>
             <% if (locals.signedIn) { %>
             <a class="web-header__btn web-header__btn--ghost" href="/web/dashboard">Dashboard</a>
-            <a class="web-header__btn web-header__btn--solid" href="/web/api/auth/logout">Log out</a>
+            <form method="post" action="/web/api/auth/logout" class="web-header__logout"><button type="submit" class="web-header__btn web-header__btn--solid">Log out</button></form>
             <% } else { %>
             <a class="web-header__btn web-header__btn--ghost" href="/web/register">Register</a>
             <% } %>

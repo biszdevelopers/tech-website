@@ -23,6 +23,7 @@ data/*.db-wal
 # Runtime uploads (never inside dist/, never in git)
 /var/uploads/
 /uploads/
+/var/og/
 
 # Debug / logs
 npm-debug.log*

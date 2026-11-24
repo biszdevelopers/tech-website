@@ -8,9 +8,9 @@
                     <form class="mt-4" action="/web/api/admin/plans" method="POST">
                         <input type="hidden" name="action" value="create"/>
                         <div class="form-group"><label class="text-white">Name</label><input class="form-control" required name="name"/></div>
-                        <div class="form-group"><label class="text-white">Price (USD)</label><input class="form-control" type="number" step="0.01" min="0" required name="price"/></div>
+                        <div class="form-group"><label class="text-white">Price (USD)</label><input class="form-control" type="number" step="0.01" min="0.01" required name="price"/></div>
                         <div class="form-group"><label class="text-white">Duration</label><input class="form-control" type="number" min="1" required name="length"/><select class="form-control" name="unit"><option value="days">Days</option><option value="hours">Hours</option></select></div>
-                        <div class="form-group"><label class="text-white">Max Attack Time (s)</label><input class="form-control" type="number" min="1" required name="mbt"/></div>
+                        <div class="form-group"><label class="text-white">Max Attack Time (s)</label><input class="form-control" type="number" min="1" max="3600" required name="mbt"/></div>
                         <div class="form-group"><label class="text-white">Concurrents</label><input class="form-control" type="number" min="1" required name="concurrents"/></div>
                         <div class="form-group"><label class="text-white">VIP</label><select class="form-control" name="vip"><option value="0">No</option><option value="1">Yes</option></select></div>
                         <div class="form-group"><label class="text-white">Private</label><select class="form-control" name="private"><option value="0">No</option><option value="1">Yes</option></select></div>
@@ -42,14 +42,14 @@
                                                     <input type="hidden" name="action" value="update"/>
                                                     <input type="hidden" name="id" value="<%= pl.ID %>"/>
                                                     <input class="form-control mb-1" name="name" value="<%= pl.name %>" required/>
-                                                    <input class="form-control mb-1" type="number" step="0.01" name="price" value="<%= pl.price %>"/>
-                                                    <input class="form-control mb-1" type="number" name="length" value="<%= pl.length %>"/>
+                                                    <input class="form-control mb-1" type="number" step="0.01" min="0.01" name="price" value="<%= pl.price %>"/>
+                                                    <input class="form-control mb-1" type="number" min="1" name="length" value="<%= pl.length %>"/>
                                                     <select class="form-control mb-1" name="unit">
                                                         <option value="days"<%- pl.unit === 'days' ? ' selected' : '' %>>Days</option>
                                                         <option value="hours"<%- pl.unit === 'hours' ? ' selected' : '' %>>Hours</option>
                                                     </select>
-                                                    <input class="form-control mb-1" type="number" name="mbt" value="<%= pl.mbt %>"/>
-                                                    <input class="form-control mb-1" type="number" name="concurrents" value="<%= pl.concurrents %>"/>
+                                                    <input class="form-control mb-1" type="number" min="1" max="3600" name="mbt" value="<%= pl.mbt %>"/>
+                                                    <input class="form-control mb-1" type="number" min="1" name="concurrents" value="<%= pl.concurrents %>"/>
                                                     <select class="form-control mb-1" name="vip"><option value="0"<%- !pl.vip ? ' selected' : '' %>>No VIP</option><option value="1"<%- pl.vip ? ' selected' : '' %>>VIP</option></select>
                                                     <select class="form-control mb-1" name="private"><option value="0"<%- !pl.private ? ' selected' : '' %>>Public</option><option value="1"<%- pl.private ? ' selected' : '' %>>Private</option></select>
                                                     <button class="btn btn-sm btn-success" type="submit">Save</button>

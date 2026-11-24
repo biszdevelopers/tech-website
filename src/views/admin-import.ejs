@@ -1,21 +1,24 @@
-<%- include('partials/head', { title: 'Import CSV | BIBS-C Tech Tools', css: ['globals.css', 'form.css'] }) %>
+<%- include('partials/head', { title: 'Import CSV | BIBS-C Tech Tools', robots: 'noindex,nofollow', css: ['site.css', 'forms.css', 'admin.css'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1>Import CSV</h1></div>
 <div id="adminNav">
     <ul>
         <li><a href="/admin">&#8592; Back to Admin</a></li>
+        <li><a href="/admin/export.csv">Export CSV</a></li>
     </ul>
 </div>
 <div id="wrap">
     <form id="form" method="post" action="/api/admin/import">
         <p class="form-hint">
             Paste CSV with a header row. Required columns: <code>name,link,display</code>.
-            Optional: <code>id,tl1,tl2,tl3,tl4,username,contact,accepted</code> plus the
-            strand columns (<code>r,tp,mt,ar,u,mdl,ra,rotech,ls,roththink,eost,ef,rte,dloi,raaoc</code>).
-            Use <code>1</code> for true flags. Rows with an existing <code>id</code> are updated.
+            Optional: <code>id,tl1,tl2,tl3,tl4,tl5,tl6,username,contact,accepted,resources</code>
+            plus the strand columns
+            (<code>r,tp,mt,ar,u,mdl,ra,rotech,ls,roththink,eost,ef,rte,dloi,raaoc</code>).
+            Resources use one <code>Label | https://...</code> per line inside the cell.
+            Only columns present in the header are changed. Use <code>1</code> for true flags.
         </p>
         <label class="field"><span>CSV data</span>
-            <textarea class="l csv-input" name="csv" required placeholder="name,link,display,tl1,tl2,tl3,tl4,accepted"></textarea>
+            <textarea class="l csv-input" name="csv" required placeholder="name,link,display,tl1,tl2,tl3,tl4,tl5,tl6,accepted"></textarea>
         </label>
         <button type="submit" class="submit-btn">Import</button>
     </form>

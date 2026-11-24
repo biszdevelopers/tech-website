@@ -1,14 +1,6 @@
 /**
- * MAIN SITE ROUTES - public pages + auth + submission intake.
- *
- * SECURITY POSTURE (parity with the hardened Next build):
- *   - /login and /submission are public pages.
- *   - POST /api/auth/login  -> bcrypt verify, rate-limited, sets signed cookie
- *   - GET  /api/auth/logout -> destroys session, redirects home
- *   - POST /api/submission  -> rate-limited, zod-validated, multipart upload,
- *                              writes pending row + domain flags + screenshot
+ * MAIN SITE ROUTES - public pages, operator auth and submission intake.
  */
-
 import { Application } from "../core/01-application";
 import { Context } from "../core/03-context";
 import { HttpError } from "../core/09-errors";
@@ -21,13 +13,35 @@ import { readMultipart } from "../lib/multipart";
 import { detectImage, saveUpload } from "../lib/uploads";
 import { withLock } from "../lib/lock";
 import { verifyPassword } from "../lib/passwords";
+import { parseResourceLines } from "../lib/resources";
+import { strandColumnNames } from "../lib/tl-config";
 import {
-    createSubmission,
-    createDomain,
+    createToolBundle,
     getNextSubmissionId,
     type CreateDomainInput,
 } from "../server/queries/submissions";
 import { mainDb } from "../lib/db/main";
+import { buildPageMeta, websiteLd } from "../lib/seo";
+
+const SUBMISSION_META = buildPageMeta({
+    title: "Submit a Tech Tool | BIBS-C Tech Tools",
+    description: "Suggest a teaching technology tool for the BIBS-C directory.",
+    path: "/submission",
+    robots: "public",
+    jsonLd: [websiteLd()],
+});
+
+function wantsJson(ctx: Context): boolean {
+    return String(ctx.raw.headers.accept ?? "").includes("application/json");
+}
+
+function sameSubmissionSuccess(ctx: Context, id?: number): void {
+    if (wantsJson(ctx)) {
+        ctx.json({ success: true, id, message: "Submission received." });
+    } else {
+        ctx.redirect("/submission?received=1", 303);
+    }
+}
 
 export function registerMainSiteRoutes(app: Application): void {
     app.get("/login", async (ctx) => {
@@ -37,7 +51,7 @@ export function registerMainSiteRoutes(app: Application): void {
     app.post(
         "/api/auth/login",
         async (ctx) => {
-            const asHtml = !String(ctx.raw.headers.accept ?? "").includes("application/json");
+            const asHtml = !wantsJson(ctx);
             if (!rateLimit("main-login:" + ctx.ip, 10, 60_000)) {
                 if (asHtml) {
                     ctx.redirect("/login?error=rate", 303);
@@ -53,13 +67,15 @@ export function registerMainSiteRoutes(app: Application): void {
                 }
                 throw new HttpError(429, "Too many login attempts. Try again in a minute.");
             }
-            const user = await mainDb.login.findUnique({ where: { User: form.username } });
-            // Always run a verification so unknown users take the same time.
+            const rows = await mainDb.login.findMany();
+            const user = rows.find(
+                (row) => String(row.User).toLowerCase() === form.username.toLowerCase()
+            );
             const check = await verifyPassword(
                 form.password,
                 user?.PW ?? "$2b$12$.5XkKkyMWCtIYiGjUqvHeuWjs5kNjl7nOYChlviJiHgVUgE4A.h6C"
             );
-            if (user === null || !check.ok) {
+            if (user === undefined || !check.ok) {
                 if (asHtml) {
                     ctx.redirect("/login?error=invalid", 303);
                     return;
@@ -72,88 +88,124 @@ export function registerMainSiteRoutes(app: Application): void {
                     data: { PW: check.rehashed },
                 });
             }
-            await mainSessions.save(ctx, { islogin: true });
+            await mainSessions.save(ctx, {
+                islogin: true,
+                username: user.User,
+                sv: Number(user.sessionVersion),
+            });
             ctx.redirect("/admin", 303);
         },
         { guard: undefined }
     );
 
-    app.get("/api/auth/logout", async (ctx) => {
+    app.post("/api/auth/logout", async (ctx) => {
         mainSessions.destroy(ctx);
         ctx.redirect("/", 303);
     });
 
     app.get("/submission", async (ctx) => {
-        ctx.htmlRaw(render("submission", { received: ctx.query.get("received") === "1" }));
+        ctx.htmlRaw(
+            render("submission", {
+                received: ctx.query.get("received") === "1",
+                meta: SUBMISSION_META,
+            })
+        );
     });
 
     app.post("/api/submission", async (ctx: Context) => {
-        if (!rateLimit("submission:" + ctx.ip, 5, 3_600_000)) {
+        if (!rateLimit("submission:" + ctx.ip, 10, 3_600_000)) {
             throw new HttpError(429, "Too many submissions. Try again later.");
         }
 
         const { fields, file } = await readMultipart(ctx);
-        const parsed = submissionSchema.safeParse(fields);
-        if (!parsed.success) {
-            throw new HttpError(400, parsed.error.issues[0]?.message ?? "Validation failed.");
-        }
         if (fields.website || fields.url) {
-            // Honeypot: real users never fill this hidden field.
-            ctx.json({ success: true, message: "Submission received." });
+            // Honeypot: look exactly like the normal success path.
+            sameSubmissionSuccess(ctx);
             return;
         }
+
+        const parsed = submissionSchema.safeParse(fields);
+        if (!parsed.success) {
+            const error = parsed.error.issues[0]?.message ?? "Validation failed.";
+            if (wantsJson(ctx)) throw new HttpError(400, error);
+            ctx.htmlRaw(
+                render("submission", {
+                    received: false,
+                    error,
+                    values: fields,
+                    meta: SUBMISSION_META,
+                }),
+                400
+            );
+            return;
+        }
+
+        const resourceResult = parseResourceLines(parsed.data.resources ?? "");
+        if (!resourceResult.ok) {
+            if (wantsJson(ctx)) throw new HttpError(400, resourceResult.error);
+            ctx.htmlRaw(
+                render("submission", {
+                    received: false,
+                    error: resourceResult.error,
+                    values: fields,
+                    meta: SUBMISSION_META,
+                }),
+                400
+            );
+            return;
+        }
+
+        const d = parsed.data;
+        const domainColumns = strandColumnNames();
+        const flags = domainColumns.map(
+            (column) => [column, fields[column] === "true"] as [string, boolean]
+        );
+        const hasWriteup = Boolean((d.tl5_desc ?? "").trim() || (d.tl6_desc ?? "").trim());
+        if (!flags.some(([, value]) => value) && !hasWriteup) {
+            const error = "Choose at least one TL1-TL4 strand or add a TL5/TL6 write-up.";
+            if (wantsJson(ctx)) throw new HttpError(400, error);
+            ctx.htmlRaw(
+                render("submission", {
+                    received: false,
+                    error,
+                    values: fields,
+                    meta: SUBMISSION_META,
+                }),
+                400
+            );
+            return;
+        }
+
         if (file && file.data.length > 0 && !detectImage(file.data)) {
             throw new HttpError(400, "Screenshot must be a PNG, JPEG or WebP image.");
         }
 
-        const d = parsed.data;
-        const domainFlags = (
-            [
-                "R",
-                "TP",
-                "MT",
-                "AR",
-                "U",
-                "MDL",
-                "RA",
-                "RoTech",
-                "LS",
-                "RoThink",
-                "EoST",
-                "EF",
-                "RTE",
-                "DLoI",
-                "RaAoC",
-            ] as const
-        ).map((col) => [col, fields[col] === "true"]) as Array<[keyof CreateDomainInput, boolean]>;
-
         const row = await withLock("submission-id", async () => {
             const id = await getNextSubmissionId();
-            const created = await createSubmission({
-                id,
-                techname: d.techname,
-                link: d.link,
-                displaytext: d.displaytext,
-                tl1_desc: d.tl1_desc ?? "",
-                tl2_desc: d.tl2_desc ?? "",
-                tl3_desc: d.tl3_desc ?? "",
-                tl4_desc: d.tl4_desc ?? "",
-                username: d.username ?? "",
-                contact: d.contact ?? "",
-                accepted: false,
-            });
-            await createDomain({ id, ...Object.fromEntries(domainFlags) } as CreateDomainInput);
-            return created;
+            createToolBundle(
+                {
+                    id,
+                    techname: d.techname,
+                    link: d.link,
+                    displaytext: d.displaytext,
+                    tl1_desc: d.tl1_desc ?? "",
+                    tl2_desc: d.tl2_desc ?? "",
+                    tl3_desc: d.tl3_desc ?? "",
+                    tl4_desc: d.tl4_desc ?? "",
+                    tl5_desc: d.tl5_desc ?? "",
+                    tl6_desc: d.tl6_desc ?? "",
+                    username: d.username ?? "",
+                    contact: d.contact ?? "",
+                    accepted: false,
+                },
+                Object.fromEntries(flags) as unknown as Omit<CreateDomainInput, "id">,
+                resourceResult.rows
+            );
+            return { id };
         });
 
-        if (file && file.data.length > 0) {
-            saveUpload(row.id, file.data);
-        }
+        if (file && file.data.length > 0) saveUpload(row.id, file.data);
 
-        if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
-            ctx.json({ success: true, id: row.id, message: "Submission received." });
-        } else {
-            ctx.redirect("/submission?received=1", 303);
-        }
+        sameSubmissionSuccess(ctx, row.id);
     });
 }

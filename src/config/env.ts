@@ -105,6 +105,12 @@ const settingsKey = process.env.SETTINGS_KEY?.trim() || "";
 if (settingsKey && Buffer.from(settingsKey, "base64").length !== 32) {
     throw new Error("SETTINGS_KEY must be a base64-encoded 32-byte key.");
 }
+if (isProd && site.https && !tlsCert && process.env.TRUST_PROXY !== "true") {
+    throw new Error(
+        "SITE_ORIGIN is https but the app has no TLS certificate and TRUST_PROXY is false. " +
+            "Set TRUST_PROXY=true when nginx or another proxy terminates TLS, or provide TLS_CERT/TLS_KEY."
+    );
+}
 if (isProd && !settingsKey) {
     console.warn(
         "WARNING: SETTINGS_KEY is not set. Stripe secrets will be stored unencrypted in SQLite."

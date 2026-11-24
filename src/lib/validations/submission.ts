@@ -22,9 +22,11 @@ export const submissionSchema = z.object({
     tl2_desc: z.string().max(8000).optional().default(""),
     tl3_desc: z.string().max(8000).optional().default(""),
     tl4_desc: z.string().max(8000).optional().default(""),
+    tl5_desc: z.string().max(8000).optional().default(""),
+    tl6_desc: z.string().max(8000).optional().default(""),
     username: z.string().max(120).optional().default(""),
     contact: z.string().max(200).optional().default(""),
-    // Domain checkboxes - these will come as string "true" or undefined
+    resources: z.string().max(20000).optional().default(""),
     R: z.string().optional(),
     TP: z.string().optional(),
     MT: z.string().optional(),
@@ -43,3 +45,7 @@ export const submissionSchema = z.object({
 });
 
 export type SubmissionInput = z.infer<typeof submissionSchema>;
+
+export const toolFieldsSchema = submissionSchema.omit({ resources: true }).extend({
+    resources: z.string().max(20000).optional().default(""),
+});

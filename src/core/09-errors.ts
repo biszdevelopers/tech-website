@@ -72,6 +72,20 @@ export async function withErrorBoundary(
         const isApi =
             !accept.includes("text/html") &&
             (ctx.path.startsWith("/api/") || ctx.path.startsWith("/web/api/"));
+
+        // Web pages get a login bounce instead of the main-site error page.
+        if (!isApi && ctx.path.startsWith("/web/")) {
+            const next = encodeURIComponent(ctx.path + (ctx.url.search || ""));
+            if (status === 401) {
+                ctx.redirect("/web/login?next=" + next, 303);
+                return;
+            }
+            if (status === 403 && /banned/i.test(err instanceof Error ? err.message : "")) {
+                ctx.redirect("/web/login?error=banned", 303);
+                return;
+            }
+        }
+
         if (status >= 500) {
             logEvent("error", {
                 ref,

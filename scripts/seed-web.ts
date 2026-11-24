@@ -1,8 +1,4 @@
-﻿try {
-    process.loadEnvFile();
-} catch {
-    /* real environment wins */
-}
+﻿import "./load-env";
 import { webDb } from "../src/lib/db/web";
 import bcrypt from "bcryptjs";
 
@@ -10,10 +6,13 @@ function hashPassword(password: string): string {
     return bcrypt.hashSync(password, 12);
 }
 
+/**
+ * Seed is create-only: re-running it must never overwrite operator edits
+ * (settings, FAQ, plans, methods, accounts).
+ */
 async function main() {
     console.log("Seeding web database...");
 
-    // Upsert settings (sitename is the @id field)
     await webDb.settings.upsert({
         where: { sitename: "IPstress" },
         update: {},
@@ -34,14 +33,14 @@ async function main() {
             testboots: 1,
             cloudflare: 0,
             skype: "",
-            key: "demo-api-key",
+            key: "",
             issuerId: "",
             coinpayments: "",
             ipnSecret: "",
             google_site: "",
             google_secret: "",
             btc_address: "",
-            secretKey: "demo-secret",
+            secretKey: "",
             cbp: 0,
             paypal_email: "",
             theme: "default",
@@ -49,15 +48,15 @@ async function main() {
             stripeSecretKey: "",
         },
     });
-    console.log("  鉁?Default settings created");
+    console.log("  ok default settings present");
 
-    // Insert demo plans
+    // Max attack times increase with plan tier: 60 / 120 / 300 / 600 seconds.
     const plans = [
         {
             ID: 1,
             name: "Bronze",
             vip: 0,
-            mbt: 1,
+            mbt: 60,
             unit: "days",
             length: 7,
             price: 5.99,
@@ -68,7 +67,7 @@ async function main() {
             ID: 2,
             name: "Silver",
             vip: 0,
-            mbt: 1,
+            mbt: 120,
             unit: "days",
             length: 30,
             price: 14.99,
@@ -79,7 +78,7 @@ async function main() {
             ID: 3,
             name: "Gold",
             vip: 1,
-            mbt: 1,
+            mbt: 300,
             unit: "days",
             length: 30,
             price: 29.99,
@@ -90,7 +89,7 @@ async function main() {
             ID: 4,
             name: "Diamond",
             vip: 1,
-            mbt: 1,
+            mbt: 600,
             unit: "days",
             length: 90,
             price: 74.99,
@@ -103,21 +102,40 @@ async function main() {
         const existing = await webDb.plans.findUnique({ where: { ID: plan.ID } });
         if (!existing) await webDb.plans.create({ data: plan });
     }
-    console.log("  鉁?4 demo plans present");
+    console.log("  ok 4 plans present (create-only)");
 
-    // Insert the demo admin only when no operator account exists. Re-running a
-    // seed must never reset a live password.
+    const methods = [
+        {
+            name: "UDP",
+            fullname: "UDP Flood",
+            type: "layer4",
+            command: "./udp {host} {port} {time}",
+        },
+        {
+            name: "TCP",
+            fullname: "TCP Flood",
+            type: "layer4",
+            command: "./tcp {host} {port} {time}",
+        },
+        { name: "HTTP", fullname: "HTTP Flood", type: "layer7", command: "./http {target} {time}" },
+    ];
+    for (const method of methods) {
+        const existing = await webDb.methods.findFirst({ where: { name: method.name } });
+        if (!existing) await webDb.methods.create({ data: method });
+    }
+    console.log("  ok UDP/TCP/HTTP methods present (create-only)");
+
+    // Operator account only when no operator exists. Re-running a seed must
+    // never reset a live password.
     const hasAdmin = await webDb.users.findFirst({ where: { rank: { gte: 1 } } });
     if (!hasAdmin) {
-        const hashedPassword = hashPassword("admin123");
         await webDb.users.create({
             data: {
-                ID: 1,
                 username: "admin",
-                password: hashedPassword,
+                password: hashPassword("admin12345"),
                 rank: 2,
                 membership: 0,
-                expire: 9999999999,
+                expire: 0,
                 status: 0,
                 referral: "",
                 referralbalance: 0,
@@ -125,14 +143,14 @@ async function main() {
                 activity: 0,
                 twoauth: 0,
                 referedBy: 0,
+                sessionVersion: 0,
             },
         });
-        console.log("  鉁?demo admin created (admin / admin123)");
+        console.log("  ok operator created (admin / admin12345) - change it after first login");
     } else {
         console.log("  = operator account exists, left untouched");
     }
 
-    // Insert smtp settings
     await webDb.smtpsettings.upsert({
         where: { host: "smtp.example.com" },
         update: {},
@@ -144,9 +162,8 @@ async function main() {
             port: 587,
         },
     });
-    console.log("  鉁?SMTP settings created");
+    console.log("  ok SMTP settings present");
 
-    // Insert sample FAQ entries
     const faqs = [
         {
             id: 1,
@@ -161,7 +178,7 @@ async function main() {
         {
             id: 3,
             question: "How do I upgrade my plan?",
-            answer: "Navigate to the Plans page, select your desired plan, and complete payment through one of our supported payment methods.",
+            answer: "Open the Plans page, choose a plan and pay by card through Stripe. Your plan activates as soon as the payment is confirmed.",
         },
         {
             id: 4,
@@ -171,18 +188,15 @@ async function main() {
         {
             id: 5,
             question: "How do I reset my password?",
-            answer: 'Go to the login page and click "Forgot Password" to receive a password reset link via email.',
+            answer: "Open a support ticket and the operator will reset it for you.",
         },
     ];
 
     for (const faq of faqs) {
-        await webDb.faq.upsert({
-            where: { id: faq.id },
-            update: faq,
-            create: faq,
-        });
+        const existing = await webDb.faq.findUnique({ where: { id: faq.id } });
+        if (!existing) await webDb.faq.create({ data: faq });
     }
-    console.log("  鉁?5 FAQ entries created");
+    console.log("  ok FAQ entries present (edited entries kept)");
 
     console.log("Web database seeded successfully!");
 }

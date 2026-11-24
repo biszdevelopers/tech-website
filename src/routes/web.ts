@@ -1,15 +1,15 @@
 /**
  * ============================================================================
  * WEB ROUTES - SaaS auth APIs, hub, profile, tickets, giftcards, affiliate,
- * wheel. Pages render via views/web-pages.ts; every handler below is a direct
- * port of the audited Next.js route handlers (same guards, limits, responses).
+ * wheel. Pages render via the web-*.ejs templates; every handler below keeps
+ * the same guards, limits and response shapes as the audited Next.js routes.
  * ============================================================================
  */
 
 import { Application } from "../core/01-application";
 import { Context } from "../core/03-context";
 import { HttpError } from "../core/09-errors";
-import { webSessions, requireWebUser } from "./guards";
+import { webSessions, requireWebUser, optionalWebUser } from "./guards";
 import { features } from "../config/features";
 import { env } from "../config/env";
 import { rateLimit } from "../lib/rate-limit";
@@ -20,12 +20,48 @@ import { randomInt } from "node:crypto";
 import { withLock } from "../lib/lock";
 import { launchAttack } from "../server/attacks";
 import { verifyPassword } from "../lib/passwords";
+import { isWebMaintenance } from "../lib/web-settings";
+import type { PlanRow, UserRow } from "../types/db";
 import bcrypt from "bcryptjs";
+import { buildPageMeta } from "../lib/seo";
+
+function privateMeta(title: string, path: string) {
+    return buildPageMeta({ title, description: "IPstress account area.", path, robots: "private" });
+}
 
 type Body = Record<string, unknown>;
 
+function safeNext(value: unknown): string {
+    const next = String(value ?? "");
+    if (!next.startsWith("/web/") || next.startsWith("//") || next.includes("\\"))
+        return "/web/dashboard";
+    if (next.startsWith("/web/login") || next.startsWith("/web/api/")) return "/web/dashboard";
+    return next;
+}
+
 /** Constant hash so unknown usernames cost the same as wrong passwords. */
 const DUMMY_HASH = "$2b$12$.5XkKkyMWCtIYiGjUqvHeuWjs5kNjl7nOYChlviJiHgVUgE4A.h6C";
+
+/** Whole seconds a plan grants. Shared by checkout, webhook and gift cards. */
+export function planTermSeconds(plan: { length: number; unit: string }): number {
+    return Math.max(Number(plan.length) || 0, 1) * (plan.unit === "hours" ? 3600 : 86400);
+}
+
+function nowSeconds(): number {
+    return Math.floor(Date.now() / 1000);
+}
+
+/** A membership row only counts while it is set and not past its expiry. */
+function hasActiveMembership(user: { membership: number; expire: number }): boolean {
+    return Number(user.membership) > 0 && Number(user.expire) > nowSeconds();
+}
+
+/** Usernames are unique case-insensitively; SQLite's UNIQUE is not. */
+export function findUserByName(username: string): UserRow | undefined {
+    return webSqlite
+        .prepare("select * from users where lower(username) = lower(?) limit 1")
+        .get(username) as UserRow | undefined;
+}
 
 /** Shared guard: valid session + existing user row; returns the user. */
 async function currentUser(ctx: Context) {
@@ -33,13 +69,83 @@ async function currentUser(ctx: Context) {
     const user = await webDb.users.findUnique({ where: { ID: session.userId! } });
     if (!user) ctx.throw(404, "User not found");
     if (Number(user.status) === 1) ctx.throw(403, "Your account has been banned.");
-    return user;
+    return user as UserRow;
+}
+
+function wantsJson(ctx: Context): boolean {
+    return String(ctx.raw.headers.accept ?? "").includes("application/json");
 }
 
 export function registerWebRoutes(app: Application): void {
+    // ----------------------------------------------------------------- gates
+    // Runs before every route, including the page routes wired in server.ts.
+    // Feature switches turn the matching page into a 404 and its API into a
+    // 403, so disabling a feature cannot leave a reachable surface behind.
+    app.use(async (ctx, next) => {
+        if (!ctx.path.startsWith("/web")) {
+            await next();
+            return;
+        }
+        const path = ctx.path;
+
+        const featureOff =
+            (!features.payments && path === "/web/plan") ||
+            (!features.wheel && (path === "/web/wheel" || path.startsWith("/web/api/wheel"))) ||
+            (!features.affiliate && (path === "/web/affiliate" || path === "/web/api/affiliate")) ||
+            (!features.giftcards &&
+                (path === "/web/giftcards" || path.startsWith("/web/api/giftcards"))) ||
+            (!features.ipstress && (path === "/web/hub" || path.startsWith("/web/api/hub")));
+        if (featureOff) {
+            if (path.startsWith("/web/api/")) ctx.json({ error: "This feature is disabled." }, 403);
+            else ctx.throw(404, "Page not found.");
+            return;
+        }
+
+        // Maintenance blocks everything except recoverable entry points:
+        // login/logout, the maintenance page itself, admin, Stripe webhook and
+        // images. Registration is intentionally NOT exempt.
+        const exempt =
+            path === "/web/maintenance" ||
+            path === "/web/login" ||
+            path === "/web/api/auth/login" ||
+            path === "/web/api/auth/logout" ||
+            path.startsWith("/web/admin") ||
+            path.startsWith("/web/api/admin/") ||
+            path.startsWith("/web/images/") ||
+            path === "/web/api/payments/stripe/webhook";
+        if (!exempt) {
+            if (await isWebMaintenance()) {
+                if (path.startsWith("/web/api/")) {
+                    ctx.json({ error: "Maintenance mode." }, 503);
+                } else {
+                    ctx.redirect("/web/maintenance", 303);
+                }
+                return;
+            }
+        }
+
+        // Pages wired in server.ts read the raw session; refreshing it here
+        // enforces the ban and sessionVersion checks before they render.
+        if (
+            ctx.method === "GET" &&
+            (path === "/web/plan" ||
+                path === "/web/giftcards" ||
+                path === "/web/affiliate" ||
+                path === "/web/wheel" ||
+                path === "/web/tickets/new")
+        ) {
+            const user = await optionalWebUser(ctx);
+            if (!user && (path === "/web/wheel" || path === "/web/tickets/new")) {
+                ctx.redirect("/web/login", 303);
+                return;
+            }
+        }
+        await next();
+    });
+
     // ------------------------------------------------------------------ auth
     app.post("/web/api/auth/login", async (ctx) => {
-        const asHtml = !String(ctx.raw.headers.accept ?? "").includes("application/json");
+        const asHtml = !wantsJson(ctx);
         if (!rateLimit("web-login:" + ctx.ip, 10, 60_000)) {
             if (asHtml) {
                 ctx.redirect("/web/login?error=rate", 303);
@@ -48,18 +154,19 @@ export function registerWebRoutes(app: Application): void {
             throw new HttpError(429, "Too many login attempts. Try again in a minute.");
         }
         const form = await ctx.body(webLoginSchema);
+        const next = safeNext((form as Body).next);
         if (!rateLimit("web-login-user:" + form.username.toLowerCase(), 10, 60_000)) {
             if (asHtml) {
-                ctx.redirect("/web/login?error=rate", 303);
+                ctx.redirect("/web/login?error=rate&next=" + encodeURIComponent(next), 303);
                 return;
             }
             throw new HttpError(429, "Too many login attempts. Try again in a minute.");
         }
-        const user = await webDb.users.findFirst({ where: { username: form.username } });
+        const user = findUserByName(form.username);
         const check = await verifyPassword(form.password, user?.password ?? DUMMY_HASH);
         if (!user || !check.ok) {
             if (asHtml) {
-                ctx.redirect("/web/login?error=invalid", 303);
+                ctx.redirect("/web/login?error=invalid&next=" + encodeURIComponent(next), 303);
                 return;
             }
             throw new HttpError(401, "Invalid username or password.");
@@ -72,7 +179,7 @@ export function registerWebRoutes(app: Application): void {
         }
         if (Number(user.status) === 1) {
             if (asHtml) {
-                ctx.redirect("/web/login?error=banned", 303);
+                ctx.redirect("/web/login?error=banned&next=" + encodeURIComponent(next), 303);
                 return;
             }
             throw new HttpError(403, "Your account has been banned.");
@@ -81,46 +188,44 @@ export function registerWebRoutes(app: Application): void {
             userId: user.ID,
             username: user.username,
             rank: Number(user.rank),
+            sv: Number(user.sessionVersion),
         });
         await webDb.loginlogs
             .create({
                 data: {
                     username: user.username,
                     ip: ctx.ip,
-                    date: Math.floor(Date.now() / 1000),
+                    date: nowSeconds(),
                     country: "",
                 },
             })
             .catch(() => undefined);
-        ctx.redirect("/web/dashboard", 303);
+        ctx.redirect(next, 303);
     });
 
-    app.get("/web/api/auth/logout", async (ctx) => {
+    app.post("/web/api/auth/logout", async (ctx) => {
         webSessions.destroy(ctx);
         ctx.redirect("/web/login", 303);
     });
 
     app.post("/web/api/auth/register", async (ctx) => {
+        const asHtml = !wantsJson(ctx);
+        const fail = (status: number, message: string): void => {
+            if (asHtml) {
+                ctx.redirect("/web/register?error=" + encodeURIComponent(message), 303);
+                return;
+            }
+            throw new HttpError(status, message);
+        };
         if (!rateLimit("register:" + ctx.ip, 5, 3_600_000)) {
-            throw new HttpError(429, "Too many registration attempts. Try again later.");
+            fail(429, "Too many registration attempts. Try again later.");
+            return;
         }
         const form = await ctx.body();
         const parsed = webRegisterSchema.safeParse(form);
         if (!parsed.success) {
-            throw new HttpError(400, parsed.error.issues[0]?.message ?? "Validation failed");
-        }
-        // Optional reCAPTCHA when keys are configured.
-        const recaptcha = String((form as Body)["g-recaptcha-response"] ?? "");
-        const secret = process.env.RECAPTCHA_SECRET_KEY;
-        if (features.recaptcha && secret) {
-            if (!recaptcha) throw new HttpError(400, "Captcha verification is required.");
-            const params = new URLSearchParams({ secret, response: recaptcha });
-            const verify = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: params.toString(),
-            }).then((r) => r.json() as Promise<{ success?: boolean }>);
-            if (!verify.success) throw new HttpError(400, "Captcha verification failed.");
+            fail(400, parsed.error.issues[0]?.message ?? "Validation failed");
+            return;
         }
 
         const referrerId = Number((form as Body).ref ?? 0);
@@ -130,38 +235,45 @@ export function registerWebRoutes(app: Application): void {
                 : null;
 
         const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
-        const trialDate = new Date();
-        trialDate.setDate(trialDate.getDate() + 7);
         const username = parsed.data.username;
-        const newUser = await withLock("user:" + username.toLowerCase(), async () => {
-            const existing = await webDb.users.findFirst({ where: { username } });
-            if (existing) throw new HttpError(409, "Username is already taken");
-            return webDb.users.create({
-                data: {
-                    username,
-                    password: hashedPassword,
-                    rank: 0,
-                    membership: 0,
-                    expire: Math.floor(trialDate.getTime() / 1000),
-                    status: 0,
-                    referral: "0",
-                    referralbalance: 0,
-                    testattack: 0,
-                    activity: 0,
-                    twoauth: 0,
-                    referedBy: referrer ? referrer.ID : 0,
-                },
+        try {
+            const newUser = await withLock("user:" + username.toLowerCase(), async () => {
+                if (findUserByName(username)) throw new HttpError(409, "Username is already taken");
+                return webDb.users.create({
+                    data: {
+                        username,
+                        password: hashedPassword,
+                        rank: 0,
+                        membership: 0,
+                        expire: 0,
+                        status: 0,
+                        referral: "0",
+                        referralbalance: 0,
+                        testattack: 0,
+                        activity: 0,
+                        twoauth: 0,
+                        referedBy: referrer && referrer.ID !== 0 ? referrer.ID : 0,
+                        sessionVersion: 0,
+                    },
+                });
             });
-        });
-        await webSessions.save(ctx, {
-            userId: newUser.ID,
-            username: newUser.username,
-            rank: Number(newUser.rank),
-        });
-        if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
-            ctx.json({ success: "You have successfully registered! Redirecting..." });
-        } else {
-            ctx.redirect("/web/dashboard", 303);
+            await webSessions.save(ctx, {
+                userId: newUser.ID,
+                username: newUser.username,
+                rank: Number(newUser.rank),
+                sv: Number(newUser.sessionVersion ?? 0),
+            });
+            if (wantsJson(ctx)) {
+                ctx.json({ success: "You have successfully registered! Redirecting..." });
+            } else {
+                ctx.redirect("/web/dashboard", 303);
+            }
+        } catch (error) {
+            if (error instanceof HttpError && error.status < 500) {
+                fail(error.status, error.message);
+                return;
+            }
+            throw error;
         }
     });
 
@@ -171,27 +283,37 @@ export function registerWebRoutes(app: Application): void {
         async (ctx) => {
             const user = await currentUser(ctx);
             expireFinishedAttacks();
-            const plan = user.membership
-                ? await webDb.plans.findUnique({ where: { ID: user.membership } })
+            const plan = hasActiveMembership(user)
+                ? ((await webDb.plans.findUnique({
+                      where: { ID: user.membership },
+                  })) as PlanRow | null)
                 : null;
             const runningAttacks = await webDb.logs.count({
                 where: { user: user.username, stopped: 0, time: { gt: 0 } },
             });
             const totalAttacks = await webDb.logs.count({ where: { user: user.username } });
-            const planName = plan ? plan.name : "No membership";
-            const maxTime = plan ? `${plan.mbt}s` : "No membership";
-            const maxConc = String(plan?.concurrents ?? "-");
-            const exp = new Date(user.expire * 1000).toLocaleDateString("en-US");
+            const purchased = ctx.query.get("purchased") === "1";
+            const [paidPayments, pendingPayments] = purchased
+                ? await Promise.all([
+                      webDb.payments.count({ where: { user: user.ID, paid: { gt: 0 } } }),
+                      webDb.payments.count({ where: { user: user.ID, paid: 0 } }),
+                  ])
+                : [1, 0];
             ctx.htmlRaw(
                 render("web-dashboard", {
+                    meta: privateMeta("Dashboard | IPstress", "/web/dashboard"),
                     signedIn: true,
-                    purchased: ctx.query.get("purchased") === "1",
-                    planName,
-                    maxTime,
-                    maxConcurrents: maxConc,
-                    expiry: exp,
+                    purchased,
+                    processing: purchased && (paidPayments === 0 || pendingPayments > 0),
+                    planName: plan ? plan.name : "No active plan",
+                    maxTime: plan ? `${plan.mbt}s` : "No active plan",
+                    maxConcurrents: plan ? String(plan.concurrents) : "No active plan",
+                    expiry: plan
+                        ? new Date(Number(user.expire) * 1000).toLocaleDateString("en-US")
+                        : "No active plan",
                     runningAttacks,
                     totalAttacks,
+                    flags: features,
                 })
             );
         },
@@ -202,22 +324,37 @@ export function registerWebRoutes(app: Application): void {
     app.get(
         "/web/hub",
         async (ctx) => {
-            await requireWebUser(ctx);
-            const [methods, servers] = await Promise.all([
+            const user = await currentUser(ctx);
+            const plan = hasActiveMembership(user)
+                ? ((await webDb.plans.findUnique({
+                      where: { ID: user.membership },
+                  })) as PlanRow | null)
+                : null;
+            const [methods, allServers] = await Promise.all([
                 webDb.methods.findMany({
                     select: { id: true, name: true, fullname: true },
                     orderBy: { name: "asc" },
                 }),
                 webDb.api.findMany({
-                    select: { id: true, name: true, slots: true },
+                    select: { id: true, name: true, slots: true, methods: true, vip: true },
                     orderBy: { name: "asc" },
                 }),
             ]);
+            const vipPlan = plan ? Number(plan.vip) === 1 : false;
+            const servers = plan
+                ? allServers.filter(
+                      (s) =>
+                          (vipPlan || Number(s.vip) !== 1) && String(s.methods ?? "").trim() !== ""
+                  )
+                : [];
             ctx.htmlRaw(
                 render("web-hub", {
+                    meta: privateMeta("Hub | IPstress", "/web/hub"),
                     signedIn: true,
                     methods: methods as never[],
                     servers: servers as never[],
+                    maxTime: plan ? Number(plan.mbt) : 0,
+                    planName: plan ? plan.name : "",
                     error: ctx.query.get("error") ?? "",
                     launched: ctx.query.get("launched") === "1",
                 })
@@ -229,7 +366,7 @@ export function registerWebRoutes(app: Application): void {
     app.post(
         "/web/api/hub",
         async (ctx) => {
-            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            const acceptJson = wantsJson(ctx);
             const back = (error?: string): void => {
                 ctx.redirect(
                     "/web/hub?" + (error ? "error=" + encodeURIComponent(error) : "launched=1"),
@@ -249,17 +386,17 @@ export function registerWebRoutes(app: Application): void {
                 return;
             }
             const user = await currentUser(ctx);
-            if (Number(user.membership) === 0) {
+            if (!hasActiveMembership(user)) {
                 fail(403, "You need an active membership to launch attacks.");
                 return;
             }
-            const now = Math.floor(Date.now() / 1000);
-            if (Number(user.expire) <= now) {
-                fail(403, "Your membership has expired.");
+            const plan = (await webDb.plans.findUnique({
+                where: { ID: user.membership },
+            })) as PlanRow | null;
+            if (!plan) {
+                fail(403, "Your plan is no longer available.");
                 return;
             }
-            const plan = await webDb.plans.findUnique({ where: { ID: user.membership } });
-            if (!plan) throw new HttpError(500, "Your plan no longer exists.");
 
             const form = await ctx.form();
             if (!form.host || !form.time || !form.method) {
@@ -328,18 +465,22 @@ export function registerWebRoutes(app: Application): void {
         "/web/profile",
         async (ctx) => {
             const user = await currentUser(ctx);
-            const plan = user.membership
+            const plan = hasActiveMembership(user)
                 ? await webDb.plans.findUnique({ where: { ID: user.membership } })
                 : null;
             ctx.htmlRaw(
                 render("web-profile", {
+                    meta: privateMeta("Profile | IPstress", "/web/profile"),
                     signedIn: true,
                     user,
                     plan,
-                    expiry: new Date(user.expire * 1000).toLocaleDateString("en-US"),
+                    expiry: plan
+                        ? new Date(Number(user.expire) * 1000).toLocaleDateString("en-US")
+                        : "No active plan",
                     refLink: user.ID > 0 ? `${env.siteOrigin}/web/register?ref=${user.ID}` : "N/A",
                     updated: ctx.query.get("updated") === "1",
                     error: ctx.query.get("error") ?? "",
+                    flags: features,
                 })
             );
         },
@@ -350,7 +491,7 @@ export function registerWebRoutes(app: Application): void {
         "/web/api/profile/password",
         async (ctx) => {
             const user = await currentUser(ctx);
-            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            const acceptJson = wantsJson(ctx);
             try {
                 const f = await ctx.form();
                 const oldP = f.old?.trim();
@@ -368,9 +509,21 @@ export function registerWebRoutes(app: Application): void {
                 if (newP !== repP) throw new HttpError(400, "Passwords do not match.");
                 const check = await verifyPassword(oldP, user.password);
                 if (!check.ok) throw new HttpError(401, "Current password is incorrect.");
+                const nextVersion = Number(user.sessionVersion) + 1;
                 await webDb.users.update({
                     where: { ID: user.ID },
-                    data: { password: await bcrypt.hash(newP, 12) },
+                    data: {
+                        password: await bcrypt.hash(newP, 12),
+                        sessionVersion: nextVersion,
+                    },
+                });
+                // This browser proved the old password, so it keeps its session
+                // under the new version. Every other session is now stale.
+                await webSessions.save(ctx, {
+                    userId: user.ID,
+                    username: user.username,
+                    rank: Number(user.rank),
+                    sv: nextVersion,
                 });
                 if (acceptJson) {
                     ctx.json({ success: "Password changed successfully." });
@@ -392,29 +545,37 @@ export function registerWebRoutes(app: Application): void {
     app.post(
         "/web/api/giftcards/redeem",
         async (ctx) => {
+            if (!features.giftcards) {
+                ctx.json({ error: "Gift cards are disabled." }, 403);
+                return;
+            }
             const user = await currentUser(ctx);
             if (!rateLimit("giftcard:" + user.ID, 5, 60 * 60_000)) {
                 throw new HttpError(429, "Too many gift card attempts. Try again later.");
             }
             const f = await ctx.form();
             const code = f.code?.trim().toUpperCase();
-            const acceptJson = String(ctx.raw.headers.accept ?? "").includes("application/json");
+            const acceptJson = wantsJson(ctx);
             try {
                 if (!code) throw new HttpError(400, "Gift card code is required.");
                 const result = await withLock("gift:" + code, async () => {
                     const card = await webDb.giftcards.findFirst({ where: { code, claimedby: 0 } });
                     if (!card)
                         throw new HttpError(400, "Invalid or already claimed gift card code.");
-                    const plan = await webDb.plans.findUnique({ where: { ID: card.planID } });
+                    const plan = (await webDb.plans.findUnique({
+                        where: { ID: card.planID },
+                    })) as PlanRow | null;
                     if (!plan) {
                         throw new HttpError(
                             400,
                             "Plan associated with this gift card no longer exists."
                         );
                     }
-                    const now = Math.floor(Date.now() / 1000);
+                    const now = nowSeconds();
                     const term =
-                        Math.max(Number(plan.length), 1) * (plan.unit === "hours" ? 3600 : 86400);
+                        Number(card.termSeconds) > 0
+                            ? Number(card.termSeconds)
+                            : planTermSeconds(plan);
                     webSqlite.transaction(() => {
                         const claim = webSqlite
                             .prepare(
@@ -425,11 +586,13 @@ export function registerWebRoutes(app: Application): void {
                             throw new HttpError(400, "Invalid or already claimed gift card code.");
                         }
                         const fresh = webSqlite
-                            .prepare("select expire from users where ID = ?")
-                            .get(user.ID) as { expire?: number } | undefined;
+                            .prepare("select expire, membership from users where ID = ?")
+                            .get(user.ID) as { expire?: number; membership?: number } | undefined;
                         if (!fresh) throw new HttpError(404, "User not found");
-                        // Extend the remaining paid time instead of replacing it.
-                        const base = Math.max(now, Number(fresh.expire) || 0);
+                        // A first purchase starts now; an active membership is
+                        // extended instead of being replaced.
+                        const active = Number(fresh.membership) > 0 && Number(fresh.expire) > now;
+                        const base = active ? Math.max(now, Number(fresh.expire) || 0) : now;
                         webSqlite
                             .prepare("update users set membership = ?, expire = ? where ID = ?")
                             .run(plan.ID, base + term, user.ID);
@@ -456,6 +619,10 @@ export function registerWebRoutes(app: Application): void {
     app.get(
         "/web/api/affiliate",
         async (ctx) => {
+            if (!features.affiliate) {
+                ctx.json({ error: "Affiliate program is disabled." }, 403);
+                return;
+            }
             const user = await currentUser(ctx);
             const referralLink =
                 user.ID > 0 ? `${env.siteOrigin}/web/register?ref=${user.ID}` : "N/A";
@@ -475,15 +642,20 @@ export function registerWebRoutes(app: Application): void {
     app.post(
         "/web/api/wheel/spin",
         async (ctx) => {
+            if (!features.wheel) {
+                ctx.json({ error: "The wheel is disabled." }, 403);
+                return;
+            }
             const user = await currentUser(ctx);
+            // Balances are USD.
             const PRIZES = [
-                { id: 0, name: "10\u00a5 Balance", points: 10 },
-                { id: 1, name: "5\u00a5 Balance", points: 5 },
-                { id: 2, name: "50\u00a5 Balance", points: 50 },
+                { id: 0, name: "$10 Balance", points: 10 },
+                { id: 1, name: "$5 Balance", points: 5 },
+                { id: 2, name: "$50 Balance", points: 50 },
                 { id: 3, name: "No Prize", points: 0 },
-                { id: 4, name: "20\u00a5 Balance", points: 20 },
-                { id: 5, name: "15\u00a5 Balance", points: 15 },
-                { id: 6, name: "100\u00a5 Balance", points: 100 },
+                { id: 4, name: "$20 Balance", points: 20 },
+                { id: 5, name: "$15 Balance", points: 15 },
+                { id: 6, name: "$100 Balance", points: 100 },
                 { id: 7, name: "No Prize", points: 0 },
             ];
             if (!rateLimit("wheel:" + user.ID, 3, 60 * 60_000)) {
@@ -495,7 +667,7 @@ export function registerWebRoutes(app: Application): void {
                     orderBy: { date: "desc" },
                     select: { date: true },
                 });
-                const now = Math.floor(Date.now() / 1000);
+                const now = nowSeconds();
                 if (last && now - Number(last.date) < 86400) {
                     throw new HttpError(
                         429,
@@ -539,7 +711,13 @@ export function registerWebRoutes(app: Application): void {
                 where: { username: user.username },
                 orderBy: { date: "desc" },
             });
-            ctx.htmlRaw(render("web-tickets", { signedIn: true, tickets }));
+            ctx.htmlRaw(
+                render("web-tickets", {
+                    signedIn: true,
+                    tickets,
+                    meta: privateMeta("Tickets | IPstress", "/web/tickets"),
+                })
+            );
         },
         { guard: "webUser" }
     );
@@ -558,7 +736,17 @@ export function registerWebRoutes(app: Application): void {
                 where: { ticketid: id },
                 orderBy: { date: "asc" },
             });
-            ctx.htmlRaw(render("web-ticket", { signedIn: true, ticket, messages }));
+            ctx.htmlRaw(
+                render("web-ticket", {
+                    signedIn: true,
+                    ticket,
+                    messages,
+                    meta: privateMeta(
+                        `Ticket #${ticket.id} | IPstress`,
+                        `/web/tickets/${ticket.id}`
+                    ),
+                })
+            );
         },
         { guard: "webUser" }
     );
@@ -585,10 +773,10 @@ export function registerWebRoutes(app: Application): void {
                     content,
                     status: "Waiting for admin response",
                     username: user.username,
-                    date: Math.floor(Date.now() / 1000),
+                    date: nowSeconds(),
                 },
             });
-            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+            if (wantsJson(ctx)) {
                 ctx.json({ success: "Ticket created successfully", id: ticket.id });
             } else {
                 ctx.redirect("/web/tickets/" + ticket.id, 303);
@@ -617,7 +805,7 @@ export function registerWebRoutes(app: Application): void {
             const content = f.content?.trim();
             if (!content) throw new HttpError(400, "Reply content is required.");
             if (content.length > 10_000) throw new HttpError(400, "Reply is too long.");
-            const now = Math.floor(Date.now() / 1000);
+            const now = nowSeconds();
             await webDb.messages.create({
                 data: { ticketid: ticket.id, content, sender: user.username, date: now },
             });
@@ -625,7 +813,7 @@ export function registerWebRoutes(app: Application): void {
                 where: { id: ticket.id },
                 data: { status: "Waiting for admin response" },
             });
-            if (String(ctx.raw.headers.accept ?? "").includes("application/json")) {
+            if (wantsJson(ctx)) {
                 ctx.json({ success: "Reply sent successfully" });
             } else {
                 ctx.redirect("/web/tickets/" + ticket.id, 303);

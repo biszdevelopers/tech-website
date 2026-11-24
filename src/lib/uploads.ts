@@ -5,7 +5,7 @@ import type { Context } from "../core/03-context";
 import { HttpError } from "../core/09-errors";
 import { env } from "../config/env";
 
-const MAX_BYTES = 5_000_000;
+const MAX_BYTES = 10_000_000;
 
 export interface DetectedImage {
     ext: "png" | "jpg" | "webp";
@@ -120,8 +120,8 @@ export function serveUpload(ctx: Context, file: string): boolean {
     ctx.res.setHeader("Content-Type", found.mime);
     ctx.res.setHeader("X-Content-Type-Options", "nosniff");
     ctx.res.setHeader("Content-Disposition", "inline");
-    // Screenshots can be replaced under the same id, so not immutable.
-    ctx.res.setHeader("Cache-Control", "public, max-age=3600");
+    // Screenshots can be replaced under the same id, so revalidate every time.
+    ctx.res.setHeader("Cache-Control", "no-cache");
     ctx.res.setHeader("Content-Length", stat.size);
     ctx.res.setHeader("ETag", etag);
     if (ctx.raw.headers["if-none-match"] === etag) {

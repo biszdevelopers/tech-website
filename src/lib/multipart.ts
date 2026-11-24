@@ -23,7 +23,7 @@
 import type { Context } from "../core/03-context";
 import { HttpError } from "../core/09-errors";
 
-export const MAX_UPLOAD_BYTES = 5_000_000; // 5 MB total body incl. file
+export const MAX_UPLOAD_BYTES = 10_000_000; // 10 MB total body incl. file
 
 export interface MultipartFile {
     filename: string;
@@ -85,7 +85,7 @@ export function readMultipart(ctx: Context): Promise<MultipartResult> {
 }
 
 async function parseMultipart(ctx: Context): Promise<MultipartResult> {
-    const contentType = String(ctx.raw.headers["content-type"] ?? "");
+    const contentType = String(ctx.raw.headers["content-type"] ?? "").toLowerCase();
     const boundary = boundaryOf(contentType);
     if (!boundary) throw new HttpError(400, "Expected multipart/form-data.");
 

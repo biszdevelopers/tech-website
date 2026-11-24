@@ -1,36 +1,54 @@
-<%- include('partials/head', { title: tool.techname + ' | BIBS-C Tech Tools', description: String(tool.tl1_desc).slice(0, 150) }) %>
+<%- include('partials/head', { title: tool.techname + ' | BIBS-C Tech Tools', description: String(tool.tl1_desc || tool.tl2_desc || tool.tl3_desc || tool.displaytext).slice(0, 160), css: ['site.css'], image: tool.ogImage }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">/</span>
+        <a href="/search">Tools</a><span aria-hidden="true">/</span>
+        <span aria-current="page"><%= tool.techname %></span>
+    </nav>
     <h1 id="tool-heading"><%= tool.techname %></h1>
-    <p class="jump-menu"> Jump to: <% strands.forEach(function (t) { %><a href="#<%= t.tl %>"><%= t.tl.replace('tl', 'TL') %></a> <% }) %> | <a href="/search">Search</a> | <a href="/">Home</a></p>
+    <p class="jump-menu"> Jump to:
+        <% tlSections.forEach(function (section) { %>
+        | <a href="#<%= section.id %>"><%= section.shortLabel %></a>
+        <% }) %>
+        | <a href="/search">Search</a> | <a href="/">Home</a></p>
 </div>
 
 <div id="bar">&nbsp;</div>
 
 <div id="all">
     <div class="techtip-wrap" id="results">
-        <div class="techtip tool-detail" id="tool-<%= tool.id %>">
+        <article class="techtip tool-detail" id="tool-<%= tool.id %>">
             <div class="line" id="line-<%= tool.id %>"></div>
-            <h3 class="name"><%= tool.techname %></h3>
+            <h2 class="name"><%= tool.techname %></h2>
             <div class="tags">
                 <% strands.forEach(function (t) { %>
-                <a href="/<%= t.tl %>#<%= t.col %>"><span class="<%= t.css %>"><%= t.label %></span></a>
+                <a href="/<%= t.tl %>/<%= t.slug %>"><span class="<%= t.css %>"><%= t.label %></span></a>
                 <% }) %>
             </div>
             <div class="info">
-                <div class="img"><img src="/uploads/<%= tool.id %>" alt="<%= tool.techname %>" data-fallback loading="lazy" decoding="async"/></div>
+                <div class="img"><img src="/uploads/<%= tool.id %>?v=<%= tool.updatedAt %>" width="96" height="96" alt="<%= tool.techname %>" data-fallback loading="lazy" decoding="async"/></div>
                 <div class="desc">
-                    <section id="tl1"><h2>TL1: Knowing Our Students</h2><p><%= tool.tl1_desc || 'Not documented for this strategy yet.' %></p></section>
-                    <section id="tl2"><h2>TL2: Strategies for Learning</h2><p><%= tool.tl2_desc || 'Not documented for this strategy yet.' %></p></section>
-                    <section id="tl3"><h2>TL3: Evidence for Learning</h2><p><%= tool.tl3_desc || 'Not documented for this strategy yet.' %></p></section>
-                    <section id="tl4"><h2>TL4: Crafting the Curriculum</h2><p><%= tool.tl4_desc || 'Not documented for this strategy yet.' %></p></section>
+                    <% tlSections.forEach(function (section) { %>
+                    <section id="<%= section.id %>">
+                        <h2><%= section.title %></h2>
+                        <p><%= section.description || 'Not documented for this strategy yet.' %></p>
+                    </section>
+                    <% }) %>
                     <div class="link">
                         <ul><li><a href="<%= tool.link %>" target="_blank" rel="noreferrer"><%= tool.displaytext %></a></li></ul>
+                        <% if (resources.length > 0) { %>
+                        <ul class="resource-list">
+                            <% resources.forEach(function (resource) { %>
+                            <li><a href="<%= resource.url %>" target="_blank" rel="noreferrer"><%= resource.label %></a></li>
+                            <% }) %>
+                        </ul>
+                        <% } %>
                     </div>
                 </div>
             </div>
-        </div>
+        </article>
     </div>
 </div>
 

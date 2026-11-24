@@ -1,0 +1,42 @@
+<%- include('partials/head', { title: 'Operator Account | BIBS-C Tech Tools', robots: 'noindex,nofollow', css: ['site.css', 'forms.css', 'admin.css'] }) %>
+<%- include('partials/navbar') %>
+<div id="adminTopbar"><h1>Operator Account</h1></div>
+<div id="adminNav">
+    <ul>
+        <li><a href="/admin">&#8592; Back to Admin</a></li>
+    </ul>
+</div>
+<div id="wrap">
+    <form id="form" method="post" action="/api/admin/account">
+        <% if (locals.saved) { %>
+        <p class="submit-success" role="status">Account updated. Other sessions have been signed out.</p>
+        <% } %>
+        <% if (locals.error) { %>
+        <p class="form-error" role="alert"><%= locals.error %></p>
+        <% } %>
+        <h2>Current credentials</h2>
+        <div class="form-grid">
+            <label class="field"><span>Current username</span>
+                <input class="l" type="text" value="<%= username %>" readonly/>
+            </label>
+            <label class="field"><span>Current password</span>
+                <input class="l" type="password" name="current" required/>
+            </label>
+        </div>
+        <h2>New credentials</h2>
+        <div class="form-grid">
+            <label class="field"><span>New username</span>
+                <input class="l" type="text" name="username" value="<%= username %>" minlength="3" maxlength="20" required/>
+            </label>
+            <label class="field"><span>New password (blank keeps current)</span>
+                <input class="l" type="password" name="password" minlength="10"/>
+            </label>
+            <label class="field"><span>Confirm new password</span>
+                <input class="l" type="password" name="confirm"/>
+            </label>
+        </div>
+        <button type="submit" class="submit-btn">Update account</button>
+    </form>
+</div>
+</body>
+</html>

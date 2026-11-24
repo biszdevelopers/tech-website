@@ -30,15 +30,16 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash } from "node:crypto";
 import { brotliCompressSync, constants as zlibConstants, gzipSync } from "node:zlib";
 import type { ZodType } from "zod";
 import { renderToString, type Html } from "./04-html";
 import { HttpError } from "./09-errors";
 import { env } from "../config/env";
+import { verifyCsrfToken } from "../lib/csrf";
 
 /** Hard ceiling on any request body. Blocks memory-exhaustion DoS attempts. */
-const MAX_BODY_BYTES = 1_000_000; // 1 MB - forms here are tiny; uploads use /api/submission's own path
+const MAX_BODY_BYTES = 8_000_000; // 8 MB for CSV imports and admin form posts
 
 /**
  * Stamp the server-side theme on the real root <html> tag. Kept pure and
@@ -59,6 +60,8 @@ export class Context {
     readonly invalidTarget: boolean;
     /** Per-request CSRF token, filled by the security middleware. */
     csrfToken = "";
+    /** Per-request CSP nonce used by the JSON-LD block. */
+    cspNonce = "";
     private readonly cookieBag = new Map<string, string>();
     private finished = false;
     private parsedBody: unknown;
@@ -134,15 +137,11 @@ export class Context {
     }
 
     /**
-     * Constant-time double-submit token check. The expected token is generated
-     * by the CSRF middleware on this same request, so an empty token can never
-     * match an empty field.
+     * Signed-token check. A valid HMAC proves the token was issued by this
+     * server, so it does not depend on the cookie surviving a tab race.
      */
     verifyCsrf(provided: string): boolean {
-        if (!this.csrfToken || provided.length !== this.csrfToken.length) return false;
-        const left = Buffer.from(provided);
-        const right = Buffer.from(this.csrfToken);
-        return timingSafeEqual(left, right);
+        return verifyCsrfToken(provided);
     }
 
     cookie(name: string): string | undefined {
@@ -194,6 +193,10 @@ export class Context {
             } else {
                 parsed = Object.fromEntries(new URLSearchParams(rawText));
             }
+            this.parsedBody = parsed;
+        }
+        if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+            parsed = {};
             this.parsedBody = parsed;
         }
         if (!schema) return parsed as T;
@@ -293,6 +296,7 @@ export class Context {
         if (this.finished) return; // one-response rule: see class docs
         let payload = text;
         if (contentType.startsWith("text/html")) {
+            payload = payload.split("__CSP_NONCE__").join(this.cspNonce);
             payload = this.injectCsrf(payload);
             payload = this.injectAriaLabels(payload);
         }
@@ -309,9 +313,16 @@ export class Context {
         this.finished = true;
         this.res.statusCode = status;
         this.res.setHeader("Content-Type", contentType);
-        // HTML embeds per-request CSRF tokens and user data; never let a proxy
-        // or CDN store it.
+        // HTML embeds a per-request CSRF token, nonce and theme; JSON and CSV
+        // can contain account data. Neither may be stored by a shared cache.
         if (contentType.startsWith("text/html")) {
+            this.res.setHeader("Cache-Control", "no-store");
+        } else if (
+            contentType.startsWith("application/json") ||
+            contentType.startsWith("text/csv")
+        ) {
+            this.res.setHeader("Cache-Control", "private, no-store");
+        } else if (this.res.getHeader("Set-Cookie")) {
             this.res.setHeader("Cache-Control", "no-store");
         }
 
@@ -332,6 +343,10 @@ export class Context {
             if (body !== bytes) this.res.setHeader("Vary", "Accept-Encoding");
         }
         this.res.setHeader("Content-Length", body.length);
+        if (this.method === "HEAD") {
+            this.res.end();
+            return;
+        }
         this.res.end(body);
     }
 

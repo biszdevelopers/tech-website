@@ -11,7 +11,7 @@
         <h2>Tools matching your request</h2>
         <ul class="notice-page__list">
             <% suggestions.forEach(function (s) { %>
-            <li><a href="/tool/<%= s.id %>"><%= s.techname %></a></li>
+            <li><a href="<%= s.path || ('/tool/' + s.id) %>"><%= s.techname %></a></li>
             <% }) %>
         </ul>
         <% } %>

@@ -11,6 +11,10 @@ function absoluteDbPath(envKey: string, fallback: string): string {
 
 const sqlite = new Database(absoluteDbPath("DATABASE_URL_WEB", "data/web.db"));
 sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("synchronous = NORMAL");
+sqlite.pragma("busy_timeout = 5000");
+sqlite.pragma("temp_store = MEMORY");
+sqlite.pragma("cache_size = -20000");
 const db = drizzle(sqlite, { schema });
 
 export const webDb = {

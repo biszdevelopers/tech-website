@@ -1,4 +1,4 @@
-﻿<%- include('partials/head', { title: 'Docs | BIBS-C Tech Tools' }) %>
+﻿<%- include('partials/head', { title: 'Project Docs | BIBS-C Tech Tools', description: 'How the BIBS-C Tech Tools directory is built, deployed and maintained.', css: ['site.css'] }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead"><h1 id="docs-heading">Project Docs</h1></div>
@@ -7,56 +7,53 @@
     <div id="basicinfo" class="docs-body">
         <h2>Stack in one paragraph</h2>
         <p>
-            No framework - just Node's <code>node:http</code> plus a small OOP core you can read
-            in an afternoon. Pages are EJS templates (plain HTML with
-            <code>&lt;%= variable %&gt;</code> holes) that compile once at boot and auto-escape
-            every interpolated value, so XSS-safe output is the default. Data lives in two SQLite
-            files accessed through Drizzle ORM with a Prisma-style query surface. Client scripts are
-            TypeScript built twice: ES5 plus polyfills for IE11, and an ES5 bundle for modern
-            browsers.
+            No framework, just Node's <code>node:http</code> plus a small core. Pages are EJS templates
+            that compile once at boot and auto-escape every interpolated value. Data lives in two SQLite
+            files accessed through Drizzle ORM. Client scripts are TypeScript built to ES5 for IE11 and a
+            module bundle for modern browsers.
         </p>
 
         <h2>Where things live</h2>
         <ul>
-            <li><b>server.ts</b> - boot + page routes; the only wiring file</li>
-            <li><b>src/core/</b> - the framework: application pipeline, router, context, sessions, cache, static server, security, errors, views</li>
-            <li><b>src/routes/</b> - API endpoints grouped by site area, all guarded + rate-limited</li>
-            <li><b>src/views/</b> - .ejs templates; shared chrome in partials/</li>
-            <li><b>src/styles/</b> - CSS sources; design tokens and light/dark themes</li>
-            <li><b>src/lib/db/</b> - Drizzle schemas + query clients (main.db = tech tools, web.db = SaaS)</li>
+            <li><b>server.ts</b> - boot, page routes and crawler files</li>
+            <li><b>src/core/</b> - application pipeline, router, context, sessions, cache, static files, security, errors and views</li>
+            <li><b>src/routes/</b> - API endpoints grouped by site area, all guarded and rate-limited</li>
+            <li><b>src/views/</b> - EJS templates; shared chrome in partials/</li>
+            <li><b>src/styles/</b> - tokens, site, forms, admin, web and dashboard CSS</li>
+            <li><b>src/lib/db/</b> - Drizzle schemas and query clients</li>
             <li><b>src/server/queries/</b> - data access used by routes</li>
-            <li><b>src/client/</b> - browser scripts, both bundles compiled to ES5 at build</li>
+            <li><b>src/client/</b> - browser scripts, compiled to ES5 at build</li>
         </ul>
+
+        <h2>Domains and resources</h2>
+        <p>
+            The directory covers six Teaching and Learning domains: Knowing Our Students, Strategies for
+            Learning, Evidence of Learning, Crafting the Curriculum, Professional Growth and Contribution to
+            Workplace Positivity. Each accepted tool has strand flags for the first four domains and
+            write-ups for all six. Additional manual or video links are stored as resources.
+        </p>
 
         <h2>Commands</h2>
         <ul>
-            <li><code>pnpm run dev</code> - watchers: TS server reload + client rebuild on save</li>
-            <li><code>pnpm run build</code> - everything lands in dist/ (server, views, assets)</li>
+            <li><code>pnpm run dev</code> - server and asset watchers</li>
+            <li><code>pnpm run build</code> - server, views, CSS and client bundles into dist/</li>
             <li><code>pnpm start</code> - production serve from dist/</li>
-            <li><code>pnpm run check</code> - types + lint + audit</li>
-            <li><code>pnpm test</code> - unit tests</li>
-            <li><code>pnpm run check:views</code> - render every template with sample data</li>
-            <li><code>pnpm run check:full</code> - check + tests + views + hot reload</li>
-            <li><code>pnpm run parity</code> - diff rendered pages vs frozen legacy baselines</li>
-            <li><code>pnpm run format</code> - Prettier (EJS templates excluded)</li>
-            <li><code>pnpm run db:migrate</code> - generate SQL migrations from schema changes</li>
-            <li><code>pnpm run db:reset</code> - recreate dev databases with seed data</li>
-            <li><code>pnpm run setup</code> - create or rotate the operator account from environment variables</li>
+            <li><code>pnpm run check</code> - types, lint and audit</li>
+            <li><code>pnpm run check:full</code> - check, unit tests, views and hot reload</li>
+            <li><code>pnpm run check:flows</code> - temporary-database end-to-end flows</li>
+            <li><code>pnpm run check:seo</code> - metadata, sitemap, feed and preview images</li>
+            <li><code>pnpm run check:contrast</code> - WCAG contrast matrix</li>
+            <li><code>pnpm run parity</code> - snapshot render comparison</li>
+            <li><code>pnpm run db:reset</code> - recreate dev databases with demo data</li>
+            <li><code>pnpm run setup</code> - create or rotate the operator account</li>
         </ul>
 
-        <h2>Themes &amp; payments</h2>
+        <h2>Themes, payments and safety</h2>
         <p>
-            One <code>theme</code> cookie drives both sites. The server stamps
-            <code>data-theme</code> on the root element, so the chosen theme survives a reload and
-            never flashes. Payments run through Stripe in USD; PayPal and Bitcoin stay disabled
-            until server-side verification exists.
-        </p>
-
-        <h2>Sessions &amp; auth</h2>
-        <p>
-            Cookies are HMAC-signed (<code>v1.payload.signature</code>) verified with
-            <code>timingSafeEqual</code>. Authorization is re-read from the database per request - editing
-            the session cookie changes nothing.
+            One theme cookie drives both sites. Cookies are signed, versioned and revalidated against the
+            database. CSRF uses a signed, expiring token. Stripe is the only enabled payment method; checkout
+            is refused when webhook verification is not configured. Demo seeds never overwrite a populated
+            database.
         </p>
     </div>
 </div>
