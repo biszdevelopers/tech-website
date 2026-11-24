@@ -1,0 +1,515 @@
+/* --------------------------------------------------------------------------
+   Submission form
+   -------------------------------------------------------------------------- */
+#form-wrap {
+    width: min(calc(100% - 2 * var(--page-pad)), 1200px);
+    margin: clamp(20px, 2.4vw, 34px) auto;
+}
+
+#form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(20px, 2.4vw, 34px);
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+}
+
+#form h2 {
+    margin: var(--space-3) 0 0;
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+#form h2:first-of-type {
+    margin-top: 0;
+}
+
+#form input.l,
+#form textarea.l {
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-md);
+    background: var(--color-input-bg);
+    color: var(--color-ink-strong);
+    font-size: 0.95rem;
+    transition:
+        border-color 200ms ease,
+        box-shadow 200ms ease;
+}
+
+#form input.l:focus,
+#form textarea.l:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-color: var(--color-ink);
+}
+
+#form textarea.l {
+    min-height: 88px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+#form input[type="file"] {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+#form input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 14px;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 200ms ease,
+        border-color 200ms ease;
+}
+
+#form input[type="file"]::file-selector-button:hover {
+    border-color: var(--color-focus);
+    background: var(--color-accent-soft);
+}
+
+#form .domains {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin: 0;
+}
+
+#form .domains label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition:
+        background 200ms ease,
+        border-color 200ms ease;
+}
+
+#form .domains label:hover {
+    border-color: var(--color-focus);
+    background: var(--color-accent-soft);
+}
+
+#form .domains input[type="checkbox"],
+#form .check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--color-accent-strong);
+}
+
+#form .form-subhead {
+    margin: 4px 0 0;
+    color: var(--color-ink);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+#form .submit-btn,
+#login-form button,
+.screenshot-panel .submit-btn {
+    align-self: flex-start;
+    margin: var(--space-3) 0 0;
+    padding: 10px 22px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-deep);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition:
+        background 200ms ease,
+        color 200ms ease,
+        transform 200ms ease,
+        box-shadow 200ms ease;
+}
+
+[data-theme="dark"] #form .submit-btn,
+[data-theme="dark"] #login-form button,
+[data-theme="dark"] .screenshot-panel .submit-btn {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+}
+
+#form .submit-btn:hover:not(:disabled),
+#login-form button:hover:not(:disabled),
+.screenshot-panel .submit-btn:hover {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+}
+
+[data-theme="dark"] #form .submit-btn:hover:not(:disabled),
+[data-theme="dark"] #login-form button:hover:not(:disabled),
+[data-theme="dark"] .screenshot-panel .submit-btn:hover {
+    background: var(--color-accent);
+}
+
+#form .submit-btn:disabled,
+#login-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#submission-errors {
+    color: var(--color-danger);
+    font-size: 0.9rem;
+}
+
+.submit-success {
+    margin: 0 auto 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-accent-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-soft);
+    color: var(--color-ink-strong);
+}
+
+/* --------------------------------------------------------------------------
+   Login
+   -------------------------------------------------------------------------- */
+#main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 96px);
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: clamp(32px, 6vh, 72px) var(--space-4);
+}
+
+#big {
+    width: 100%;
+    max-width: 460px;
+}
+
+#big h1 {
+    margin: 0 0 var(--space-2);
+    color: var(--color-ink-strong);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    letter-spacing: -0.01em;
+}
+
+#login {
+    padding: var(--space-5);
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+}
+
+#login h2 {
+    margin: 0 0 var(--space-4);
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+#login-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    color: var(--color-ink);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+#login-form input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-md);
+    background: var(--color-input-bg);
+    color: var(--color-ink-strong);
+    font-size: 0.95rem;
+    transition:
+        border-color 200ms ease,
+        box-shadow 200ms ease;
+}
+
+#login-form input:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-color: var(--color-ink);
+}
+
+#login-form button {
+    align-self: stretch;
+    margin: 0;
+    padding: 10px 18px;
+}
+
+#login-error {
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(176, 0, 32, 0.2);
+    border-radius: var(--radius-md);
+    background: rgba(176, 0, 32, 0.08);
+    color: #b00020;
+    font-size: 0.9rem;
+}
+
+[data-theme="dark"] #login-error {
+    border-color: rgba(255, 107, 107, 0.35);
+    background: rgba(255, 107, 107, 0.14);
+    color: #ffb4ab;
+}
+
+.form-error {
+    margin: 0 0 18px;
+    padding: 10px 12px;
+    border: 1px solid rgba(176, 0, 32, 0.2);
+    border-radius: var(--radius-md);
+    background: rgba(176, 0, 32, 0.08);
+    color: #b00020;
+    font-size: 0.9rem;
+}
+
+[data-theme="dark"] .form-error {
+    border-color: rgba(255, 107, 107, 0.35);
+    background: rgba(255, 107, 107, 0.14);
+    color: #ffb4ab;
+}
+
+/* --------------------------------------------------------------------------
+   Admin forms
+   -------------------------------------------------------------------------- */
+#form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+#form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+#form .field > span {
+    color: var(--color-ink);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+#form .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-ink);
+    font-size: 0.92rem;
+}
+
+#form .form-hint {
+    max-width: 90ch;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+    line-height: 1.65;
+}
+
+#form .form-hint code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--color-surface-2);
+    color: var(--color-ink-strong);
+    font-size: 0.86em;
+}
+
+#form textarea.csv-input {
+    min-height: 320px;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+}
+
+#wrap .panel-title {
+    width: min(calc(100% - 2 * var(--page-pad)), 1200px);
+    margin: 28px auto 12px;
+    font-size: 1.05rem;
+}
+
+.screenshot-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px;
+    width: min(calc(100% - 2 * var(--page-pad)), 1200px);
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-panel);
+    box-shadow: var(--shadow-1);
+}
+
+.screenshot-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.screenshot-panel .submit-btn {
+    align-self: flex-start;
+    margin: 0;
+    padding: 9px 18px;
+}
+
+.screenshot-panel input[type="file"] {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.admin-shot {
+    width: 160px;
+    height: 160px;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: #fff;
+    object-fit: contain;
+}
+
+.admin-shot--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-style: dashed;
+    background: var(--color-surface);
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Account form
+   -------------------------------------------------------------------------- */
+.account-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 560px;
+}
+
+.account-form label,
+.account-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--color-ink);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.account-form input,
+.account-form select {
+    padding: 10px 12px;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-md);
+    background: var(--color-input-bg);
+    color: var(--color-ink-strong);
+    font-size: 0.95rem;
+}
+
+.account-form input:focus,
+.account-form select:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-color: var(--color-ink);
+}
+
+.account-form button {
+    align-self: flex-start;
+    margin-top: var(--space-2);
+    padding: 10px 22px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-deep);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.account-form button:hover {
+    background: var(--color-accent-strong);
+    color: var(--color-ink-on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Validation states
+   -------------------------------------------------------------------------- */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+    border-color: var(--color-danger);
+}
+
+.field-error {
+    margin-top: 4px;
+    color: var(--color-danger);
+    font-size: 0.85rem;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    #form .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    #main {
+        min-height: 0;
+        align-items: flex-start;
+        padding: var(--space-5) var(--space-3);
+    }
+
+    #login {
+        padding: var(--space-4);
+    }
+
+    #form {
+        padding: var(--space-4) var(--space-3);
+    }
+}

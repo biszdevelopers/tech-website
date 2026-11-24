@@ -1,103 +1,394 @@
-/* ==========================================================================
-   IE11-ONLY OVERRIDES - loaded via conditional comment, ignored elsewhere.
-   Fixes what modern CSS takes for granted:
-     - flex `gap` is unsupported        -> explicit child margins
-     - CSS Grid is unsupported          -> flex equivalents
-     - clamp() is unsupported           -> fixed sizes (already fallback'd)
-   ========================================================================== */
+/* IE11-only fixes, loaded from ie-detect.js. Modern browsers never see this
+   file. Flexbox works; grid, gap, clamp(), min() and :focus-visible do not. */
 
-/* --- Home TL cards: one row, equal widths ------------------------------- */
+/* --- page widths (min/max functions are unsupported) --------------------- */
+#topbar {
+    padding-right: 5%;
+    padding-left: 5%;
+}
+.site-brand {
+    margin-right: auto;
+    font-size: 1.3rem;
+}
+#basicinfo,
+.tl-section,
+.tl-submit-cta,
+#subhead,
+.techtip-wrap,
+#wrap,
+#adminTopbar,
+#adminNav,
+.admin-bulkbar,
+.page-breadcrumb {
+    width: 92%;
+    max-width: 1440px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#front {
+    min-height: 300px;
+    padding: 60px 5%;
+}
+#front h1 {
+    width: 75%;
+    font-size: 2.2rem;
+}
+
+/* --- home strategy cards: 3 across, 2 on tablet, 1 on phones ------------- */
 .tl-section {
     display: flex;
+    flex-wrap: wrap;
+    padding: 24px 0;
 }
 .tl-section > a {
-    flex: 1 1 0;
-    min-width: 0;
-    margin-left: 6px;
-    margin-right: 6px;
+    display: flex;
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+    padding: 0 8px;
+    margin-bottom: 16px;
+}
+.tlx__strands {
+    display: block;
+}
+.tlx__strands li {
+    margin-bottom: 8px;
+}
+.tlx__strands li:first-child::before {
+    display: block;
+}
+.tlhead {
+    font-size: 1.15rem;
+}
+.tlx__strands-label {
+    font-size: 0.85rem;
+}
+.techtip .name,
+.techtip h3 {
+    font-size: 1.25rem;
+}
+#subhead h1 {
+    font-size: 1.8rem;
+}
+#basicinfo h1,
+.section-anchor {
+    font-size: 1.6rem;
 }
 
-/* --- Search form row ---------------------------------------------------- */
+/* --- nav ----------------------------------------------------------------- */
+#navbar {
+    position: relative;
+}
+#nav {
+    display: flex;
+}
+#nav li {
+    flex: 1 1 0;
+}
+
+/* --- search / filters / chips ------------------------------------------- */
 .search-form input[type="text"] {
     margin-right: 8px;
 }
+.filters {
+    display: block;
+}
+.filters .label {
+    margin-right: 8px;
+}
+.filters .filter-apply {
+    margin: 6px 0 12px;
+}
+.techtip .tags span {
+    margin: 0 4px 4px 0;
+}
+.techtip .tags a {
+    display: inline-block;
+    margin-right: 4px;
+}
+.label {
+    display: inline-block;
+    margin-right: 6px;
+}
+.label span {
+    display: inline-block;
+}
 
-/* --- Dash: stat cards --------------------------------------------------- */
+/* --- tech tip columns (grid fallback) ----------------------------------- */
+.techtip .info {
+    display: flex;
+    align-items: flex-start;
+}
+.techtip .img {
+    flex: 0 0 96px;
+    margin-right: 20px;
+}
+.techtip .desc {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.techtip .link {
+    flex: 0 0 200px;
+    margin-left: 20px;
+}
+.techtip.search-result .link,
+.techtip.tool-detail .link {
+    flex-basis: 100%;
+    margin-left: 0;
+}
+
+/* --- forms --------------------------------------------------------------- */
+#form-wrap {
+    width: 92%;
+    margin: 24px auto;
+}
+#form {
+    padding: 20px;
+}
+#main {
+    padding: 48px 16px;
+}
+#form .domains {
+    display: block;
+}
+#form .domains label {
+    margin: 0 14px 8px 0;
+}
+#form .form-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+#form .field {
+    flex: 0 0 calc(33.3333% - 16px);
+    max-width: calc(33.3333% - 16px);
+    margin-right: 16px;
+}
+#form .field:last-child {
+    margin-right: 0;
+}
+#form .submit-btn,
+#login-form button,
+.screenshot-panel .submit-btn {
+    min-width: 140px;
+}
+
+/* --- notices ------------------------------------------------------------- */
+.notice-page__actions .notice-page__btn {
+    margin: 0 5px 10px;
+}
+.quiet-note {
+    max-width: 340px;
+}
+.jump-menu {
+    display: inline-block;
+    width: auto;
+}
+
+/* --- web header ---------------------------------------------------------- */
+.web-header {
+    position: relative;
+}
+.web-header__brand {
+    margin-right: 24px;
+}
+.web-header__nav li {
+    display: inline-block;
+    margin-right: 4px;
+}
+.web-header__cta {
+    margin-left: auto;
+}
+.web-header__cta a {
+    margin-left: 8px;
+}
+
+/* --- dashboard chrome ---------------------------------------------------- */
+.topbar .navbar {
+    display: flex;
+}
+.navbar-header {
+    margin-right: 12px;
+}
+.navbar-nav {
+    display: flex;
+}
+.navbar-nav .nav-item {
+    margin-left: 8px;
+}
+.sidebar-link {
+    display: flex;
+}
+.sidebar-link svg {
+    margin-right: 12px;
+}
+.page-wrapper {
+    padding: 24px 3% 56px;
+}
+.page-wrapper .container-fluid {
+    width: auto;
+}
+.page-breadcrumb .breadcrumb {
+    margin-left: 12px;
+}
+.ticket-thread {
+    display: block;
+}
+.ticket-message {
+    margin-bottom: 12px;
+}
+.ticket-message__meta span {
+    margin-left: 12px;
+}
+
+/* --- cards / rows -------------------------------------------------------- */
 .card-group {
     display: flex;
     flex-wrap: wrap;
 }
 .card-group > .card {
-    flex: 1 1 190px;
-    margin-right: 16px;
-    margin-bottom: 16px;
+    margin-right: 18px;
+    margin-bottom: 18px;
 }
 .card-group > .card:last-child {
     margin-right: 0;
 }
-
-/* --- Dash: 12-column rows -> percentage columns ------------------------- */
 .row {
-    display: block;
-}
-.row::after {
-    content: "";
-    display: table;
-    clear: both;
-}
-.row > [class*="col-"] {
-    float: left;
-    box-sizing: border-box;
-    padding-right: 9px;
-    padding-left: 9px;
-}
-.col-12 {
-    width: 100%;
-}
-.col-md-4 {
-    width: 33.3333%;
-}
-.col-md-5 {
-    width: 41.6666%;
-}
-.col-md-6 {
-    width: 50%;
-}
-.col-md-7 {
-    width: 58.3333%;
-}
-.col-md-8 {
-    width: 66.6666%;
-}
-
-/* --- Submission form domain grid ---------------------------------------- */
-.domains {
     display: flex;
     flex-wrap: wrap;
 }
-.domains label {
-    margin-right: 18px;
+.border-right {
+    border-right: 1px solid var(--ip-border, #2a3474);
 }
 
-/* --- Tech tip card body keeps image beside text ------------------------- */
-.techtip .info {
-    display: flex;
+/* --- marketing ----------------------------------------------------------- */
+.container,
+.container-lg,
+.container-fluid {
+    width: 92%;
 }
-.techtip .info > * {
-    margin-right: 12px;
+.banner_area {
+    padding: 90px 0 60px;
 }
-
-/* --- Web header spacing (no flex gap in IE11) --------------------------- */
-.web-header__nav li {
-    display: inline-block;
-    margin-right: 18px;
+.banner_area .banner_content h1 {
+    font-size: 2.6rem;
 }
-.web-header__cta a {
-    margin-left: 10px;
+.title h2 {
+    font-size: 2rem;
+    line-height: 1.25;
 }
-
-/* --- Buttons inside blocks don't stretch oddly -------------------------- */
-.btn-block {
+.our_mission_area {
+    padding-right: 5%;
+    padding-left: 5%;
+}
+.our_mission_area,
+.mining_invest_area,
+.faq_area {
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+.footer_area {
+    padding: 60px 0 28px;
+}
+.auth-wrapper {
     display: block;
-    width: 100%;
+}
+.auth-wrapper > .row {
+    margin-right: auto;
+    margin-left: auto;
+}
+.maintenance-page {
+    display: block;
+    padding-top: 80px;
+}
+
+/* --- admin --------------------------------------------------------------- */
+.admin-filters {
+    display: block;
+}
+.admin-filters input,
+.admin-filters select,
+.admin-filters button,
+.admin-count {
+    margin: 0 8px 8px 0;
+}
+.admin-count {
+    margin-left: 0;
+}
+.admin-pager a {
+    margin-right: 6px;
+}
+.admin-bulkbar__btn {
+    margin-right: 8px;
+}
+.AdminTable_actions__k8lIU {
+    display: block;
+}
+.AdminTable_actions__k8lIU button {
+    margin: 0 4px 4px 0;
+}
+
+/* --- focus (no :focus-visible in IE11) ----------------------------------- */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+summary:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+#theme-toggle:focus,
+#nav a:focus {
+    outline: 2px solid #0cf293;
+}
+
+/* --- narrow screens ------------------------------------------------------ */
+@media (max-width: 1100px) {
+    .tl-section > a {
+        flex-basis: 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 900px) {
+    #form .field {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-right: 0;
+    }
+    .techtip .info {
+        display: block;
+    }
+    .techtip .img,
+    .techtip .link {
+        flex-basis: auto;
+        margin: 0 0 12px;
+    }
+    .web-header__nav {
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+    .web-header__cta {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    .tl-section > a {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+    #nav {
+        display: flex;
+        overflow-x: auto;
+    }
+    #nav li {
+        flex: 0 0 auto;
+    }
+    .page-wrapper {
+        width: 100%;
+        margin-left: 0;
+        padding: 18px 16px 40px;
+    }
 }
