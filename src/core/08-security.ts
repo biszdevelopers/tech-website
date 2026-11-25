@@ -9,6 +9,7 @@ import type { Middleware } from "./01-application";
 import { rateLimit } from "../lib/rate-limit";
 import { readMultipart, MAX_UPLOAD_BYTES } from "../lib/multipart";
 import { env } from "../config/env";
+import { HttpError } from "./09-errors";
 import { createCsrfToken, verifyCsrfToken } from "../lib/csrf";
 
 const CSRF_COOKIE = env.isHttps ? "__Host-csrf" : "csrf";
@@ -125,6 +126,14 @@ function isAssetPath(path: string): boolean {
 
 export async function csrfProtection(ctx: Context, next: () => Promise<void>): Promise<void> {
     const safe = ctx.method === "GET" || ctx.method === "HEAD" || ctx.method === "OPTIONS";
+    const isApiClient = (): boolean => {
+        if (String(ctx.raw.headers["sec-fetch-mode"] ?? "") === "navigate") return false;
+        const accept = String(ctx.raw.headers.accept ?? "");
+        return (
+            !accept.includes("text/html") &&
+            (ctx.path.startsWith("/api/") || ctx.path.startsWith("/web/api/"))
+        );
+    };
 
     if (safe && isAssetPath(ctx.path)) {
         await next();
@@ -173,13 +182,29 @@ export async function csrfProtection(ctx: Context, next: () => Promise<void>): P
         return;
     }
 
+    const rejectCsrf = (): void => {
+        if (normalizedPath === "/api/submission" && !isApiClient()) {
+            ctx.redirect("/submission?error=csrf", 303);
+            return;
+        }
+        ctx.throw(403, "Your form token expired. Reload the page and try again.");
+    };
+
     const contentType = String(ctx.raw.headers["content-type"] ?? "").toLowerCase();
     if (contentType.includes("multipart/form-data")) {
         if (!MULTIPART_PATHS.has(normalizedPath)) {
             ctx.throw(415, "Unsupported multipart endpoint.");
             return;
         }
-        await readMultipart(ctx);
+        try {
+            await readMultipart(ctx);
+        } catch (error) {
+            if (error instanceof HttpError && error.status === 403) {
+                rejectCsrf();
+                return;
+            }
+            throw error;
+        }
     } else {
         let provided = String(ctx.raw.headers[CSRF_HEADER] ?? "");
         if (!provided) {
@@ -189,7 +214,7 @@ export async function csrfProtection(ctx: Context, next: () => Promise<void>): P
             }
         }
         if (!ctx.verifyCsrf(provided)) {
-            ctx.throw(403, "Your form token expired. Reload the page and try again.");
+            rejectCsrf();
             return;
         }
         if (!ctx.cookie(CSRF_COOKIE)) {

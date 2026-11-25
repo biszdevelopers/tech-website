@@ -107,6 +107,10 @@ export function registerMainSiteRoutes(app: Application): void {
         ctx.htmlRaw(
             render("submission", {
                 received: ctx.query.get("received") === "1",
+                error:
+                    ctx.query.get("error") === "csrf"
+                        ? "Your form expired before it was sent. Please submit it again."
+                        : "",
                 meta: SUBMISSION_META,
             })
         );
