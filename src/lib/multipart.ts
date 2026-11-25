@@ -85,7 +85,8 @@ export function readMultipart(ctx: Context): Promise<MultipartResult> {
 }
 
 async function parseMultipart(ctx: Context): Promise<MultipartResult> {
-    const contentType = String(ctx.raw.headers["content-type"] ?? "").toLowerCase();
+    // The boundary is case-sensitive; only the media type is matched loosely.
+    const contentType = String(ctx.raw.headers["content-type"] ?? "");
     const boundary = boundaryOf(contentType);
     if (!boundary) throw new HttpError(400, "Expected multipart/form-data.");
 
