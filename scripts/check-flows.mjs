@@ -50,6 +50,8 @@ const env = {
     OG_DIR: og,
     SESSION_SECRET: "flow-secret-flow-secret-flow-secret-32!!",
     SESSION_SECRET_WEB: "flow-secret-web-flow-secret-web-32!!",
+    ADMIN_USERNAME: "admin",
+    ADMIN_PASSWORD,
     TRUST_PROXY: "false",
 };
 

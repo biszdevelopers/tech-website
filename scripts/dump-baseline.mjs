@@ -1,7 +1,14 @@
 // Dumps every GET page of the RUNNING legacy Next.js server into tests/baseline/.
 // Usage: BASE=http://localhost:3000 node scripts/dump-baseline.mjs
 import { mkdirSync, writeFileSync } from "node:fs";
+try {
+    process.loadEnvFile();
+} catch {
+    /* real env wins */
+}
 const BASE = process.env.BASE ?? "http://localhost:3000";
+const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || "admin12345";
 mkdirSync("tests/baseline", { recursive: true });
 
 async function jar(loginPath, body) {
@@ -65,7 +72,10 @@ for (const [name, route] of anonRoutes) {
     }
 }
 
-const mainCookie = await jar("/api/auth/login", "username=admin&password=admin12345");
+const mainCookie = await jar(
+    "/api/auth/login",
+    `username=${encodeURIComponent(ADMIN_USER)}&password=${encodeURIComponent(ADMIN_PASS)}`
+);
 for (const [name, route] of [
     ["admin.html", "/admin"],
     ["admin-edit-1.html", "/admin/edit/1"],

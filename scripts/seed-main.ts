@@ -1,7 +1,6 @@
 ﻿import "./load-env";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import bcrypt from "bcryptjs";
 import { mainDb, mainSqlite } from "../src/lib/db/main";
 import { createToolBundle } from "../src/server/queries/submissions";
 import { parseResourceLines, type ResourceInput } from "../src/lib/resources";
@@ -172,21 +171,6 @@ function loadTools(): ParsedTool[] {
 
 async function main(): Promise<void> {
     console.log("Seeding main database...");
-
-    const existingLogin = await mainDb.login.findFirst();
-    if (!existingLogin) {
-        await mainDb.login.create({
-            data: { User: "admin", PW: await bcrypt.hash("admin12345", 12), sessionVersion: 0 },
-        });
-        console.log("  demo operator created (admin / admin12345)");
-    } else if (existingLogin.sessionVersion === undefined) {
-        await mainDb.login.update({
-            where: { User: existingLogin.User },
-            data: { sessionVersion: 0 },
-        });
-    } else {
-        console.log("  operator login exists, left untouched");
-    }
 
     const count = await mainDb.submission.count();
     if (count > 0) {

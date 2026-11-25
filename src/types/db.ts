@@ -48,12 +48,6 @@ export interface ResourceRow {
     sort: number;
 }
 
-export interface LoginRow {
-    User: string;
-    PW: string;
-    sessionVersion: number;
-}
-
 // web.db
 
 export interface UserRow {

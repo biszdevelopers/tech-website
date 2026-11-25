@@ -7,6 +7,7 @@ import type { Context } from "./src/core/03-context";
 import { loadViews, render, setViewHelpers } from "./src/core/views";
 import { Application, pageCache } from "./src/core/01-application";
 import { guards, mainSessions, optionalWebUser } from "./src/routes/guards";
+import { isMainAdminSession } from "./src/lib/admin-auth";
 import { allStrands, getStrand, getTlConfig, strandFilterName, tlList } from "./src/lib/tl-config";
 import { registerMainSiteRoutes } from "./src/routes/main-site";
 import { registerAdminRoutes } from "./src/routes/admin";
@@ -521,10 +522,7 @@ app.get("/uploads/:file", async (ctx) => {
     if (!Number.isFinite(id)) ctx.throw(404, "Not found");
     const tool = await getToolViewById(id);
     const session = mainSessions.load(ctx);
-    const loginRow = session?.islogin ? await mainDb.login.findFirst() : null;
-    const adminCheck = Boolean(
-        session?.islogin && loginRow && Number(session.sv ?? 0) === Number(loginRow.sessionVersion)
-    );
+    const adminCheck = isMainAdminSession(session);
     if (!tool && !adminCheck) {
         ctx.throw(404, "Not found");
         return;

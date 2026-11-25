@@ -6,8 +6,8 @@
 #
 # Environment:
 #   DEPLOY_BRANCH   branch to deploy (default: main)
-#   ADMIN_USERNAME  only needed when the databases do not exist yet
-#   ADMIN_PASSWORD  only needed when the databases do not exist yet
+# ADMIN_USERNAME/ADMIN_PASSWORD are the directory login and are required on every
+# boot. They are also used to create the first IPstress web admin on fresh databases.
 set -euo pipefail
 
 APP_DIR="/opt/tech-website"
@@ -86,7 +86,7 @@ echo "==> Syncing database schema"
 pnpm run db:init
 
 if [ "$FRESH" = "1" ]; then
-    echo "==> Fresh database: operator credentials are required"
+    echo "==> Fresh database: ADMIN_USERNAME and ADMIN_PASSWORD are required"
     if [ -z "${ADMIN_USERNAME:-}" ] || [ -z "${ADMIN_PASSWORD:-}" ]; then
         echo "!! Set ADMIN_USERNAME and ADMIN_PASSWORD in .env or the environment, then rerun."
         exit 1

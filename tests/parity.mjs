@@ -22,7 +22,16 @@
 
 import { readFileSync } from "node:fs";
 
+try {
+    process.loadEnvFile();
+} catch {
+    /* real env wins */
+}
 const BASE = process.env.BASE ?? "http://localhost:3000";
+const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || "admin12345";
+const WEB_ADMIN_USER = process.env.WEB_ADMIN_USERNAME || "admin";
+const WEB_ADMIN_PASS = process.env.WEB_ADMIN_PASSWORD || "admin12345";
 const MANIFEST = [
     ["index.html", "/"],
     ["tl1.html", "/tl1"],
@@ -76,6 +85,8 @@ async function cookieFor(kind) {
     if (!kind) return "";
     const pagePath = kind === "main" ? "/login" : "/web/login";
     const loginPath = kind === "main" ? "/api/auth/login" : "/web/api/auth/login";
+    const username = kind === "main" ? ADMIN_USER : WEB_ADMIN_USER;
+    const password = kind === "main" ? ADMIN_PASS : WEB_ADMIN_PASS;
     const page = await fetch(BASE + pagePath);
     const html = await page.text();
     const token = (html.match(/name="csrf-token" content="([^"]+)"/) ?? [])[1] ?? "";
@@ -88,7 +99,7 @@ async function cookieFor(kind) {
             "Content-Type": "application/x-www-form-urlencoded",
             Cookie: cookies.map((c) => c.split(";")[0]).join("; "),
         },
-        body: `username=admin&password=admin12345&_csrf=${encodeURIComponent(token)}`,
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&_csrf=${encodeURIComponent(token)}`,
     });
     return [...cookies, ...(res.headers.getSetCookie?.() ?? [])]
         .map((c) => c.split(";")[0])

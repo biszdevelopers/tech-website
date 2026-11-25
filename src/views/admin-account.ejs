@@ -4,39 +4,21 @@
 <div id="adminNav">
     <ul>
         <li><a href="/admin">&#8592; Back to Admin</a></li>
+        <li><form class="logout-form" method="post" action="/api/auth/logout"><button type="submit">Log out</button></form></li>
     </ul>
 </div>
 <div id="wrap">
-    <form id="form" method="post" action="/api/admin/account">
-        <% if (locals.saved) { %>
-        <p class="submit-success" role="status">Account updated. Other sessions have been signed out.</p>
-        <% } %>
-        <% if (locals.error) { %>
-        <p class="form-error" role="alert"><%= locals.error %></p>
-        <% } %>
-        <h2>Current credentials</h2>
-        <div class="form-grid">
-            <label class="field"><span>Current username</span>
-                <input class="l" type="text" value="<%= username %>" readonly/>
-            </label>
-            <label class="field"><span>Current password</span>
-                <input class="l" type="password" name="current" required/>
-            </label>
-        </div>
-        <h2>New credentials</h2>
-        <div class="form-grid">
-            <label class="field"><span>New username</span>
-                <input class="l" type="text" name="username" value="<%= username %>" minlength="3" maxlength="20" required/>
-            </label>
-            <label class="field"><span>New password (blank keeps current)</span>
-                <input class="l" type="password" name="password" minlength="10"/>
-            </label>
-            <label class="field"><span>Confirm new password</span>
-                <input class="l" type="password" name="confirm"/>
-            </label>
-        </div>
-        <button type="submit" class="submit-btn">Update account</button>
-    </form>
+    <p class="signed-in">Signed in as <b><%= username %></b>.</p>
+
+    <h2>Change the operator credentials</h2>
+    <p>The directory administrator reads <code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code>
+        from <code>.env</code> at startup. These values are never stored in the database.</p>
+    <ol>
+        <li>Open <code>.env</code>.</li>
+        <li>Change <code>ADMIN_USERNAME</code> or <code>ADMIN_PASSWORD</code>.</li>
+        <li>Restart the server with <code>pnpm run start</code>.</li>
+    </ol>
+    <p>Restarting with a different password invalidates every existing admin session.</p>
 </div>
 </body>
 </html>

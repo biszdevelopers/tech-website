@@ -25,7 +25,6 @@ export const mainDb = {
     domains: createModel(db, schema.domains, { pk: "id" }),
     resources: createModel(db, schema.resources, { pk: "id" }),
     appMeta: createModel(db, schema.appMeta, { pk: "key" }),
-    login: createModel(db, schema.login, { pk: "User" }),
     $disconnect: async () => sqlite.close(),
 };
 

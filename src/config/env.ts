@@ -117,6 +117,26 @@ if (isProd && !settingsKey) {
     );
 }
 
+function adminUsername(): string {
+    const value = requiredString("ADMIN_USERNAME", 3).trim();
+    if (!/^[A-Za-z0-9._-]{3,20}$/.test(value)) {
+        throw new Error(
+            "ADMIN_USERNAME must be 3-20 characters using letters, digits, dot, dash or underscore."
+        );
+    }
+    return value;
+}
+
+function adminPassword(): string {
+    return requiredString("ADMIN_PASSWORD", 10);
+}
+
+const adminUser = adminUsername();
+const adminPass = adminPassword();
+if (isProd && (adminPass.length < 12 || /^(admin|password|changeme|letmein)/i.test(adminPass))) {
+    console.warn("WARNING: ADMIN_PASSWORD is weak. Use 16+ random characters in .env and restart.");
+}
+
 export const env = Object.freeze({
     isProd,
     port,
@@ -134,6 +154,9 @@ export const env = Object.freeze({
 
     sessionSecretMain: requiredString("SESSION_SECRET", 32),
     sessionSecretWeb: requiredString("SESSION_SECRET_WEB", 32),
+    /** Directory operator credentials. Read from .env at boot, never stored in SQLite. */
+    adminUsername: adminUser,
+    adminPassword: adminPass,
     /** Cookie lifetime in seconds - parity with the previous site (30 min). */
     sessionTtlSeconds: optionalNumber("SESSION_TTL_SECONDS", 1800),
 

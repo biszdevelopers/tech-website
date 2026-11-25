@@ -31,10 +31,10 @@
         "db:seed": "pnpm exec tsx scripts/seed-main.ts && pnpm exec tsx scripts/seed-web.ts",
         "db:reset": "pnpm run db:clear && pnpm run db:seed",
         "setup": "pnpm exec tsx scripts/setup-admin.ts",
-        "check:views": "pnpm exec tsx tests/views-smoke.ts",
+        "check:views": "node --import tsx --import ./tests/setup-env.ts tests/views-smoke.ts",
         "db:migrate": "pnpm exec drizzle-kit generate --config=drizzle.main.config.ts && pnpm exec drizzle-kit generate --config=drizzle.web.config.ts",
         "check:full": "pnpm run check && pnpm test && pnpm run check:views && pnpm run check:hot",
-        "check:hot": "pnpm exec tsx tests/hot-reload.ts",
+        "check:hot": "node --import tsx --import ./tests/setup-env.ts tests/hot-reload.ts",
         "check:seo": "node scripts/check-seo.mjs",
         "check:flows": "node scripts/check-flows.mjs",
         "check:contrast": "node --import tsx --test tests/unit/contrast.test.ts"

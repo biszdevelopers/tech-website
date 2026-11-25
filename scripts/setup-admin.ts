@@ -1,11 +1,10 @@
 import "./load-env";
 import bcrypt from "bcryptjs";
-import { mainDb } from "../src/lib/db/main";
 import { webDb } from "../src/lib/db/web";
 
-// Creates, rotates or renames the operator credentials for BOTH subprojects.
-// Re-running after `db:init` is supported: the existing account is updated in
-// place, and every existing session is invalidated by bumping the version.
+// Configures the IPstress web administrator. The tech-directory operator is
+// read directly from ADMIN_USERNAME/ADMIN_PASSWORD in .env at startup, so no
+// database row is written for it.
 // Usage:
 //   ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 10 chars> pnpm run setup
 
@@ -27,28 +26,6 @@ async function main(): Promise<void> {
     }
 
     const hash = await bcrypt.hash(password, 12);
-
-    const loginRows = await mainDb.login.findMany();
-    const named = loginRows.find(
-        (row) => String(row.User).toLowerCase() === username.toLowerCase()
-    );
-    if (named) {
-        await mainDb.login.update({
-            where: { User: named.User },
-            data: { User: username, PW: hash, sessionVersion: Number(named.sessionVersion) + 1 },
-        });
-    } else if (loginRows.length > 0) {
-        await mainDb.login.update({
-            where: { User: loginRows[0].User },
-            data: {
-                User: username,
-                PW: hash,
-                sessionVersion: Number(loginRows[0].sessionVersion) + 1,
-            },
-        });
-    } else {
-        await mainDb.login.create({ data: { User: username, PW: hash, sessionVersion: 0 } });
-    }
 
     const webUsers = await webDb.users.findMany();
     const namedAdmin = webUsers.find(
@@ -101,8 +78,10 @@ async function main(): Promise<void> {
         });
     }
 
-    console.log(`Operator credentials set for "${username}" in both databases.`);
-    await mainDb.$disconnect();
+    console.log(`IPstress web administrator set for "${username}".`);
+    console.log(
+        "The tech-directory operator uses ADMIN_USERNAME/ADMIN_PASSWORD from .env; restart to apply changes."
+    );
     await webDb.$disconnect();
 }
 

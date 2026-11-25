@@ -5,7 +5,7 @@ import type { Context } from "../core/03-context";
 import { SessionManager, type SessionData } from "../core/05-session";
 import { env } from "../config/env";
 import { webDb } from "../lib/db/web";
-import { mainDb } from "../lib/db/main";
+import { adminSessionVersion, isMainAdminSession } from "../lib/admin-auth";
 import type { UserRow } from "../types/db";
 
 export const mainSessions = new SessionManager(
@@ -24,20 +24,17 @@ export const webSessions = new SessionManager(
     "Lax"
 );
 
-/** Main admin session, re-checked against the login row every request. */
+/** Main admin session, re-checked against the current .env credentials. */
 export async function requireMainAdmin(ctx: Context): Promise<void> {
     const session = mainSessions.load(ctx);
-    if (!session?.islogin) ctx.throw(404, "Page not found.");
-    const row = await mainDb.login.findFirst();
-    if (!row) ctx.throw(404, "Page not found.");
-    if (Number(session.sv ?? 0) !== Number(row.sessionVersion)) {
-        mainSessions.destroy(ctx);
+    if (!isMainAdminSession(session)) {
+        if (ctx.cookie(mainSessions.cookieName)) mainSessions.destroy(ctx);
         ctx.throw(404, "Page not found.");
     }
     mainSessions.save(ctx, {
         islogin: true,
-        username: row.User,
-        sv: Number(row.sessionVersion),
+        username: env.adminUsername,
+        sv: adminSessionVersion(),
     });
 }
 

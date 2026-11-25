@@ -38,7 +38,7 @@ pnpm run db:init
 pnpm run db:seed
 pnpm run db:reset
 pnpm run db:migrate   # generate SQL from schema changes
-pnpm run setup        # create the first admin from ADMIN_USERNAME/ADMIN_PASSWORD
+pnpm run setup        # set the IPstress web admin from ADMIN_USERNAME/ADMIN_PASSWORD
 ```
 
 ## Configuration
@@ -50,13 +50,18 @@ them. Set `TRUST_PROXY=true` when a trusted reverse proxy supplies
 secrets stored in SQLite. `FEATURE_*` flags disable payments, the wheel,
 affiliate, gift cards or the IPstress hub without a code change.
 
-Demo seed data (`pnpm run db:seed`) never overwrites an existing operator
-account or an edited plan. Seed credentials (`admin` / `admin12345`) exist only
-on a database that had no operator yet. Use `pnpm run setup` with a 10+
-character password for any real deployment.
-Re-running `pnpm run setup` rotates the existing operator account: the password
-is replaced and a new `ADMIN_USERNAME` renames that account in both databases
-(no duplicate admin rows; every existing session is invalidated).
+The directory administrator is not stored in SQLite. `ADMIN_USERNAME` and
+`ADMIN_PASSWORD` in `.env` are read at every boot, so changing either value there
+and restarting the server is the only way to change the login. Restarting with a
+new password invalidates every existing admin session. Use at least 10
+characters; 16 or more is recommended. Keep `.env` out of version control and,
+on Linux, restrict it with `chmod 600 .env`.
+
+Demo seed data (`pnpm run db:seed`) never overwrites existing tools. Seed
+credentials (`admin` / `admin12345`) apply only to the IPstress web app on a
+database that had no web admin yet. `pnpm run setup` configures that web admin
+from `ADMIN_USERNAME`/`ADMIN_PASSWORD`; it does not write the directory
+operator to SQLite.
 
 The directory covers six Teaching and Learning domains (TL1-TL6). Tools have strand tags for TL1-TL4, write-ups for all six, and optional resource links.
 
@@ -84,9 +89,11 @@ math.
 
 - Canonical `SITE_ORIGIN` for redirects/CSRF/Stripe; never trusts the `Host`
   header.
-- Signed cookie sessions (`__Host-` in production, HttpOnly, SameSite),
-  bcrypt with constant-time failure paths; legacy scrypt hashes are rehashed on
-  successful login.
+- Signed cookie sessions (`__Host-` in production, HttpOnly, SameSite). The
+  directory operator is compared against `.env` with constant-time hashes and is
+  never stored in SQLite; its session fingerprint changes with the password.
+  Web-app passwords use bcrypt with constant-time failure paths; legacy scrypt
+  hashes are rehashed on successful login.
 - Signed, expiring CSRF tokens on every mutation; Origin checks on all mutating
   requests, including proxy-safe host comparison. Form posts answer with `303`
   redirects or JSON, never raw bodies.
@@ -112,7 +119,8 @@ SQLite's online backup API, syncs the schema, builds with the previous `dist/`
 kept for rollback, fixes ownership, restarts, and polls `/api/health`. A failed
 health check restores the previous build. Fresh databases require
 `ADMIN_USERNAME`/`ADMIN_PASSWORD` (in `.env` or the environment) so a deploy
-never ships the demo credentials.
+never ships the demo credentials. The directory operator is read from these
+values at boot and is not written to either database.
 
 The app works standalone with `pnpm start` (production mode, in-process
 compression, caching and security headers). `pnpm start` works with either HTTP or HTTPS

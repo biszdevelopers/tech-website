@@ -138,6 +138,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             },
         ],
     },
+    "admin-account": { username: "admin" },
     "admin-edit": {
         id: 3,
         sub: {

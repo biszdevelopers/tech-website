@@ -60,9 +60,3 @@ export const appMeta = sqliteTable("app_meta", {
     key: text("key").primaryKey(),
     value: text("value").notNull().default(""),
 });
-
-export const login = sqliteTable("login", {
-    User: text("User").primaryKey(),
-    PW: text("PW").notNull().default(""),
-    sessionVersion: integer("sessionVersion").notNull().default(0),
-});

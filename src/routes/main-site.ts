@@ -12,7 +12,8 @@ import { rateLimit } from "../lib/rate-limit";
 import { readMultipart } from "../lib/multipart";
 import { detectImage, saveUpload } from "../lib/uploads";
 import { withLock } from "../lib/lock";
-import { verifyPassword } from "../lib/passwords";
+import { adminPasswordMatches, adminSessionVersion, adminUsernameMatches } from "../lib/admin-auth";
+import { env } from "../config/env";
 import { parseResourceLines } from "../lib/resources";
 import { categorySelection } from "../lib/categories";
 import { strandColumnNames } from "../lib/tl-config";
@@ -21,7 +22,6 @@ import {
     getNextSubmissionId,
     type CreateDomainInput,
 } from "../server/queries/submissions";
-import { mainDb } from "../lib/db/main";
 import { buildPageMeta, websiteLd } from "../lib/seo";
 
 const SUBMISSION_META = buildPageMeta({
@@ -68,31 +68,19 @@ export function registerMainSiteRoutes(app: Application): void {
                 }
                 throw new HttpError(429, "Too many login attempts. Try again in a minute.");
             }
-            const rows = await mainDb.login.findMany();
-            const user = rows.find(
-                (row) => String(row.User).toLowerCase() === form.username.toLowerCase()
-            );
-            const check = await verifyPassword(
-                form.password,
-                user?.PW ?? "$2b$12$.5XkKkyMWCtIYiGjUqvHeuWjs5kNjl7nOYChlviJiHgVUgE4A.h6C"
-            );
-            if (user === undefined || !check.ok) {
+            const usernameOk = adminUsernameMatches(form.username);
+            const passwordOk = adminPasswordMatches(form.password);
+            if (!usernameOk || !passwordOk) {
                 if (asHtml) {
                     ctx.redirect("/login?error=invalid", 303);
                     return;
                 }
                 throw new HttpError(401, "Invalid username or password.");
             }
-            if (check.rehashed) {
-                await mainDb.login.update({
-                    where: { User: user.User },
-                    data: { PW: check.rehashed },
-                });
-            }
             await mainSessions.save(ctx, {
                 islogin: true,
-                username: user.User,
-                sv: Number(user.sessionVersion),
+                username: env.adminUsername,
+                sv: adminSessionVersion(),
             });
             ctx.redirect("/admin", 303);
         },
