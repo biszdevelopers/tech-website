@@ -389,7 +389,7 @@ footer a:hover {
 }
 
 #basicinfo p {
-    max-width: 72ch;
+    max-width: 100%;
     font-size: clamp(0.98rem, 1.05vw, 1.06rem);
     line-height: 1.65;
 }
@@ -459,7 +459,7 @@ footer a:hover {
 }
 
 .tl-description {
-    max-width: 82ch;
+    max-width: 100%;
     margin: 0 0 16px;
     color: var(--color-muted);
     font-size: clamp(0.95rem, 1vw, 1.02rem);
@@ -608,7 +608,7 @@ a.tlx:focus-visible .tlx__strands li::before {
 }
 
 .tl-standards {
-    max-width: 82ch;
+    max-width: 100%;
     margin: 0 0 var(--space-3);
     padding: 10px 14px;
     border: 1px solid var(--color-border);
@@ -627,10 +627,13 @@ a.tlx:focus-visible .tlx__strands li::before {
 .tl-standards ul {
     margin: 8px 0 0;
     padding-left: 18px;
+    columns: 2;
+    column-gap: clamp(24px, 4vw, 64px);
 }
 
 .tl-standards li {
     margin-bottom: 4px;
+    break-inside: avoid;
 }
 
 .tl-submit-cta {
@@ -692,6 +695,10 @@ a.tlx:focus-visible .tlx__strands li::before {
 .n5 {
     background: #4ec1de;
     color: #0d1440;
+}
+.cat {
+    background: #6a4a9e;
+    color: #fff;
 }
 
 .techtip-wrap {
@@ -797,7 +804,7 @@ a.tlx:focus-visible .tlx__strands li::before {
 }
 
 .techtip .desc {
-    max-width: 95ch;
+    max-width: 100%;
     color: var(--color-muted);
     font-size: clamp(0.94rem, 1vw, 1.02rem);
     line-height: 1.65;
@@ -826,7 +833,7 @@ a.tlx:focus-visible .tlx__strands li::before {
 
 .techtip.search-result .desc,
 .techtip.tool-detail .desc {
-    max-width: 90ch;
+    max-width: 100%;
 }
 
 .techtip.tool-detail .desc h2 {
@@ -959,6 +966,49 @@ a.tlx:focus-visible .tlx__strands li::before {
 .filters .filter-reset:hover {
     background: var(--color-accent-soft);
     color: var(--color-ink-strong);
+}
+
+/* Write-up domains group strand and category filters under one form. */
+.filters--writeup {
+    display: block;
+    padding-bottom: var(--space-4);
+}
+
+.filter-group {
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    border: 0;
+}
+
+.filter-group legend {
+    margin-bottom: 8px;
+    padding: 0;
+    color: var(--color-muted);
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.filter-group__label {
+    margin: 10px 0 6px;
+    color: var(--color-ink);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+}
+
+.filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: var(--space-3);
 }
 
 .label {
@@ -1425,11 +1475,17 @@ mark {
     color: #bdf5ff;
     border: 1px solid rgba(120, 225, 247, 0.34);
 }
+[data-theme="dark"] .cat {
+    background: rgba(150, 112, 214, 0.28);
+    color: #e3d5ff;
+    border: 1px solid rgba(180, 148, 240, 0.4);
+}
 [data-theme="dark"] .n1,
 [data-theme="dark"] .n2,
 [data-theme="dark"] .n3,
 [data-theme="dark"] .n4,
-[data-theme="dark"] .n5 {
+[data-theme="dark"] .n5,
+[data-theme="dark"] .cat {
     font-weight: 600;
 }
 
@@ -1444,6 +1500,10 @@ mark {
 @media (max-width: 1100px) {
     .tl-section {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tl-standards ul {
+        columns: 1;
     }
 
     .techtip .info {

@@ -41,6 +41,16 @@
             <% }) %>
         </div>
 
+        <h2>Categories</h2>
+        <% categoryGroups.forEach(function (group) { %>
+        <h3 class="form-subhead"><%= group.title %></h3>
+        <div class="domains">
+            <% group.options.forEach(function (option) { %>
+            <label><input type="checkbox" name="<%= option.name %>"<%- option.checked ? ' checked=""' : '' %>/><%= option.label %></label>
+            <% }) %>
+        </div>
+        <% }) %>
+
         <h2>Additional resources</h2>
         <label class="field"><span>One per line: Label | https://...</span>
             <textarea class="l" name="resources" rows="4"><%= resourceText %></textarea>

@@ -14,6 +14,7 @@ import { detectImage, saveUpload } from "../lib/uploads";
 import { withLock } from "../lib/lock";
 import { verifyPassword } from "../lib/passwords";
 import { parseResourceLines } from "../lib/resources";
+import { categorySelection } from "../lib/categories";
 import { strandColumnNames } from "../lib/tl-config";
 import {
     createToolBundle,
@@ -211,6 +212,8 @@ export function registerMainSiteRoutes(app: Application): void {
                     tl4_desc: d.tl4_desc ?? "",
                     tl5_desc: d.tl5_desc ?? "",
                     tl6_desc: d.tl6_desc ?? "",
+                    tl5_tags: categorySelection(fields, "tl5"),
+                    tl6_tags: categorySelection(fields, "tl6"),
                     username: d.username ?? "",
                     contact: d.contact ?? "",
                     accepted: false,

@@ -13,6 +13,8 @@ export interface SubmissionRow {
     tl4_desc: string;
     tl5_desc: string;
     tl6_desc: string;
+    tl5_tags: string;
+    tl6_tags: string;
     accepted: boolean;
     username: string;
     contact: string;

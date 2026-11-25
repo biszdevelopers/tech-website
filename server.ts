@@ -7,7 +7,7 @@ import type { Context } from "./src/core/03-context";
 import { loadViews, render, setViewHelpers } from "./src/core/views";
 import { Application, pageCache } from "./src/core/01-application";
 import { guards, mainSessions, optionalWebUser } from "./src/routes/guards";
-import { getStrand, getTlConfig, tlList } from "./src/lib/tl-config";
+import { allStrands, getStrand, getTlConfig, strandFilterName, tlList } from "./src/lib/tl-config";
 import { registerMainSiteRoutes } from "./src/routes/main-site";
 import { registerAdminRoutes } from "./src/routes/admin";
 import { registerAdminAccountRoutes } from "./src/routes/admin-account";
@@ -25,6 +25,7 @@ import { getWebSettings } from "./src/lib/web-settings";
 import { mainDb } from "./src/lib/db/main";
 import { webDb } from "./src/lib/db/web";
 import { toolPath, toolSlug } from "./src/lib/tool-path";
+import { categoryFilterName } from "./src/lib/categories";
 import {
     absoluteUrl,
     breadcrumbsLd,
@@ -113,6 +114,7 @@ async function tlRender(
     if (!config) return null;
     const activeStrand = activeSlug ? getStrand(tl, activeSlug) : null;
     if (activeSlug && !activeStrand) return null;
+    const isWriteup = config.strands.length === 0;
     const checked = config.strands.map((strand) => {
         if (activeStrand) return strand.slug === activeStrand.slug;
         return query[strand.checkboxName] !== "0";
@@ -120,27 +122,87 @@ async function tlRender(
     const selectedColumns = config.strands
         .filter((_, index) => checked[index])
         .map((strand) => strand.domainColumn);
+    const writeupStrands = isWriteup ? allStrands() : [];
+    const strandChecked = writeupStrands.map(
+        (strand) => query[strandFilterName(strand.domainColumn)] === "1"
+    );
+    const categoryOptions = isWriteup ? config.topics : [];
+    const categoryChecked = categoryOptions.map(
+        (_, index) => query[categoryFilterName(index)] === "1"
+    );
+    const selectedWriteupStrands = writeupStrands.filter((_, index) => strandChecked[index]);
+    const selectedCategories = categoryOptions.filter((_, index) => categoryChecked[index]);
     const mask = getStrandMask(selectedColumns);
-    const tools =
-        config.strands.length === 0 ? await getAcceptedToolViews() : await getToolsByMask(mask);
+    let tools = isWriteup ? await getAcceptedToolViews() : await getToolsByMask(mask);
     const descriptionField = `${tl}_desc` as
         "tl1_desc" | "tl2_desc" | "tl3_desc" | "tl4_desc" | "tl5_desc" | "tl6_desc";
-    const filtered = tools
-        .filter((tool) => (config.strands.length === 0 ? Boolean(tool[descriptionField]) : true))
-        .map((tool) => ({
-            id: tool.id,
-            techname: tool.techname,
-            link: tool.link,
-            displaytext: tool.displaytext,
-            desc: tool[descriptionField] ?? "",
-            updatedAt: tool.updatedAt,
-            path: tool.path,
-            resources: tool.resources,
-            tight: TIGHT_DESC.has(`${tl}:${tool.id}`),
-            tags: Object.fromEntries(
-                config.strands.map((s) => [s.domainColumn, tool.tags[s.domainColumn]])
-            ),
-        }));
+    if (isWriteup) {
+        tools = tools.filter((tool) => Boolean(tool[descriptionField]));
+        if (selectedWriteupStrands.length > 0) {
+            tools = tools.filter((tool) =>
+                selectedWriteupStrands.some((strand) => tool.tags[strand.domainColumn])
+            );
+        }
+        if (selectedCategories.length > 0) {
+            tools = tools.filter((tool) =>
+                selectedCategories.some((category) =>
+                    (tl === "tl5" ? tool.tl5Categories : tool.tl6Categories).includes(category)
+                )
+            );
+        }
+    }
+    const filtered = tools.map((tool) => ({
+        id: tool.id,
+        techname: tool.techname,
+        link: tool.link,
+        displaytext: tool.displaytext,
+        desc: tool[descriptionField] ?? "",
+        updatedAt: tool.updatedAt,
+        path: tool.path,
+        resources: tool.resources,
+        tight: TIGHT_DESC.has(`${tl}:${tool.id}`),
+        tags: Object.fromEntries(
+            (isWriteup ? writeupStrands : config.strands).map((s) => [
+                s.domainColumn,
+                tool.tags[s.domainColumn],
+            ])
+        ),
+        categories: isWriteup ? (tl === "tl5" ? tool.tl5Categories : tool.tl6Categories) : [],
+    }));
+    const tagOptions = isWriteup
+        ? writeupStrands.map((strand) => ({
+              label: strand.label,
+              domainColumn: strand.domainColumn,
+              cssClass: strand.cssClass,
+              href: `/${strand.tl}/${strand.slug}`,
+          }))
+        : config.strands.map((strand) => ({
+              label: strand.label,
+              domainColumn: strand.domainColumn,
+              cssClass: strand.cssClass,
+              href: `/${tl}/${strand.slug}`,
+          }));
+    const writeupFilters = isWriteup
+        ? {
+              strandGroups: tlList
+                  .filter((group) => group.strands.length > 0)
+                  .map((group) => ({
+                      title: group.title,
+                      options: group.strands.map((strand) => ({
+                          name: strandFilterName(strand.domainColumn),
+                          label: strand.label,
+                          cssClass: strand.cssClass,
+                          tooltip: strand.tooltip,
+                          checked: query[strandFilterName(strand.domainColumn)] === "1",
+                      })),
+                  })),
+              categories: categoryOptions.map((label, index) => ({
+                  name: categoryFilterName(index),
+                  label,
+                  checked: categoryChecked[index],
+              })),
+          }
+        : null;
     const strandLinks = config.strands.map((strand) => ({
         label: strand.label,
         href: `/${tl}/${strand.slug}`,
@@ -176,6 +238,8 @@ async function tlRender(
             filtered,
             activeStrand,
             strandLinks,
+            tagOptions,
+            writeupFilters,
             meta,
         }),
         meta,
@@ -691,6 +755,10 @@ app.get("/tool/:id/:slug", async (ctx) => {
         description: tool[`${config.id}_desc` as keyof typeof tool] as string,
     }));
     const strands = DOM_TAGS.filter((tag) => tool.tags[tag.col]);
+    const categories = [
+        ...tool.tl5Categories.map((label, index) => ({ domain: "tl5", label, index })),
+        ...tool.tl6Categories.map((label, index) => ({ domain: "tl6", label, index })),
+    ];
     const resources = tool.resources;
     const meta = metaFor({
         title: `${tool.techname} | BIBS-C Tech Tools`,
@@ -715,9 +783,9 @@ app.get("/tool/:id/:slug", async (ctx) => {
     const key = `tool:${tool.id}`;
     const cached = HTML_CACHE
         ? await pageCache.remember(key, async () =>
-              render("tool", { tool, strands, tlSections, resources, meta })
+              render("tool", { tool, strands, categories, tlSections, resources, meta })
           )
-        : render("tool", { tool, strands, tlSections, resources, meta });
+        : render("tool", { tool, strands, categories, tlSections, resources, meta });
     ctx.htmlRaw(cached);
 });
 
@@ -765,7 +833,16 @@ app.get("/:tl", async (ctx) => {
     });
     const config = getTlConfig(ctx.params.tl);
     const bits = config
-        ? config.strands.map((s) => (query[s.checkboxName] !== "0" ? "1" : "0")).join("")
+        ? config.strands.length > 0
+            ? config.strands.map((s) => (query[s.checkboxName] !== "0" ? "1" : "0")).join("")
+            : [
+                  allStrands()
+                      .map((s) => (query[strandFilterName(s.domainColumn)] === "1" ? "1" : "0"))
+                      .join(""),
+                  config.topics
+                      .map((_, index) => (query[categoryFilterName(index)] === "1" ? "1" : "0"))
+                      .join(""),
+              ].join(":")
         : "x";
     const cacheKey = `tl:${ctx.params.tl}:all:${bits}`;
     let body: string | undefined = HTML_CACHE ? pageCache.get(cacheKey) : undefined;

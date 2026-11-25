@@ -13,6 +13,8 @@ export const submission = sqliteTable(
         tl4_desc: text("tl4_desc").notNull().default(""),
         tl5_desc: text("tl5_desc").notNull().default(""),
         tl6_desc: text("tl6_desc").notNull().default(""),
+        tl5_tags: text("tl5_tags").notNull().default(""),
+        tl6_tags: text("tl6_tags").notNull().default(""),
         link: text("link").notNull().default(""),
         displaytext: text("displaytext").notNull().default(""),
         accepted: integer("accepted", { mode: "boolean" }).notNull().default(false),

@@ -26,7 +26,14 @@ import { parseCsv, csvCell } from "../lib/csv";
 import { withLock } from "../lib/lock";
 import { parseResourceLines, formatResourceLines } from "../lib/resources";
 import { submissionSchema } from "../lib/validations/submission";
-import { strandColumnNames, tlList } from "../lib/tl-config";
+import { strandColumnNames, tlList, getTlConfig } from "../lib/tl-config";
+import {
+    categoryFieldName,
+    categoryLabels,
+    categorySelection,
+    normalizeCategories,
+    splitCategories,
+} from "../lib/categories";
 import { mainDb } from "../lib/db/main";
 
 const DOMAIN_FIELDS = strandColumnNames();
@@ -39,6 +46,29 @@ const DESCRIPTION_COLUMNS = tlList.map((config) => ({
     field: `${config.id}_desc`,
     label: config.title,
 }));
+
+type CategoryDomain = "tl5" | "tl6";
+
+interface CategoryGroup {
+    domain: CategoryDomain;
+    title: string;
+    options: Array<{ name: string; label: string; checked: boolean }>;
+}
+
+function categoryGroupsFor(tags: { tl5_tags?: string; tl6_tags?: string } = {}): CategoryGroup[] {
+    return (["tl5", "tl6"] as const).map((domain) => {
+        const selected = splitCategories(tags[`${domain}_tags`]);
+        return {
+            domain,
+            title: getTlConfig(domain)?.title ?? domain,
+            options: categoryLabels(domain).map((label, index) => ({
+                name: categoryFieldName(domain, index),
+                label,
+                checked: selected.includes(label),
+            })),
+        };
+    });
+}
 
 function domainDataFromFields(fields: Record<string, unknown>): Record<string, boolean> {
     const flags: Record<string, boolean> = {};
@@ -148,6 +178,7 @@ export function registerAdminRoutes(app: Application): void {
                     id,
                     sub,
                     strands,
+                    categoryGroups: categoryGroupsFor(sub),
                     descriptionColumns: DESCRIPTION_COLUMNS,
                     resourceText: formatResourceLines(resources),
                     hasUpload: uploadExists(id),
@@ -185,6 +216,8 @@ export function registerAdminRoutes(app: Application): void {
                 "tl4",
                 "tl5",
                 "tl6",
+                "tl5_categories",
+                "tl6_categories",
                 "accepted",
                 "username",
                 "contact",
@@ -213,6 +246,8 @@ export function registerAdminRoutes(app: Application): void {
                         s.tl4_desc,
                         s.tl5_desc,
                         s.tl6_desc,
+                        s.tl5_tags,
+                        s.tl6_tags,
                         s.accepted ? 1 : 0,
                         s.username,
                         s.contact,
@@ -243,6 +278,7 @@ export function registerAdminRoutes(app: Application): void {
                         label,
                         checked: false,
                     })),
+                    categoryGroups: categoryGroupsFor(),
                     descriptionColumns: DESCRIPTION_COLUMNS,
                 })
             );
@@ -295,6 +331,8 @@ export function registerAdminRoutes(app: Application): void {
                         tl4_desc: data.tl4_desc ?? "",
                         tl5_desc: data.tl5_desc ?? "",
                         tl6_desc: data.tl6_desc ?? "",
+                        tl5_tags: categorySelection(fields, "tl5"),
+                        tl6_tags: categorySelection(fields, "tl6"),
                         username: data.username ?? "",
                         contact: data.contact ?? "",
                         accepted: fields.accepted === "on" || fields.accepted === "true",
@@ -334,6 +372,12 @@ export function registerAdminRoutes(app: Application): void {
 
             const existingSubs = await getAllSubmissions();
             const existingById = new Map(existingSubs.map((row) => [row.id, row]));
+            const categoryColumn = (domain: "tl5" | "tl6"): number => {
+                const primary = index(`${domain}_categories`);
+                return primary >= 0 ? primary : index(`${domain}_tags`);
+            };
+            const tl5CategoryCol = categoryColumn("tl5");
+            const tl6CategoryCol = categoryColumn("tl6");
             const existingDomains = await getAllDomains();
             const domainById = new Map(existingDomains.map((row) => [row.id, row]));
             const existingResources = await getAllResources();
@@ -377,6 +421,12 @@ export function registerAdminRoutes(app: Application): void {
                     }
                     if (index("username") >= 0) updates.username = cell(row, index("username"));
                     if (index("contact") >= 0) updates.contact = cell(row, index("contact"));
+                    if (tl5CategoryCol >= 0) {
+                        updates.tl5_tags = normalizeCategories(cell(row, tl5CategoryCol), "tl5");
+                    }
+                    if (tl6CategoryCol >= 0) {
+                        updates.tl6_tags = normalizeCategories(cell(row, tl6CategoryCol), "tl6");
+                    }
                     if (index("accepted") >= 0) {
                         updates.accepted = cell(row, index("accepted")) === "1";
                     }
@@ -436,6 +486,14 @@ export function registerAdminRoutes(app: Application): void {
                                 tl4_desc: cell(row, index("tl4")),
                                 tl5_desc: cell(row, index("tl5")),
                                 tl6_desc: cell(row, index("tl6")),
+                                tl5_tags:
+                                    tl5CategoryCol >= 0
+                                        ? normalizeCategories(cell(row, tl5CategoryCol), "tl5")
+                                        : "",
+                                tl6_tags:
+                                    tl6CategoryCol >= 0
+                                        ? normalizeCategories(cell(row, tl6CategoryCol), "tl6")
+                                        : "",
                                 username: cell(row, index("username")),
                                 contact: cell(row, index("contact")),
                                 accepted: cell(row, index("accepted")) === "1",
@@ -561,6 +619,8 @@ export function registerAdminRoutes(app: Application): void {
                     tl4_desc: data.tl4_desc ?? "",
                     tl5_desc: data.tl5_desc ?? "",
                     tl6_desc: data.tl6_desc ?? "",
+                    tl5_tags: categorySelection(body, "tl5"),
+                    tl6_tags: categorySelection(body, "tl6"),
                     username: data.username ?? "",
                     contact: data.contact ?? "",
                 },

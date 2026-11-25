@@ -26,7 +26,7 @@
     --font-display: "Noto Sans", system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    --page-max: 1440px;
+    --page-max: 1800px;
     --page-pad: clamp(18px, 4vw, 48px);
     --content-gutter: max(var(--page-pad), calc((100% - var(--page-max)) / 2));
     --nav-offset: 130px;

@@ -35,6 +35,14 @@
         <label class="field"><span><%= config.title %></span>
             <textarea name="<%= field %>" class="l" maxlength="8000" placeholder="<%= config.shortLabel %> description..."><%= v[field] || '' %></textarea>
         </label>
+        <% if (config.id === 'tl5' || config.id === 'tl6') { %>
+        <p class="form-hint">Optional: choose the <%= config.shortLabel.toLowerCase() %> categories this tool supports.</p>
+        <div class="domains">
+            <% config.topics.forEach(function (topic, index) { var categoryField = config.id + '_c' + (index + 1); %>
+            <label><input type="checkbox" name="<%= categoryField %>" value="true"<%- v[categoryField] === 'true' ? ' checked=""' : '' %>/><%= topic %></label>
+            <% }) %>
+        </div>
+        <% } %>
         <% }) %>
 
         <h2 id="domains">Strands:</h2>

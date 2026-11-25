@@ -294,3 +294,23 @@ export function getStrand(tl: string, slug: string): StrandConfig | null {
 export function strandColumnNames(): string[] {
     return tlList.flatMap((config) => config.strands.map((strand) => strand.domainColumn));
 }
+
+export interface StrandRef extends StrandConfig {
+    tl: string;
+    tlTitle: string;
+}
+
+/** Every strand across TL1-TL4, for filtering write-up domains. */
+export function allStrands(): StrandRef[] {
+    return tlList.flatMap((config) =>
+        config.strands.map((strand) => ({
+            ...strand,
+            tl: config.id,
+            tlTitle: config.title,
+        }))
+    );
+}
+
+export function strandFilterName(column: string): string {
+    return `st_${column}`;
+}

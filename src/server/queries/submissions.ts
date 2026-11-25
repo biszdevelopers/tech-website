@@ -9,6 +9,7 @@ import { mainDb, mainSqlite } from "../../lib/db/main";
 import { pageCache } from "../../core/06-cache";
 import type { SubmissionRow, DomainRow, ResourceRow } from "../../types/db";
 import type { ResourceInput } from "../../lib/resources";
+import { splitCategories } from "../../lib/categories";
 import { toolPath } from "../../lib/tool-path";
 import { strandColumnNames, tlList } from "../../lib/tl-config";
 
@@ -28,11 +29,15 @@ export interface ToolView {
     tl4_desc: string;
     tl5_desc: string;
     tl6_desc: string;
+    tl5_tags: string;
+    tl6_tags: string;
     accepted: boolean;
     username: string;
     contact: string;
     updatedAt: number;
     tags: Record<string, boolean>;
+    tl5Categories: string[];
+    tl6Categories: string[];
     mask: number;
     path: string;
     resources: ResourceRow[];
@@ -166,12 +171,21 @@ export async function getAcceptedToolViews(): Promise<ToolView[]> {
             });
             const searchText = tlList
                 .map((config) => sub[`${config.id}_desc` as keyof SubmissionRow] ?? "")
-                .concat([sub.techname, sub.displaytext, sub.username, sub.contact])
+                .concat([
+                    sub.techname,
+                    sub.displaytext,
+                    sub.username,
+                    sub.contact,
+                    sub.tl5_tags,
+                    sub.tl6_tags,
+                ])
                 .join(" ")
                 .toLowerCase();
             return {
                 ...sub,
                 tags,
+                tl5Categories: splitCategories(sub.tl5_tags),
+                tl6Categories: splitCategories(sub.tl6_tags),
                 mask,
                 path: toolPath(sub),
                 resources: resourcesById.get(sub.id) ?? [],
@@ -213,6 +227,8 @@ export interface CreateSubmissionInput {
     tl4_desc: string;
     tl5_desc: string;
     tl6_desc: string;
+    tl5_tags: string;
+    tl6_tags: string;
     username: string;
     contact: string;
     accepted: boolean;
@@ -236,6 +252,8 @@ export interface SubmissionUpdateInput {
     tl4_desc?: string;
     tl5_desc?: string;
     tl6_desc?: string;
+    tl5_tags?: string;
+    tl6_tags?: string;
     link?: string;
     displaytext?: string;
     accepted?: boolean;
@@ -326,6 +344,8 @@ const SUBMISSION_COLUMNS = [
     "tl4_desc",
     "tl5_desc",
     "tl6_desc",
+    "tl5_tags",
+    "tl6_tags",
     "link",
     "displaytext",
     "accepted",

@@ -26,6 +26,9 @@
                 <% strands.forEach(function (t) { %>
                 <a href="/<%= t.tl %>/<%= t.slug %>"><span class="<%= t.css %>"><%= t.label %></span></a>
                 <% }) %>
+                <% categories.forEach(function (category) { %>
+                <a href="/<%= category.domain %>?cat_<%= category.index + 1 %>=1"><span class="cat"><%= category.label %></span></a>
+                <% }) %>
             </div>
             <div class="info">
                 <div class="img"><img src="/uploads/<%= tool.id %>?v=<%= tool.updatedAt %>" width="96" height="96" alt="<%= tool.techname %>" data-fallback loading="lazy" decoding="async"/></div>

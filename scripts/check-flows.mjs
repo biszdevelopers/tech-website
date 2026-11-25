@@ -181,6 +181,7 @@ async function main() {
     );
     const stalePage = await page("/submission?error=csrf");
     check("expired form explains what happened", stalePage.html.includes("form expired"));
+    check("submission has category filters", anonSub.html.includes('name="tl5_c1"'));
     const form = new FormData();
     form.set("_csrf", token(anonSub.html));
     form.set("techname", "Flow Temp Tool");
@@ -188,6 +189,7 @@ async function main() {
     form.set("displaytext", "Flow");
     form.set("tl1_desc", "Flow description");
     form.set("tl5_desc", "Flow growth");
+    form.set("tl5_c1", "true");
     form.set("R", "true");
     form.set("resources", "Manual | https://example.com/flow-manual");
     form.set("screenshot", new Blob([png], { type: "image/png" }), "flow.png");
@@ -240,6 +242,21 @@ async function main() {
     check("accepted tool page shows resources", publicToolHtml.includes("flow-manual"));
     const searchPage = await page("/search?query=Flow+Temp");
     check("accepted tool appears in search", searchPage.html.includes("Flow Temp Tool"));
+    const tl5Page = await page("/tl5");
+    check(
+        "tl5 exposes strand and category filters",
+        tl5Page.html.includes("filters--writeup") && tl5Page.html.includes("Category")
+    );
+    check("tl5 category matches", (await page("/tl5?cat_1=1")).html.includes("Flow Temp Tool"));
+    check(
+        "tl5 category excludes other topics",
+        !(await page("/tl5?cat_2=1")).html.includes("Flow Temp Tool")
+    );
+    check("tl5 strand matches", (await page("/tl5?st_R=1")).html.includes("Flow Temp Tool"));
+    check(
+        "tl5 strand excludes other strands",
+        !(await page("/tl5?st_TP=1")).html.includes("Flow Temp Tool")
+    );
     const sitemapAccepted = await fetch(`${BASE}/sitemap.xml`).then((r) => r.text());
     check("sitemap lists the accepted tool", sitemapAccepted.includes(`/tool/${pending.id}/`));
     const canonical = await fetch(`${BASE}/tool/${pending.id}`, { redirect: "manual" });

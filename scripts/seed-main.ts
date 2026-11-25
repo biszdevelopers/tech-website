@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { mainDb, mainSqlite } from "../src/lib/db/main";
 import { createToolBundle } from "../src/server/queries/submissions";
 import { parseResourceLines, type ResourceInput } from "../src/lib/resources";
+import { normalizeCategories } from "../src/lib/categories";
 import { strandColumnNames } from "../src/lib/tl-config";
 
 interface ParsedTool {
@@ -15,6 +16,8 @@ interface ParsedTool {
     tl4_desc: string;
     tl5_desc: string;
     tl6_desc: string;
+    tl5_tags: string;
+    tl6_tags: string;
     link: string;
     displaytext: string;
     accepted: boolean;
@@ -24,30 +27,42 @@ interface ParsedTool {
 
 const DOMAIN_FIELDS = strandColumnNames();
 
-const TL56_SEED: Record<string, { tl5: string; tl6: string }> = {
+const TL56_SEED: Record<string, { tl5: string; tl6: string; tl5Tags: string; tl6Tags: string }> = {
     TEAMS: {
         tl5: "Use Teams channels and shared files for collaborative planning, peer feedback and professional learning across the school.",
         tl6: "Use Teams chat and meetings to keep communication respectful and inclusive, share resources with colleagues and follow up promptly.",
+        tl5Tags: "Growth goals, Professional development",
+        tl6Tags: "Professional responsibilities, Communication, Collegiality",
     },
     WEEBLY: {
         tl5: "Publish a professional portfolio or class site, then use feedback and reflection to refine the resources shared with colleagues.",
         tl6: "",
+        tl5Tags: "Self-reflection, Professional development",
+        tl6Tags: "",
     },
     NEARPOD: {
         tl5: "Adapt ready-made Nearpod lessons and share what works in department meetings, using student response data to guide professional learning.",
         tl6: "",
+        tl5Tags: "Professional development, Adaptability",
+        tl6Tags: "",
     },
     PADLET: {
         tl5: "",
         tl6: "Open a shared staff Padlet for celebrations, questions and ideas so every colleague has an easy, respectful way to contribute.",
+        tl5Tags: "",
+        tl6Tags: "Communication, Collegiality",
     },
     SEESAW: {
         tl5: "",
         tl6: "Use Seesaw family communication tools to share positive updates and keep families included in the classroom community.",
+        tl5Tags: "",
+        tl6Tags: "Communication, Collegiality",
     },
     "CLASS DOJO": {
         tl5: "",
         tl6: "Use Class Dojo points and parent updates to reinforce positive behavior and build a consistent, supportive classroom culture.",
+        tl5Tags: "",
+        tl6Tags: "Communication, Collegiality",
     },
 };
 
@@ -113,6 +128,14 @@ function parseSection(block: string): ParsedTool[] {
             tl4_desc: read(cells, "tl4_description") || read(cells, "tl4"),
             tl5_desc: read(cells, "tl5_description") || curated?.tl5 || "",
             tl6_desc: read(cells, "tl6_description") || curated?.tl6 || "",
+            tl5_tags: normalizeCategories(
+                read(cells, "tl5_categories") || read(cells, "tl5_tags") || curated?.tl5Tags || "",
+                "tl5"
+            ),
+            tl6_tags: normalizeCategories(
+                read(cells, "tl6_categories") || read(cells, "tl6_tags") || curated?.tl6Tags || "",
+                "tl6"
+            ),
             link: read(cells, "link"),
             displaytext: read(cells, "displaytext") || techname,
             accepted: bool(read(cells, "accepted")),
@@ -196,6 +219,8 @@ async function main(): Promise<void> {
                 tl4_desc: tool.tl4_desc,
                 tl5_desc: tool.tl5_desc,
                 tl6_desc: tool.tl6_desc,
+                tl5_tags: tool.tl5_tags,
+                tl6_tags: tool.tl6_tags,
                 username: "seed",
                 contact: "seed@bibs-c.local",
                 accepted: tool.accepted,

@@ -52,6 +52,15 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         checked: [true],
         activeStrand: null,
         strandLinks: [{ label: "Relationships", href: "/tl1/relationships" }],
+        tagOptions: [
+            {
+                label: "Relationships",
+                domainColumn: "R",
+                cssClass: "n1",
+                href: "/tl1/relationships",
+            },
+        ],
+        writeupFilters: null,
         filtered: [
             {
                 id: 1,
@@ -63,6 +72,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                 path: "/tool/1/kahoot",
                 resources: [],
                 tags: { R: true },
+                categories: [],
             },
         ],
     },
@@ -119,6 +129,8 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
                 tl4_desc: "",
                 tl5_desc: "",
                 tl6_desc: "",
+                tl5_tags: "",
+                tl6_tags: "",
                 username: "",
                 contact: "",
                 updatedAt: 1,
@@ -138,6 +150,8 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             tl4_desc: "",
             tl5_desc: "",
             tl6_desc: "",
+            tl5_tags: "",
+            tl6_tags: "",
             username: "",
             contact: "",
             updatedAt: 1,
@@ -146,6 +160,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             { name: "R", label: "Relationship", checked: true },
             { name: "TP", label: "Teacher Planning", checked: false },
         ],
+        categoryGroups: [],
         descriptionColumns: tlList.map((c) => ({ field: `${c.id}_desc`, label: c.title })),
         resourceText: "",
         hasUpload: false,
@@ -266,6 +281,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     },
     "admin-new": {
         strands: [{ name: "R", label: "Relationship", checked: false }],
+        categoryGroups: [],
         descriptionColumns: tlList.map((c) => ({ field: `${c.id}_desc`, label: c.title })),
     },
     "admin-import": {},
@@ -322,6 +338,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
         strands: [
             { col: "R", label: "Relationships", tl: "tl1", slug: "relationships", css: "n1" },
         ],
+        categories: [],
         tlSections: tlList.map((c) => ({
             id: c.id,
             title: c.title,
