@@ -53,3 +53,58 @@ const nodeListCtor = window.NodeList as unknown as {
 if (nodeListCtor && typeof nodeListCtor.prototype.forEach !== "function") {
     nodeListCtor.prototype.forEach = Array.prototype.forEach;
 }
+
+/**
+ * IE11 ignores loading="lazy", so a long tool list downloads every screenshot
+ * before the visitor scrolls. Swap far-below images for a 1px placeholder and
+ * restore each source when it comes within one screen of the viewport.
+ * JavaScript-disabled IE keeps its normal eager images because nothing runs.
+ */
+function ieLazyImages(): void {
+    const images = document.querySelectorAll<HTMLImageElement>('img[loading="lazy"]');
+    if (images.length === 0) return;
+    const pending: HTMLImageElement[] = [];
+    const placeholder =
+        "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+    Array.prototype.forEach.call(images, function (img: HTMLImageElement) {
+        const src = img.getAttribute("src");
+        if (!src) return;
+        // Keep images already near the first screen eager; only defer the rest.
+        if (img.getBoundingClientRect().top < window.innerHeight + 500) return;
+        img.setAttribute("data-ie-src", src);
+        img.setAttribute("src", placeholder);
+        pending.push(img);
+    });
+    if (pending.length === 0) return;
+
+    let scheduled = false;
+    function loadNearby(): void {
+        scheduled = false;
+        const limit = window.innerHeight + 500;
+        for (let index = pending.length - 1; index >= 0; index -= 1) {
+            const img = pending[index];
+            if (img.getBoundingClientRect().top >= limit) continue;
+            const src = img.getAttribute("data-ie-src");
+            if (src) img.setAttribute("src", src);
+            img.removeAttribute("data-ie-src");
+            pending.splice(index, 1);
+        }
+    }
+    function schedule(): void {
+        if (scheduled) return;
+        scheduled = true;
+        window.setTimeout(loadNearby, 120);
+    }
+
+    window.addEventListener("scroll", schedule, false);
+    window.addEventListener("resize", schedule, false);
+    window.addEventListener("load", loadNearby, false);
+    loadNearby();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ieLazyImages, false);
+} else {
+    ieLazyImages();
+}
