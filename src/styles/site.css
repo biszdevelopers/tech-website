@@ -1190,7 +1190,7 @@ mark {
    Docs
    -------------------------------------------------------------------------- */
 .docs-page #basicinfo {
-    width: min(calc(100% - 2 * var(--page-pad)), 1080px);
+    width: min(calc(100% - 2 * var(--page-pad)), var(--page-max));
     margin-top: clamp(20px, 2.4vw, 32px);
     margin-bottom: clamp(32px, 4vw, 56px);
     padding: clamp(24px, 3vw, 44px);
@@ -1211,7 +1211,7 @@ mark {
 
 .docs-body p,
 .docs-body li {
-    max-width: 92ch;
+    max-width: 100%;
     color: var(--color-ink-strong);
     line-height: 1.7;
 }
