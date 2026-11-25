@@ -157,6 +157,30 @@ async function main() {
     const png = Buffer.from([
         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 0, 0, 0, 0,
     ]);
+    const staleForm = new FormData();
+    staleForm.set("_csrf", "b".repeat(64));
+    staleForm.set("techname", "Stale Flow Tool");
+    staleForm.set("link", "https://example.com/stale");
+    staleForm.set("displaytext", "Stale");
+    staleForm.set("tl1_desc", "Stale description");
+    staleForm.set("R", "true");
+    const stale = await fetch(`${BASE}/api/submission`, {
+        method: "POST",
+        redirect: "manual",
+        headers: {
+            Origin: BASE,
+            Accept: "text/html",
+            cookie: cookies(anonSub.response).join("; "),
+        },
+        body: staleForm,
+    });
+    check(
+        "expired form redirects to a fresh one",
+        stale.status === 303 && stale.headers.get("location") === "/submission?error=csrf",
+        `${stale.status} ${stale.headers.get("location") ?? ""}`
+    );
+    const stalePage = await page("/submission?error=csrf");
+    check("expired form explains what happened", stalePage.html.includes("form expired"));
     const form = new FormData();
     form.set("_csrf", token(anonSub.html));
     form.set("techname", "Flow Temp Tool");
@@ -209,6 +233,15 @@ async function main() {
         body: JSON.stringify({ id: String(pending.id) }),
     });
     check("accept submission", accepted.status === 200, String(accepted.status));
+    const publicTool = await fetch(`${BASE}/tool/${pending.id}`, { redirect: "follow" });
+    const publicToolHtml = await publicTool.text();
+    check("accepted tool page is public", publicTool.status === 200, String(publicTool.status));
+    check("accepted tool page shows the name", publicToolHtml.includes("Flow Temp Tool"));
+    check("accepted tool page shows resources", publicToolHtml.includes("flow-manual"));
+    const searchPage = await page("/search?query=Flow+Temp");
+    check("accepted tool appears in search", searchPage.html.includes("Flow Temp Tool"));
+    const sitemapAccepted = await fetch(`${BASE}/sitemap.xml`).then((r) => r.text());
+    check("sitemap lists the accepted tool", sitemapAccepted.includes(`/tool/${pending.id}/`));
     const canonical = await fetch(`${BASE}/tool/${pending.id}`, { redirect: "manual" });
     check("tool canonical redirect", canonical.status === 301);
 

@@ -117,10 +117,6 @@ export function registerMainSiteRoutes(app: Application): void {
     });
 
     app.post("/api/submission", async (ctx: Context) => {
-        if (!rateLimit("submission:" + ctx.ip, 10, 3_600_000)) {
-            throw new HttpError(429, "Too many submissions. Try again later.");
-        }
-
         const { fields, file } = await readMultipart(ctx);
         if (fields.website || fields.url) {
             // Honeypot: look exactly like the normal success path.
@@ -182,6 +178,23 @@ export function registerMainSiteRoutes(app: Application): void {
 
         if (file && file.data.length > 0 && !detectImage(file.data)) {
             throw new HttpError(400, "Screenshot must be a PNG, JPEG or WebP image.");
+        }
+
+        // Count only fully validated tools, so a typo in the form never uses up
+        // a network's allowance for genuine submissions.
+        if (!rateLimit("submission:" + ctx.ip, 30, 3_600_000)) {
+            const error = "This network has sent several tools already. Please try again later.";
+            if (wantsJson(ctx)) throw new HttpError(429, error);
+            ctx.htmlRaw(
+                render("submission", {
+                    received: false,
+                    error,
+                    values: fields,
+                    meta: SUBMISSION_META,
+                }),
+                429
+            );
+            return;
         }
 
         const row = await withLock("submission-id", async () => {
