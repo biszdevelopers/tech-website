@@ -100,12 +100,13 @@ export class Router {
      * the 404 view via ctx.throw(404) semantics).
      */
     match(method: string, pathname: string): RouteMatch | null {
-        const staticHit = this.staticRoutes.get(`${method} ${normalizePath(pathname)}`);
+        const lookupMethod = method === "HEAD" ? "GET" : method;
+        const staticHit = this.staticRoutes.get(`${lookupMethod} ${normalizePath(pathname)}`);
         if (staticHit) return { handler: staticHit.handler, options: staticHit.options };
 
         const parts = pathname.split("/").filter(Boolean);
-        for (const route of this.candidates(method, parts[0])) {
-            if (route.method !== method) continue;
+        for (const route of this.candidates(lookupMethod, parts[0])) {
+            if (route.method !== lookupMethod) continue;
             if (tryMatch(route.segments, parts)) {
                 return { handler: route.handler, options: route.options };
             }
@@ -126,12 +127,13 @@ export class Router {
      * without building a Context.
      */
     dispatch(method: string, pathname: string, ctx: Context): RouteMatch | null {
-        const staticHit = this.staticRoutes.get(`${method} ${normalizePath(pathname)}`);
+        const lookupMethod = method === "HEAD" ? "GET" : method;
+        const staticHit = this.staticRoutes.get(`${lookupMethod} ${normalizePath(pathname)}`);
         if (staticHit) return { handler: staticHit.handler, options: staticHit.options };
 
         const parts = pathname.split("/").filter(Boolean);
-        for (const route of this.candidates(method, parts[0])) {
-            if (route.method !== method) continue;
+        for (const route of this.candidates(lookupMethod, parts[0])) {
+            if (route.method !== lookupMethod) continue;
             const params = tryMatch(route.segments, parts);
             if (params) {
                 Object.assign(ctx.params, params);
@@ -167,7 +169,11 @@ function tryMatch(segments: string[], parts: string[]): Record<string, string> |
     for (let i = 0; i < segments.length; i += 1) {
         const seg = segments[i];
         if (seg.startsWith(":")) {
-            params[seg.slice(1)] = decodeURIComponent(parts[i]);
+            try {
+                params[seg.slice(1)] = decodeURIComponent(parts[i]);
+            } catch {
+                return null; // malformed percent-encoding is simply not a route
+            }
         } else if (seg !== parts[i]) {
             return null;
         }

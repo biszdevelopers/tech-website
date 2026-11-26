@@ -1,13 +1,14 @@
-<%- include('partials/head', { title: heading + ' | BIBS-C Tech Tools', description: 'Search tech tools by name, description, or strand tag.' }) %>
+<%- include('partials/head', { title: heading + ' | BIBS-C Tech Tools', description: 'Search teaching technology tools by name, description, strand or submitter.', css: ['site.css'] }) %>
 <%- include('partials/navbar') %>
 
-<div id="search"></div>
-
 <div id="subhead">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">/</span>
+        <span aria-current="page">Search</span>
+    </nav>
     <h1 id="search-results"><%= heading %></h1>
     <form id="search-form" class="search-form" action="/search" method="get">
-        <input type="text" id="search-input" placeholder="Search tech tools by name, description, or tag…"
-               aria-label="Search tech tools" name="query" value="<%= q %>"/>
+        <input type="text" id="search-input" placeholder="Search tech tools by name, description, strand or tag..." aria-label="Search tech tools" name="query" value="<%= q %>" maxlength="200"/>
         <button type="submit" id="search-submit">Search</button>
     </form>
     <% if (q) { %>
@@ -26,38 +27,44 @@
 <div id="all">
     <div class="techtip-wrap" id="results">
         <% if (!q) { %>
-        <div><h4>Type a search term above to look up a tool.</h4></div>
+        <div class="empty-state"><h2>Type a search term above to look up a tool.</h2></div>
         <% } else if (results.length === 0) { %>
-        <div><h4>No tools match &ldquo;<%= q %>&rdquo;.</h4></div>
+        <div class="empty-state"><h2>No tools match &ldquo;<%= q %>&rdquo;.</h2></div>
         <% } else { results.forEach(function (item) {
                var tags = item.activeTags;
                var display = tags.slice(0, 5);
                var hidden = tags.slice(5); %>
-        <div class="techtip search-result" id="tool-<%= item.id %>">
+        <article class="techtip search-result" id="tool-<%= item.id %>">
             <div class="line" id="line-<%= item.id %>"></div>
-            <h3 class="name"><%= item.techname %></h3>
+            <h2 class="name"><a href="<%= item.path %>"><%= item.techname %></a></h2>
             <div class="tags">
                 <% display.forEach(function (t) { %>
-                <a href="/<%= t.tl %>#<%= t.col %>"><span class="<%= t.css %>"><%= t.label %></span></a>
+                <a href="/<%= t.tl %>/<%= t.slug %>"><span class="<%= t.css %>"><%= t.label %></span></a>
                 <% }) %>
                 <% if (hidden.length > 0) { %>
-                <span class="tags-more">and <%= hidden.length %> more&hellip;</span>
+                <span class="tags-more">and <%= hidden.length %> more...</span>
                 <% } %>
             </div>
             <div class="info">
-                <div class="img"><img src="/uploads/<%= item.id %>" alt="<%= item.techname %>" loading="lazy" decoding="async"/></div>
+                <div class="img"><a href="<%= item.path %>"><img src="/uploads/<%= item.id %>?v=<%= item.updatedAt %>" width="96" height="96" alt="<%= item.techname %>" data-fallback loading="lazy" decoding="async"/></a></div>
                 <div class="desc">
-                    <% function hilite(text, label) { var t = String(text); var i = t.toLowerCase().indexOf(q.toLowerCase()); if (q && i >= 0) { %><p><b><%= label %>:</b> <%= t.slice(0, i) %><mark><%= t.slice(i, i + q.length) %></mark><%= t.slice(i + q.length) %></p><% } else if (t) { %><p><b><%= label %>:</b> <%= t %></p><% } } %>
-                    <% hilite(item.tl1_desc, 'TL1'); %>
-                    <% hilite(item.tl2_desc, 'TL2'); %>
-                    <% hilite(item.tl3_desc, 'TL3'); %>
-                    <% hilite(item.tl4_desc, 'TL4'); %>
+                    <% tlList.forEach(function (config) { var field = config.id + '_desc'; var t = String(item[field] || ''); var i = t.toLowerCase().indexOf(q.toLowerCase()); %>
+                    <% if (q && i >= 0) { %><p><b><%= config.shortLabel %>:</b> <%= t.slice(0, i) %><mark><%= t.slice(i, i + q.length) %></mark><%= t.slice(i + q.length) %></p>
+                    <% } else if (t) { %><p><b><%= config.shortLabel %>:</b> <%= t %></p><% } %>
+                    <% }) %>
                     <div class="link">
                         <ul><li><a href="<%= item.link %>" target="_blank" rel="noreferrer"><%= item.displaytext %></a></li></ul>
+                        <% if (item.resources.length > 0) { %>
+                        <ul class="resource-list">
+                            <% item.resources.forEach(function (resource) { %>
+                            <li><a href="<%= resource.url %>" target="_blank" rel="noreferrer"><%= resource.label %></a></li>
+                            <% }) %>
+                        </ul>
+                        <% } %>
                     </div>
                 </div>
             </div>
-        </div>
+        </article>
         <% }) } %>
     </div>
 </div>

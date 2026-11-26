@@ -1,6 +1,6 @@
 <div id="cover">
     <div id="topbar">
-        <h1>BIBS-C Tech Tools</h1>
+        <p class="site-brand">BIBS-C Tech Tools</p>
         <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
                 aria-pressed="false" title="Toggle dark mode (Alt+T)">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -24,10 +24,9 @@
     <nav id="navbar" aria-label="Primary">
         <ul id="nav">
             <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <% tlList.forEach(function (config) { %>
+            <li><a href="/<%= config.id %>"><span><%= config.navLabel %></span><span class="nav-underline" aria-hidden="true"></span></a></li>
+            <% }) %>
             <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
         </ul>
     </nav>

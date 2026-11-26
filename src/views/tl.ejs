@@ -1,20 +1,93 @@
-<%- include('partials/head', { title: config.title + ' | BIBS-C Tech Tools', description: 'Filter and explore tech tools aligned with ' + config.title + ' strands.', scripts: ['filters.js'] }) %>
+<%- include('partials/head', { title: config.title + ' | BIBS-C Tech Tools', description: config.description, css: ['site.css'], scripts: ['filters.js'] }) %>
 <%- include('partials/navbar') %>
 
 <div id="subhead">
-    <h1 id="tl-title"><%= config.title %></h1>
-    <h3 id="filter">Filter by strand:</h3>
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">/</span>
+        <% if (locals.activeStrand) { %>
+        <a href="/<%= tl %>"><%= config.title %></a><span aria-hidden="true">/</span>
+        <span aria-current="page"><%= activeStrand.label %></span>
+        <% } else { %>
+        <span aria-current="page"><%= config.title %></span>
+        <% } %>
+    </nav>
+    <h1 id="tl-title"><%= locals.activeStrand ? activeStrand.label : config.title %></h1>
+    <p class="tl-description"><%= config.description %></p>
+    <% if (locals.activeStrand) { %>
+    <p class="strand-active"><span>Showing only:</span> <%= activeStrand.label %>.
+        <a href="/<%= tl %>">View all strands</a></p>
+    <% } %>
+
+    <details class="tl-standards" open>
+        <summary>What this domain covers</summary>
+        <ul>
+            <% config.standards.forEach(function (standard) { %><li><%= standard %></li><% }) %>
+        </ul>
+    </details>
+
+    <% if (config.strands.length > 0) { %>
+    <h2 id="filter" class="filter-heading">Filter by strand:</h2>
     <form class="filters" action="/<%= tl %>" method="get">
         <% config.strands.forEach(function (strand, i) { %>
-        <div class="label" id="<%= strand.domainColumn %>">
+        <label class="label" id="<%= strand.domainColumn %>">
             <input type="hidden" name="<%= strand.checkboxName %>" value="0"/>
             <span class="<%= strand.cssClass %>"><%= strand.label %>
                 <input type="checkbox" class="checkf" aria-label="<%= strand.label %>" name="<%= strand.checkboxName %>"<%- checked[i] ? ' checked=""' : '' %> value="1"/>
             </span>
-            <div class="overlay"><% if (tl === 'tl3' && i === config.strands.length - 1) { %><%= strand.tooltip %><% } else { %> <%= strand.tooltip %> <% } %></div>
-        </div>
+            <span class="overlay"><%= strand.tooltip %></span>
+        </label>
         <% }) %>
+        <button type="submit" class="filter-apply">Apply filters</button>
+        <a class="filter-reset" href="/<%= tl %>">Reset</a>
     </form>
+
+    <nav class="strand-index" aria-label="Browse by strand">
+        <% strandLinks.forEach(function (link) { %>
+        <a href="<%= link.href %>"><%= link.label %></a>
+        <% }) %>
+    </nav>
+    <% } else if (locals.writeupFilters) { %>
+    <h2 id="filter" class="filter-heading">Filter by strand and category:</h2>
+    <form class="filters filters--writeup" action="/<%= tl %>" method="get">
+        <fieldset class="filter-group">
+            <legend>Strand</legend>
+            <% writeupFilters.strandGroups.forEach(function (group) { %>
+            <p class="filter-group__label"><%= group.title %></p>
+            <div class="filter-chips">
+                <% group.options.forEach(function (option) { %>
+                <label class="label">
+                    <input type="hidden" name="<%= option.name %>" value="0"/>
+                    <span class="<%= option.cssClass %>"><%= option.label %>
+                        <input type="checkbox" class="checkf" aria-label="<%= option.label %>" name="<%= option.name %>"<%- option.checked ? ' checked=""' : '' %> value="1"/>
+                    </span>
+                    <span class="overlay"><%= option.tooltip %></span>
+                </label>
+                <% }) %>
+            </div>
+            <% }) %>
+        </fieldset>
+        <fieldset class="filter-group">
+            <legend>Category</legend>
+            <% writeupFilters.categoryGroups.forEach(function (group) { %>
+            <p class="filter-group__label"><%= group.title %></p>
+            <div class="filter-chips">
+                <% group.options.forEach(function (option) { %>
+                <label class="label">
+                    <input type="hidden" name="<%= option.name %>" value="0"/>
+                    <span class="cat"><%= option.label %>
+                        <input type="checkbox" class="checkf" aria-label="<%= option.label %>" name="<%= option.name %>"<%- option.checked ? ' checked=""' : '' %> value="1"/>
+                    </span>
+                </label>
+                <% }) %>
+            </div>
+            <% }) %>
+        </fieldset>
+        <div class="filter-actions">
+            <button type="submit" class="filter-apply">Apply filters</button>
+            <a class="filter-reset" href="/<%= tl %>">Reset</a>
+        </div>
+    </form>
+    <% } %>
 </div>
 
 <div id="bar">&nbsp;</div>
@@ -22,31 +95,45 @@
 <div id="all">
     <div class="techtip-wrap" id="results">
         <p class="jump-menu">
-            Jump to: <a href="#tl-title">Top</a> | <a href="#filter">Filter</a><% config.strands.forEach(function (s) { %><span>
-            | <a href="#<%= s.domainColumn %>"><%= s.label %></a>
-            </span><% }) %>
-            | <a href="/#front">Home</a> | <a href="/search">Search</a>
+            Jump to: <a href="#tl-title">Top</a><% if (config.strands.length > 0 || locals.writeupFilters) { %> | <a href="#filter">Filter</a><% } %> | <a href="/search">Search</a> | <a href="/">Home</a>
         </p>
 
         <% if (filtered.length === 0) { %>
-        <div><h4>No results here match your filters.</h4></div>
+        <div class="empty-state">
+            <h2>No tools here yet.</h2>
+            <% if (locals.filtersActive) { %>
+            <p>No accepted tools match the selected filters. Try <a href="/<%= tl %>">resetting the filters</a>.</p>
+            <% } else { %>
+            <p>This domain is ready for write-ups. Add them in the admin panel or submit a tool with a <%= config.shortLabel %> description.</p>
+            <% } %>
+        </div>
         <% } else { filtered.forEach(function (tool) { %>
-        <div class="techtip" id="tool-<%= tool.id %>">
+        <article class="techtip" id="tool-<%= tool.id %>">
             <div class="line" id="line-<%= tool.id %>"></div>
-            <h3 class="name"><%= tool.techname %></h3>
+            <h2 class="name"><a href="<%= tool.path %>"><%= tool.techname %></a></h2>
             <div class="tags">
-                <% config.strands.forEach(function (strand) { if (tool.tags[strand.domainColumn]) { %>
-                <span class="<%= strand.cssClass %>"><%= strand.label %></span>
+                <% tagOptions.forEach(function (tag) { if (tool.tags[tag.domainColumn]) { %>
+                <a href="<%= tag.href %>"><span class="<%= tag.cssClass %>"><%= tag.label %></span></a>
                 <% } }) %>
+                <% tool.categories.forEach(function (category) { %>
+                <a href="<%= category.href %>"><span class="cat"><%= category.label %></span></a>
+                <% }) %>
             </div>
             <div class="info">
-                <div class="img"><img src="/uploads/<%= tool.id %>" alt="<%= tool.techname %>" loading="lazy" decoding="async"/></div>
+                <div class="img"><a href="<%= tool.path %>"><img src="/uploads/<%= tool.id %>?v=<%= tool.updatedAt %>" width="96" height="96" alt="<%= tool.techname %>" data-fallback loading="lazy" decoding="async"/></a></div>
                 <div class="desc"><% if (tool.tight) { %><%= tool.desc %><% } else { %> <%= tool.desc %> <% } %></div>
                 <div class="link">
                     <ul><li><a href="<%= tool.link %>" target="_blank" rel="noreferrer"><%= tool.displaytext %></a></li></ul>
+                    <% if (tool.resources.length > 0) { %>
+                    <ul class="resource-list">
+                        <% tool.resources.forEach(function (resource) { %>
+                        <li><a href="<%= resource.url %>" target="_blank" rel="noreferrer"><%= resource.label %></a></li>
+                        <% }) %>
+                    </ul>
+                    <% } %>
                 </div>
             </div>
-        </div>
+        </article>
         <% }) } %>
     </div>
 </div>

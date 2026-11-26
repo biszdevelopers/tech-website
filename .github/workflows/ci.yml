@@ -23,5 +23,8 @@ jobs:
             - run: pnpm run lint
             - run: pnpm run format:check
             - run: pnpm test
+            - run: pnpm run check:contrast
             - run: pnpm run check:views
             - run: pnpm run build
+            - run: pnpm run db:reset
+            - run: pnpm run check:flows

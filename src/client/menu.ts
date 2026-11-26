@@ -53,3 +53,19 @@ function initDashMenu(): void {
 }
 
 initDashMenu();
+
+// Destructive admin forms ask first. Inline onsubmit handlers are blocked by
+// the CSP, so this single delegated listener covers every dashboard page.
+document.addEventListener("submit", function (ev: Event) {
+    const form = ev.target as HTMLFormElement | null;
+    if (!form || form.tagName !== "FORM") return;
+    const actionInput = form.querySelector('input[name="action"]') as HTMLInputElement | null;
+    const destructive =
+        /delete|revoke/i.test(form.getAttribute("action") || "") ||
+        Boolean(actionInput && /delete|revoke/i.test(actionInput.value));
+    if (!destructive) return;
+    const message = form.getAttribute("data-confirm") || "Delete this item permanently?";
+    if (!window.confirm(message)) {
+        ev.preventDefault();
+    }
+});

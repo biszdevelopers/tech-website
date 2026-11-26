@@ -10,7 +10,7 @@ export default tseslint.config(
             "tests/baseline/**",
             "scripts/dump-baseline.mjs",
             "postcss.config.cjs",
-            "prisma/*.db*",
+            "data/*.db*",
             "var/**",
         ],
     },

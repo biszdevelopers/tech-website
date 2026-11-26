@@ -1,6 +1,6 @@
-import { sqliteTable, integer, text, real, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, text, real, index, uniqueIndex } from "drizzle-orm/sqlite-core";
 
-// Mirrors prisma/schema-web.prisma. Property/column names match Prisma fields
+// Mirrors src/lib/db/schema-web.ts. Property/column names match the fields
 // exactly. IDs that were `@default(autoincrement())` use primaryKey({autoIncrement:true}).
 export const twoauthsettings = sqliteTable("2authsettings", {
     secret: text("secret").primaryKey(),
@@ -75,6 +75,7 @@ export const giftcards = sqliteTable("giftcards", {
     dateClaimed: integer("dateClaimed").notNull().default(0),
     date: integer("date").notNull().default(0),
     user: text("user"),
+    termSeconds: integer("termSeconds").notNull().default(0),
 });
 
 export const iplogs = sqliteTable("iplogs", {
@@ -84,13 +85,17 @@ export const iplogs = sqliteTable("iplogs", {
     date: integer("date").notNull().default(0),
 });
 
-export const loginlogs = sqliteTable("loginlogs", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    username: text("username").notNull().default(""),
-    ip: text("ip").notNull().default(""),
-    date: integer("date").notNull().default(0),
-    country: text("country").notNull().default(""),
-});
+export const loginlogs = sqliteTable(
+    "loginlogs",
+    {
+        id: integer("id").primaryKey({ autoIncrement: true }),
+        username: text("username").notNull().default(""),
+        ip: text("ip").notNull().default(""),
+        date: integer("date").notNull().default(0),
+        country: text("country").notNull().default(""),
+    },
+    (t) => [index("loginlogs_date").on(t.date)]
+);
 
 export const logs = sqliteTable(
     "logs",
@@ -113,6 +118,8 @@ export const logs = sqliteTable(
     (t) => [
         index("logs_handler_stopped").on(t.handler, t.stopped),
         index("logs_user_stopped").on(t.user, t.stopped),
+        index("logs_user_date").on(t.user, t.date),
+        index("logs_stopped_date").on(t.stopped, t.date),
         index("logs_date").on(t.date),
     ]
 );
@@ -144,15 +151,22 @@ export const news = sqliteTable("news", {
     date: text("date").notNull().default(""),
 });
 
-export const payments = sqliteTable("payments", {
-    ID: integer("ID").primaryKey({ autoIncrement: true }),
-    paid: real("paid").notNull().default(0),
-    plan: integer("plan").notNull().default(0),
-    user: integer("user").notNull().default(0),
-    email: text("email").notNull().default(""),
-    tid: text("tid").notNull().default(""),
-    date: integer("date").notNull().default(0),
-});
+export const payments = sqliteTable(
+    "payments",
+    {
+        ID: integer("ID").primaryKey({ autoIncrement: true }),
+        paid: real("paid").notNull().default(0),
+        plan: integer("plan").notNull().default(0),
+        user: integer("user").notNull().default(0),
+        email: text("email").notNull().default(""),
+        tid: text("tid").notNull().default(""),
+        date: integer("date").notNull().default(0),
+        amount: integer("amount").notNull().default(0),
+        currency: text("currency").notNull().default("usd"),
+        termSeconds: integer("termSeconds").notNull().default(0),
+    },
+    (t) => [uniqueIndex("payments_tid_unique").on(t.tid)]
+);
 
 export const ping_sessions = sqliteTable("ping_sessions", {
     ID: integer("ID").primaryKey({ autoIncrement: true }),
@@ -261,4 +275,5 @@ export const users = sqliteTable("users", {
     login_useragent: text("login_useragent"),
     cark: text("cark"),
     ban_sbp: text("ban_sbp"),
+    sessionVersion: integer("sessionVersion").notNull().default(0),
 });

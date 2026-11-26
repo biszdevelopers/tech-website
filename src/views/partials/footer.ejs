@@ -1,9 +1,8 @@
 <footer id="footer" data-built-by="richie-rich90454">
     <p id="footer-nav">
-        <a href="/tl1">Knowing (TL1)</a>
-        <a href="/tl2">Strategies (TL2)</a>
-        <a href="/tl3">Evidence (TL3)</a>
-        <a href="/tl4">Crafting (TL4)</a>
+        <% tlList.forEach(function (config) { %>
+        <a href="/<%= config.id %>"><%= config.navLabel %></a>
+        <% }) %>
         <a href="/search">Search</a>
         <a href="/submission">Submit a Tool</a>
         <a href="/docs">Docs</a>

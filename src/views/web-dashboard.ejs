@@ -1,8 +1,9 @@
-<%- include('partials/head', { title: 'Dashboard | IPstress', css: ['webtheme.css'] }) %>
+<%- include('partials/head', { title: 'Dashboard | IPstress', css: ['web.css'] }) %>
 <%- include('partials/web-header') %>
+<% var flags = locals.flags || {}; %>
 <div class="page-breadcrumb">
     <div class="d-flex align-items-center">
-        <h4 class="page-title text-truncate text-white font-weight-medium mb-0"> Dashboard </h4>
+        <h1 class="page-title text-truncate text-white font-weight-medium mb-0"> Dashboard </h1>
         <div class="ml-auto">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb m-0 p-0">
@@ -15,7 +16,11 @@
 </div>
 <div class="container-fluid">
     <% if (locals.purchased) { %>
-    <p class="alert alert-success" role="status">Payment received. Your plan is active.</p>
+        <% if (locals.processing) { %>
+        <p class="alert alert-info" role="status">Payment is processing. Your plan activates as soon as Stripe confirms the payment.</p>
+        <% } else { %>
+        <p class="alert alert-success" role="status">Payment received. Your plan is active.</p>
+        <% } %>
     <% } %>
     <div class="card-group">
         <div class="card border-right">
@@ -69,9 +74,24 @@
                     <div class="card-body">
                         <h4 class="card-title">Quick Actions</h4>
                         <div class="mt-4 activity">
+                            <% if (flags.ipstress) { %>
                             <a href="/web/hub" class="btn btn-danger btn-block mb-2">Launch Attack</a>
+                            <% } %>
+                            <% if (flags.payments) { %>
                             <a href="/web/plan" class="btn btn-primary btn-block mb-2">Upgrade Plan</a>
-                            <a href="/web/tickets/new" class="btn btn-secondary btn-block">Create Ticket</a>
+                            <% } %>
+                            <a href="/web/tickets/new" class="btn btn-secondary btn-block mb-2">Create Ticket</a>
+                            <a href="/web/profile" class="btn btn-secondary btn-block mb-2">Profile</a>
+                            <a href="/web/tickets" class="btn btn-secondary btn-block mb-2">Tickets</a>
+                            <% if (flags.giftcards) { %>
+                            <a href="/web/giftcards" class="btn btn-secondary btn-block mb-2">Gift Cards</a>
+                            <% } %>
+                            <% if (flags.wheel) { %>
+                            <a href="/web/wheel" class="btn btn-secondary btn-block mb-2">Wheel</a>
+                            <% } %>
+                            <% if (flags.affiliate) { %>
+                            <a href="/web/affiliate" class="btn btn-secondary btn-block">Affiliate</a>
+                            <% } %>
                         </div>
                     </div>
                 </div>

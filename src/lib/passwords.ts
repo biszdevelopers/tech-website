@@ -26,3 +26,7 @@ export async function verifyPassword(password: string, stored: string): Promise<
     }
     return { ok: false };
 }
+
+export function hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 12);
+}

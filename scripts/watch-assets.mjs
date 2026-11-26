@@ -7,7 +7,9 @@ import autoprefixer from "autoprefixer";
 
 const CLIENT_ENTRIES = [
     "admin",
+    "extras",
     "filters",
+    "ie-detect",
     "img-fallback",
     "menu",
     "scroll-top",

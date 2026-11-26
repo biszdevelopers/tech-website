@@ -45,6 +45,12 @@ function pickDir(first: string, second: string): string {
 
 /** Cache of compiled template functions, keyed by filename without extension. */
 const cache = new Map<string, ejs.TemplateFunction>();
+let helpers: Record<string, unknown> = {};
+
+/** Install app-wide locals (TL list, site constants) for every render. */
+export function setViewHelpers(values: Record<string, unknown>): void {
+    helpers = { ...helpers, ...values };
+}
 
 /**
  * Dev convenience: when not in production, templates recompile on every
@@ -119,12 +125,12 @@ export function render(viewName: string, data: Record<string, unknown> = {}): st
         if (!existsSync(join(VIEWS_DIR, file))) {
             throw new Error(`View "${file}" not found.`);
         }
-        return compile(file)({ ...data, YEN: "\u00a5", v: BUST });
+        return compile(file)({ ...helpers, ...data, v: BUST });
     }
     const fn = cache.get(viewName);
     if (!fn) throw new Error(`View "${viewName}.ejs" not found. Did loadViews() run?`);
-    // Always inject helpers available inside every .ejs template.
-    return fn({ ...data, YEN: "\u00a5", v: BUST });
+    // App-wide helpers are merged first so route data always wins.
+    return fn({ ...helpers, ...data, v: BUST });
 }
 
 /** Check if a named view exists (used for testing / route validation). */

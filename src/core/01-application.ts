@@ -108,9 +108,9 @@ export class Application {
                 env.tlsCert && env.tlsKey
                     ? createHttpsServer(
                           { cert: readFileSync(env.tlsCert), key: readFileSync(env.tlsKey) },
-                          (req, res) => void this.handle(req, res)
+                          (req, res) => void this.safeHandle(req, res)
                       )
-                    : createServer((req, res) => void this.handle(req, res));
+                    : createServer((req, res) => void this.safeHandle(req, res));
             // nginx's default idle timeout is 60s; ours MUST be higher or the
             // proxy occasionally races the socket and serves random 502s.
             this.server.keepAliveTimeout = 65_000;
@@ -144,6 +144,29 @@ export class Application {
         force.unref();
         await new Promise<void>((done) => this.server!.close(() => done()));
         clearTimeout(force);
+    }
+
+    /** Never let a throw outside the error boundary kill the listener. */
+    private async safeHandle(
+        raw: import("node:http").IncomingMessage,
+        res: import("node:http").ServerResponse
+    ): Promise<void> {
+        try {
+            await this.handle(raw, res);
+        } catch (error) {
+            logEvent("error", {
+                path: (raw.url ?? "").slice(0, 200),
+                method: raw.method,
+                stack: error instanceof Error ? error.stack : String(error),
+            });
+            if (res.headersSent) {
+                res.destroy();
+                return;
+            }
+            res.statusCode = 500;
+            res.setHeader("Content-Type", "text/plain; charset=utf-8");
+            res.end("Internal server error");
+        }
     }
 
     /** Entry point wired to node:http. Split from listen() so tests can call it. */
@@ -205,6 +228,7 @@ export class Application {
     }
 
     private async dispatchRoute(ctx: Context): Promise<void> {
+        if (ctx.invalidTarget) throw new HttpError(404, "Page not found.");
         if (this.statics.serve(ctx)) return; // assets short-circuit everything
 
         const match = this.router.dispatch(ctx.method, ctx.path, ctx);

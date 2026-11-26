@@ -11,6 +11,9 @@
                     <% } else if (locals.launched) { %>
                     <p class="alert alert-success" role="status">Attack launched.</p>
                     <% } %>
+                    <% if (layer4.length + layer7.length === 0) { %>
+                    <p class="alert alert-warning" role="alert">No methods are configured yet. Add one under Methods first.</p>
+                    <% } %>
                     <form class="mt-4" action="/web/api/admin/hub" method="POST">
                         <div class="form-group">
                             <label class="text-white" for="host">Host</label>
@@ -23,7 +26,11 @@
                         </div>
                         <div class="form-group">
                             <label class="text-white" for="time">Time (Seconds)</label>
-                            <input class="form-control" id="time" type="number" placeholder="30" required name="time" value="30"/>
+                            <select class="form-control" id="time" name="time" required>
+                                <% for (var t = 30; t <= 3600; t += 30) { %>
+                                <option value="<%= t %>"><%= t %> seconds</option>
+                                <% } %>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="text-white" for="method">Method</label>
@@ -49,7 +56,7 @@
                                 <% }) %>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-danger btn-block btn-lg">Launch</button>
+                        <button type="submit" class="btn btn-danger btn-block btn-lg" <%- layer4.length + layer7.length === 0 ? 'disabled' : '' %>>Launch</button>
                     </form>
                 </div>
             </div>

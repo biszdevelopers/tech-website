@@ -110,15 +110,28 @@ function initWheel(): void {
             } catch (e) {
                 /* treat as prize 0 */
             }
-            const result = document.getElementById("wheel-result");
-            if (result)
-                result.textContent = prizeName ? "You won: " + prizeName : "Better luck next time.";
             const segments = WHEEL_PRIZES.length;
             const arc = (Math.PI * 2) / segments;
-            const targetRotation = Math.PI * 2 * 5 + (segments - prizeIndex) * arc + arc / 2;
+            const desired = (segments - prizeIndex) * arc + arc / 2;
+            const current = ((wheelRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            let delta = desired - current;
+            while (delta < 0) delta += Math.PI * 2;
+            // Always at least five full turns forward: spinning the same prize
+            // twice must still animate, and never rotate backwards.
+            const targetRotation = wheelRotation + Math.PI * 2 * 5 + delta;
+
+            function showResult(): void {
+                const result = document.getElementById("wheel-result");
+                if (result)
+                    result.textContent = prizeName
+                        ? "You won: " + prizeName
+                        : "Better luck next time.";
+            }
+
             function done(): void {
                 wheelSpinning = false;
                 spinButton.removeAttribute("disabled");
+                showResult();
             }
             if (reducedMotion) {
                 wheelRotation = targetRotation;

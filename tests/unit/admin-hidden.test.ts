@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Context } from "../../src/core/03-context";
 import { HttpError } from "../../src/core/09-errors";
-import { requireMainAdmin } from "../../src/routes/guards";
+import { requireMainAdmin } from "../../src/routes/main-guard";
 
 const anonymous = {
     cookie: () => undefined,

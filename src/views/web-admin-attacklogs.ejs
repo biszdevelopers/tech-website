@@ -8,11 +8,11 @@
                     <div class="table-responsive mt-4">
                         <table class="table">
                             <thead>
-                                <tr><th>ID</th><th>User</th><th>Target</th><th>Port</th><th>Method</th><th>Time</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+                                <tr><th>ID</th><th>User</th><th>Target</th><th>Port</th><th>Method</th><th>Time</th><th>Date</th><th>Status</th></tr>
                             </thead>
                             <tbody>
                                 <% if (logs.length === 0) { %>
-                                    <tr><td colSpan="9" class="text-center text-muted">No logs found.</td></tr>
+                                    <tr><td colSpan="8" class="text-center text-muted">No logs found.</td></tr>
                                 <% } else { logs.forEach(function (l) { %>
                                     <tr>
                                         <td><%= l.id %></td>

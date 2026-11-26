@@ -1,8 +1,15 @@
-<%- include('partials/head', { title: 'Hub | IPstress', css: ['webtheme.css'] }) %>
+<%- include('partials/head', { title: 'Hub | IPstress', css: ['web.css'] }) %>
 <%- include('partials/web-header') %>
+<%
+    var maxTime = Number(locals.maxTime || 0);
+    var timeOptions = [];
+    for (var t = 30; t <= maxTime; t += 30) timeOptions.push(t);
+    if (maxTime > 0 && timeOptions[timeOptions.length - 1] !== maxTime) timeOptions.push(maxTime);
+    var canLaunch = maxTime > 0 && methods.length > 0 && servers.length > 0;
+%>
 <div class="page-breadcrumb">
     <div class="d-flex align-items-center">
-        <h4 class="page-title text-truncate text-white font-weight-medium mb-0"> Attack Hub </h4>
+        <h1 class="page-title text-truncate text-white font-weight-medium mb-0"> Attack Hub </h1>
         <div class="ml-auto">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb m-0 p-0">
@@ -20,7 +27,9 @@
                 <div class="card-body">
                     <h4 class="card-title">Launch Attack</h4>
                     <div class="mt-4 activity">
-                        <% if (locals.error) { %>
+                        <% if (maxTime <= 0) { %>
+                        <p class="alert alert-warning" role="alert">You need an active membership to launch attacks.</p>
+                        <% } else if (locals.error) { %>
                         <p class="alert alert-warning" role="alert"><%= locals.error %></p>
                         <% } else if (locals.launched) { %>
                         <p class="alert alert-success" role="status">Attack launched.</p>
@@ -29,27 +38,31 @@
                             <div class="form-group">
                                 <label class="text-white" for="host">Host</label>
                                 <input class="form-control" id="host" type="text"
-                                       placeholder="Enter target IP or hostname" required name="host"/>
+                                       placeholder="Enter target IP or hostname" required name="host"
+                                       <%- canLaunch ? '' : 'disabled' %>/>
                             </div>
                             <div class="form-group">
                                 <label class="text-white" for="port">Port</label>
                                 <input class="form-control" id="port" type="text"
-                                       placeholder="80" name="port" value="80"/>
+                                       placeholder="80" name="port" value="80"
+                                       <%- canLaunch ? '' : 'disabled' %>/>
                             </div>
                             <div class="form-group">
                                 <label class="text-white" for="time">Time (seconds)</label>
-                                <select class="form-control" id="time" name="time">
-                                    <option value="30">30 seconds</option>
-                                    <option value="60">60 seconds</option>
-                                    <option value="120">120 seconds</option>
-                                    <option value="180">180 seconds</option>
-                                    <option value="300">300 seconds</option>
-                                    <option value="600">600 seconds</option>
+                                <select class="form-control" id="time" name="time" <%- canLaunch ? '' : 'disabled' %>>
+                                    <% if (timeOptions.length === 0) { %>
+                                        <option value="">No attack time available</option>
+                                    <% } else { timeOptions.forEach(function (value) { %>
+                                        <option value="<%= value %>"><%= value %> seconds</option>
+                                    <% }) } %>
                                 </select>
+                                <% if (maxTime > 0) { %>
+                                <small class="text-muted">Your plan allows up to <%= maxTime %> seconds per attack.</small>
+                                <% } %>
                             </div>
                             <div class="form-group">
                                 <label class="text-white" for="method">Method</label>
-                                <select class="form-control" id="method" name="method">
+                                <select class="form-control" id="method" name="method" <%- canLaunch ? '' : 'disabled' %>>
                                     <% if (methods.length === 0) { %>
                                         <option value="">No methods available</option>
                                     <% } else { methods.forEach(function (m) { %>
@@ -59,7 +72,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="text-white" for="server">Server</label>
-                                <select class="form-control" id="server" name="server">
+                                <select class="form-control" id="server" name="server" <%- canLaunch ? '' : 'disabled' %>>
                                     <% if (servers.length === 0) { %>
                                         <option value="">No servers available</option>
                                     <% } else { servers.forEach(function (s) { %>
@@ -67,7 +80,7 @@
                                     <% }) } %>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-danger btn-block btn-lg"> Start Attack </button>
+                            <button type="submit" class="btn btn-danger btn-block btn-lg" <%- canLaunch ? '' : 'disabled' %>> Start Attack </button>
                         </form>
                     </div>
                 </div>

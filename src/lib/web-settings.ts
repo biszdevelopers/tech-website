@@ -43,3 +43,8 @@ export async function getWebSettings(): Promise<WebSettings> {
 export function invalidateWebSettings(): void {
     cache = null;
 }
+
+/** Single source of truth for the maintenance gate (pages and APIs differ). */
+export async function isWebMaintenance(): Promise<boolean> {
+    return (await getWebSettings()).maintaince === "1";
+}

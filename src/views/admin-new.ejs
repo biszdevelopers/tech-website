@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'New Submission | BIBS-C Tech Tools', css: ['globals.css', 'form.css'] }) %>
+<%- include('partials/head', { title: 'New Submission | BIBS-C Tech Tools', robots: 'noindex,nofollow', css: ['site.css', 'forms.css', 'admin.css'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1>New Tech Tool</h1></div>
 <div id="adminNav">
@@ -11,29 +11,22 @@
         <h2>Tool details</h2>
         <div class="form-grid">
             <label class="field"><span>Tool name</span>
-                <input class="l" type="text" name="techname" required/>
+                <input class="l" type="text" name="techname" required maxlength="160"/>
             </label>
             <label class="field"><span>Link</span>
-                <input class="l" type="text" name="link" placeholder="https://..." required/>
+                <input class="l" type="url" name="link" placeholder="https://..." required maxlength="2048"/>
             </label>
             <label class="field"><span>Display text</span>
-                <input class="l" type="text" name="displaytext" required/>
+                <input class="l" type="text" name="displaytext" required maxlength="200"/>
             </label>
         </div>
 
         <h2>Descriptions</h2>
-        <label class="field"><span>TL1: Knowing Our Students</span>
-            <textarea class="l" name="tl1_desc"></textarea>
+        <% descriptionColumns.forEach(function (column) { %>
+        <label class="field"><span><%= column.label %></span>
+            <textarea class="l" name="<%= column.field %>" maxlength="8000"></textarea>
         </label>
-        <label class="field"><span>TL2: Strategies for Learning</span>
-            <textarea class="l" name="tl2_desc"></textarea>
-        </label>
-        <label class="field"><span>TL3: Evidence for Learning</span>
-            <textarea class="l" name="tl3_desc"></textarea>
-        </label>
-        <label class="field"><span>TL4: Crafting the Curriculum</span>
-            <textarea class="l" name="tl4_desc"></textarea>
-        </label>
+        <% }) %>
 
         <h2>Strands</h2>
         <div class="domains">
@@ -42,15 +35,30 @@
             <% }) %>
         </div>
 
+        <h2>Categories</h2>
+        <% categoryGroups.forEach(function (group) { %>
+        <h3 class="form-subhead"><%= group.title %></h3>
+        <div class="domains">
+            <% group.options.forEach(function (option) { %>
+            <label><input type="checkbox" name="<%= option.name %>"/><%= option.label %></label>
+            <% }) %>
+        </div>
+        <% }) %>
+
+        <h2>Additional resources</h2>
+        <label class="field"><span>One per line. Each resource must use: Label | https://...</span>
+            <textarea class="l" name="resources" rows="4" maxlength="20000" placeholder="Manual | https://example.com/guide"></textarea>
+        </label>
+
         <h2>Submission details</h2>
         <div class="form-grid">
             <label class="field"><span>Submitter name</span>
-                <input class="l" type="text" name="username"/>
+                <input class="l" type="text" name="username" maxlength="120"/>
             </label>
             <label class="field"><span>Contact email</span>
-                <input class="l" type="text" name="contact"/>
+                <input class="l" type="text" name="contact" maxlength="200"/>
             </label>
-            <label class="field"><span>Screenshot (PNG, JPEG or WebP)</span>
+            <label class="field"><span>Screenshot (PNG, JPEG or WebP, max 10 MB)</span>
                 <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp"/>
             </label>
         </div>

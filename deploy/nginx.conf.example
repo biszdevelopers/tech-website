@@ -1,5 +1,6 @@
 # /etc/nginx/sites-available/tech-website
-# Optional reverse proxy. The Node app also works standalone (`pnpm start`)
+# Optional reverse proxy. The Node app also works standalone (`pnpm start`).
+# When using this proxy, set TRUST_PROXY=true in the app's .env.
 # and performs its own compression, caching and security headers.
 
 server {
@@ -27,7 +28,7 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 90s;
     }

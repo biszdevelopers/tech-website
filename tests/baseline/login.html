@@ -3,38 +3,64 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login | BIBS-C Tech Tools</title>
-    
-    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
-    
-    <link rel="stylesheet" href="/css/globals.css?v=9baaf329e2d162d8" />
-    
-    <link rel="stylesheet" href="/css/login.css?v=9baaf329e2d162d8" />
-    
-    
+
+    <title>Operator Login | BIBS-C Tech Tools</title>
+    <meta name="description" content="Operator sign in." />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+
+    <link rel="icon" href="/images/favicon.png?v=eccb1a320ddd684d" />
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Operator Login | BIBS-C Tech Tools" />
+    <meta property="og:description" content="Operator sign in." />
+
+    <meta property="og:image" content="/images/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Operator Login | BIBS-C Tech Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Operator Login | BIBS-C Tech Tools" />
+    <meta name="twitter:description" content="Operator sign in." />
+    <meta name="twitter:image" content="/images/og-default.png" />
+    <meta name="twitter:image:alt" content="Operator Login | BIBS-C Tech Tools" />
+
+
+    <link rel="stylesheet" href="/css/tokens.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/site.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/forms.css?v=eccb1a320ddd684d" />
+
+
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
-    <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
-    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
-    <![endif]-->
-    
-    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
-    
-<meta name="csrf-token" content="5ddd957d7677b475a8e6c872e5f818c925a1285958768ddbd37ed5ff1fc23d66"/></head>
+    <script src="/js/legacy/theme-boot.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=eccb1a320ddd684d"></script>
+
+    <script type="module" src="/js/modern/theme.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/theme.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/img-fallback.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/scroll-top.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/extras.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/extras.js?v=eccb1a320ddd684d" defer></script>
+
+<meta name="csrf-token" content="1795616569364.83f304006cc7d3bb40d57338a9b9a60b.b56d24f7d4b69da40c493e751d2eea61ff15d9973f370922de9f905db3860bbe"/></head>
 <body>
 
 <div id="cover">
     <div id="topbar">
-        <h1>BIBS-C Tech Tools</h1>
+        <p class="site-brand">BIBS-C Tech Tools</p>
         <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
                 aria-pressed="false" title="Toggle dark mode (Alt+T)">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -58,10 +84,19 @@
     <nav id="navbar" aria-label="Primary">
         <ul id="nav">
             <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
+            <li><a href="/tl5"><span>Growth (TL5)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
+            <li><a href="/tl6"><span>Positivity (TL6)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
         </ul>
     </nav>
@@ -70,13 +105,17 @@
 
 <div id="main">
     <div id="big">
-        <h1 id="login-heading">Sign in</h1>
+        <h1 id="login-heading">Operator sign in</h1>
         <div id="login">
             <h2 id="login-info">Enter your credentials to continue.</h2>
-            
-            <form id="login-form" method="post" action="/api/auth/login"><input type="hidden" name="_csrf" value="5ddd957d7677b475a8e6c872e5f818c925a1285958768ddbd37ed5ff1fc23d66"/>
-                <p><input type="text" placeholder="Username" aria-label="Username" required name="username"/></p>
-                <p><input type="password" placeholder="Password" aria-label="Password" required name="password"/></p>
+
+            <form id="login-form" method="post" action="/api/auth/login"><input type="hidden" name="_csrf" value="1795616569364.83f304006cc7d3bb40d57338a9b9a60b.b56d24f7d4b69da40c493e751d2eea61ff15d9973f370922de9f905db3860bbe"/>
+                <label class="field"><span>Username</span>
+                    <input type="text" placeholder="Username" required name="username" autocomplete="username" maxlength="120"/>
+                </label>
+                <label class="field"><span>Password</span>
+                    <input type="password" placeholder="Password" required name="password" autocomplete="current-password" maxlength="200"/>
+                </label>
                 <button type="submit">Login</button>
             </form>
         </div>

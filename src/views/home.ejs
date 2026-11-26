@@ -1,9 +1,9 @@
-<%- include('partials/head', { title: 'BIBS-C Tech Tools', description: 'Tech tools and resources for BASIS International and Bilingual Schools China' }) %>
+<%- include('partials/head', { title: 'BIBS-C Tech Tools | Teaching and Learning Technology Directory', description: 'A curated directory of teaching technology tools organized across the six Teaching and Learning domains.', css: ['site.css'] }) %>
 <%- include('partials/navbar') %>
 
 <div id="front" data-built-by="richie-rich90454">
     <img alt="Abstract hand-drawn welcome illustration" fetchpriority="high" decoding="async"
-         class="hero-media" src="/images/hero.svg"/>
+         class="hero-media" src="/images/hero.svg" width="1600" height="900"/>
     <div aria-hidden="true" class="hero-shade"></div>
     <h1>Welcome to BASIS International and Bilingual Schools China Tech Tools</h1>
 </div>
@@ -15,34 +15,24 @@
         <h2 id="about" class="section-anchor">About this site</h2>
         <p> Before you start using this site, you&#39;ll want to take a moment to understand how it is organized. </p>
         <p> This website presents technological tools you can use to aid your instruction. These <b>Tech Tools</b> are
-            sorted into four <b>domains</b> based on their function (see below). Within each domain, Tech Tools are then
+            sorted into six <b>domains</b> based on their function (see below). Within each domain, Tech Tools are then
             sorted into <b>strands</b> based on how they help you accomplish each step in implementing the broader
-            educational strategy. On this site, there will be a separate page for domain, where you will then be able to
-            apply an interactive filter to find tools specific to each strand. </p>
-        <h1 id="strategies">The 4 Strategies for Teaching and Learning (TL):</h1>
-        <p id="jump-menu" class="jump-menu"> Jump to: <a href="/#tl1">TL1: Knowing</a> | <a href="/#tl2">TL2: Strategies</a> | 
-            <a href="/#tl3">TL3: Evidence</a> | <a href="/#tl4">TL4: Crafting</a> | <a href="/#submit-cta">Submit a Tool</a> | 
-            <a href="/#footer">Footer</a> </p>
+            educational strategy. Each domain has its own page with filters and a strand index. </p>
+        <h2 id="strategies">The Six Domains of Teaching and Learning (TL):</h2>
+        <p id="jump-menu" class="jump-menu"> Jump to:
+            <% cards.forEach(function (card, i) { %><% if (i > 0) { %> | <% } %><a href="/#<%= card.id %>"><%= card.shortLabel %> (<%= card.id.toUpperCase() %>)</a><% }) %>
+            | <a href="/#submit-cta">Submit a Tool</a> | <a href="/#footer">Footer</a></p>
     </div>
 </div>
 
 <div class="tl-section" id="domains">
-    <% [
-        { id: 'tl1', href: '/tl1', title: 'TL1: Knowing Our Students',
-          strands: ['Relationships', 'Teacher planning', 'Modify their teaching', 'Achieve readiness'] },
-        { id: 'tl2', href: '/tl2', title: 'TL2: Strategies for Learning',
-          strands: ['Understanding', 'Multi-dimensional learning', 'Reasoned arguments', 'Repertoire of techniques', 'Learning spaces'] },
-        { id: 'tl3', href: '/tl3', title: 'TL3: Evidence for Learning',
-          strands: ['Reflect on thinking', 'Evidence of student learning', 'Employ feedback'] },
-        { id: 'tl4', href: '/tl4', title: 'TL4: Crafting the Curriculum',
-          strands: ['Risk-taking environment', 'Deepening lines of inquiry', 'Responsibility and aspects of citizenship'] },
-    ].forEach(function (card) { %>
+    <% cards.forEach(function (card) { %>
     <a class="tlx" id="<%= card.id %>" href="<%= card.href %>">
         <div class="tlhead"><%= card.title %></div>
-        <div class="tlx__strands-label">Includes the strands</div>
+        <div class="tlx__strands-label"><%= card.strands.length ? 'Includes the strands' : 'Covers the standards' %></div>
         <ul class="tlx__strands">
-            <% card.strands.forEach(function (s) { %>
-            <li><%= s %></li>
+            <% card.items.forEach(function (item) { %>
+            <li><%= item %></li>
             <% }) %>
         </ul>
     </a>
@@ -51,7 +41,7 @@
 
 <p class="tl-submit-cta" id="submit-cta">
     In addition, if you know of any tech tools not already on this site, you may submit them here:
-    <a href="/submission"><button class="submit-link">Submit New Tech Tool</button></a> </p>
+    <a class="submit-link" href="/submission">Submit New Tech Tool</a> </p>
 
 <%- include('partials/footer') %>
 </body>

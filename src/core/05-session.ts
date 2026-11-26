@@ -38,10 +38,13 @@ import type { Context } from "./03-context";
 export interface SessionData {
     /** Main-site admin flag (public tech-directory back office). */
     islogin?: boolean;
+    /** Main-site operator username. */
+    username?: string;
     /** Web-app user id, username and rank - set together at login. */
     userId?: number;
-    username?: string;
     rank?: number;
+    /** Credential generation. A bump invalidates every existing cookie. */
+    sv?: number;
 }
 
 export class SessionManager {

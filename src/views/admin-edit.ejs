@@ -1,9 +1,10 @@
-<%- include('partials/head', { title: 'Edit Submission #' + id + ' | BIBS-C Tech Tools', css: ['globals.css', 'form.css'] }) %>
+<%- include('partials/head', { title: 'Edit Submission #' + id + ' | BIBS-C Tech Tools', robots: 'noindex,nofollow', css: ['site.css', 'forms.css', 'admin.css'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1>Edit Submission #<%= id %></h1></div>
 <div id="adminNav">
     <ul>
         <li><a href="/admin">&#8592; Back to Admin</a></li>
+        <li><a href="/admin/export.csv">Export CSV</a></li>
     </ul>
 </div>
 <div id="wrap">
@@ -16,29 +17,22 @@
         <h2>Tool details</h2>
         <div class="form-grid">
             <label class="field"><span>Tool name</span>
-                <input class="l" type="text" name="Techname" value="<%= sub.techname %>" required/>
+                <input class="l" type="text" name="techname" value="<%= sub.techname %>" required maxlength="160"/>
             </label>
             <label class="field"><span>Link</span>
-                <input class="l" type="text" name="Link" value="<%= sub.link %>" required/>
+                <input class="l" type="url" name="link" value="<%= sub.link %>" required maxlength="2048"/>
             </label>
             <label class="field"><span>Display text</span>
-                <input class="l" type="text" name="display" value="<%= sub.displaytext %>" required/>
+                <input class="l" type="text" name="displaytext" value="<%= sub.displaytext %>" required maxlength="200"/>
             </label>
         </div>
 
         <h2>Descriptions</h2>
-        <label class="field"><span>TL1: Knowing Our Students</span>
-            <textarea class="l" name="description"><%= sub.tl1_desc %></textarea>
+        <% descriptionColumns.forEach(function (column) { %>
+        <label class="field"><span><%= column.label %></span>
+            <textarea class="l" name="<%= column.field %>" maxlength="8000"><%= sub[column.field] %></textarea>
         </label>
-        <label class="field"><span>TL2: Strategies for Learning</span>
-            <textarea class="l" name="description2"><%= sub.tl2_desc %></textarea>
-        </label>
-        <label class="field"><span>TL3: Evidence for Learning</span>
-            <textarea class="l" name="description3"><%= sub.tl3_desc %></textarea>
-        </label>
-        <label class="field"><span>TL4: Crafting the Curriculum</span>
-            <textarea class="l" name="description4"><%= sub.tl4_desc %></textarea>
-        </label>
+        <% }) %>
 
         <h2>Strands</h2>
         <div class="domains">
@@ -47,12 +41,41 @@
             <% }) %>
         </div>
 
+        <h2>Categories</h2>
+        <% categoryGroups.forEach(function (group) { %>
+        <h3 class="form-subhead"><%= group.title %></h3>
+        <div class="domains">
+            <% group.options.forEach(function (option) { %>
+            <label><input type="checkbox" name="<%= option.name %>"<%- option.checked ? ' checked=""' : '' %>/><%= option.label %></label>
+            <% }) %>
+        </div>
+        <% }) %>
+
+        <h2>Additional resources</h2>
+        <label class="field"><span>One per line. Each resource must use: Label | https://...</span>
+            <textarea class="l" name="resources" rows="4" maxlength="20000" placeholder="Manual | https://example.com/guide"><%= resourceText %></textarea>
+        </label>
+
+        <h2>Submitter</h2>
+        <div class="form-grid">
+            <label class="field"><span>Name</span>
+                <input class="l" type="text" name="username" value="<%= sub.username %>" maxlength="120"/>
+            </label>
+            <label class="field"><span>Contact</span>
+                <input class="l" type="text" name="contact" value="<%= sub.contact %>" maxlength="200"/>
+            </label>
+        </div>
+
         <button type="submit" class="submit-btn">Save changes</button>
     </form>
 
     <h2 class="panel-title">Screenshot</h2>
     <div class="screenshot-panel">
-        <img class="admin-shot" src="/uploads/<%= id %>" alt="Current screenshot"/>
+        <% if (locals.hasUpload) { %>
+        <img class="admin-shot" src="/uploads/<%= id %>?v=<%= sub.updatedAt %>" alt="Current screenshot"/>
+        <% } else { %>
+        <div class="admin-shot admin-shot--empty">No screenshot</div>
+        <% } %>
         <form method="post" action="/api/admin/screenshot" enctype="multipart/form-data">
             <input type="hidden" name="id" value="<%= id %>"/>
             <input type="file" name="screenshot" accept="image/png,image/jpeg,image/webp" required/>

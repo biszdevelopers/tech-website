@@ -1,90 +1,114 @@
 /**
- * ============================================================================
- * SERVER ENTRY POINT
- * ============================================================================
- *
- * PURPOSE
- * The only file whose job is "wire everything together and start listening".
- * Configuration (src/config/env.ts), the framework (src/core), and the
- * application's own routes/views (src/routes, src/views) meet here - and
- * nowhere else. If you are new to this codebase: read src/core/01-application
- * first, then come back here to see how little glue a well-factored app needs.
- *
- * BOOT SEQUENCE
- *   1. env.ts validates configuration (crashes loudly if secrets are missing)
- *   2. Application is assembled: guards, middlewares, routes
- *   3. HTTP listener starts; SIGTERM/SIGINT drain connections before exiting
- *
- * TODO(roadmap): Phase B/C replace the placeholder home/404/error views with
- * the real ported pages from the previous Next.js build (visual parity gates).
+ * Application entry point. Configuration, framework and routes meet here.
  */
-
+import { createReadStream, existsSync, statSync } from "node:fs";
 import { env } from "./src/config/env";
 import type { Context } from "./src/core/03-context";
-import { loadViews, render } from "./src/core/views";
+import { loadViews, render, setViewHelpers } from "./src/core/views";
 import { Application, pageCache } from "./src/core/01-application";
-import { guards, webSessions } from "./src/routes/guards";
-import { tlConfigs } from "./src/lib/tl-config";
+import { guards, mainSessions, optionalWebUser } from "./src/routes/guards";
+import { isMainAdminSession } from "./src/lib/admin-auth";
+import { allStrands, getStrand, getTlConfig, strandFilterName, tlList } from "./src/lib/tl-config";
 import { registerMainSiteRoutes } from "./src/routes/main-site";
 import { registerAdminRoutes } from "./src/routes/admin";
+import { registerAdminAccountRoutes } from "./src/routes/admin-account";
 import { registerWebRoutes } from "./src/routes/web";
 import { registerWebAdminRoutes } from "./src/routes/web-admin";
 import { registerPaymentRoutes } from "./src/routes/payments";
-import { getAcceptedSubmissions, getDomainsByColumns } from "./src/server/queries/submissions";
+import {
+    getAcceptedToolViews,
+    getToolViewById,
+    getToolsByMask,
+    getStrandMask,
+} from "./src/server/queries/submissions";
 import { serveUpload } from "./src/lib/uploads";
 import { getWebSettings } from "./src/lib/web-settings";
 import { mainDb } from "./src/lib/db/main";
 import { webDb } from "./src/lib/db/web";
+import { toolPath, toolSlug } from "./src/lib/tool-path";
+import {
+    categoryDomains,
+    categoryFilterName,
+    legacyCategoryFilterName,
+    type CategoryDomain,
+} from "./src/lib/categories";
+import {
+    absoluteUrl,
+    breadcrumbsLd,
+    buildPageMeta,
+    collectionLd,
+    docsLd,
+    ogDomainPath,
+    ogSitePath,
+    ogToolPath,
+    organizationLd,
+    toolLd,
+    websiteLd,
+    type PageMeta,
+} from "./src/lib/seo";
+import { generateDomainOg, generateSiteOg, generateToolOg } from "./src/lib/og";
 
 // ---------------------------------------------------------------------------
-// Page data assembly - the DB/fetch part of each dynamic page, feeding render().
+// Shared page helpers
 // ---------------------------------------------------------------------------
 
-/** Tag-pill metadata in the fixed display order inherited from the legacy page. */
-const DOM_TAGS: ReadonlyArray<{ col: string; label: string; tl: string; css: string }> = [
-    { col: "R", label: "Relationships", tl: "tl1", css: "n1" },
-    { col: "TP", label: "Teacher Planning", tl: "tl1", css: "n2" },
-    { col: "MT", label: "Modify Teaching", tl: "tl1", css: "n3" },
-    { col: "AR", label: "Achieve Readiness", tl: "tl1", css: "n4" },
-    { col: "U", label: "Understanding", tl: "tl2", css: "n1" },
-    { col: "MDL", label: "Multi-dimensional", tl: "tl2", css: "n2" },
-    { col: "RA", label: "Reasoned Arguments", tl: "tl2", css: "n3" },
-    { col: "RoTech", label: "Repertoire", tl: "tl2", css: "n4" },
-    { col: "LS", label: "Learning Spaces", tl: "tl2", css: "n5" },
-    { col: "RoThink", label: "Reflect on Thinking", tl: "tl3", css: "n1" },
-    { col: "EoST", label: "Evidence of Learning", tl: "tl3", css: "n2" },
-    { col: "EF", label: "Employ Feedback", tl: "tl3", css: "n3" },
-    { col: "RTE", label: "Risk-taking", tl: "tl4", css: "n1" },
-    { col: "DLoI", label: "Deepening Inquiry", tl: "tl4", css: "n2" },
-    { col: "RaAoC", label: "Responsibility", tl: "tl4", css: "n3" },
-];
+const DOM_TAGS = tlList.flatMap((config) =>
+    config.strands.map((strand) => ({
+        col: strand.domainColumn,
+        label: strand.label,
+        tl: config.id,
+        slug: strand.slug,
+        css: strand.cssClass,
+    }))
+);
 
-/**
- * Tools whose legacy description rendered WITHOUT the surrounding whitespace
- * every other card has (source formatting variance in the old build). Frozen
- * from tests/baseline - do not edit by hand.
- */
 const TIGHT_DESC = new Set(["tl2:14", "tl2:21", "tl3:20", "tl3:21"]);
+
+function categoryLinks(
+    labels: string[],
+    domain: CategoryDomain
+): Array<{ label: string; href: string }> {
+    const options = getTlConfig(domain)?.topics ?? [];
+    const links: Array<{ label: string; href: string }> = [];
+    labels.forEach((label) => {
+        const index = options.indexOf(label);
+        if (index >= 0) {
+            links.push({
+                label,
+                href: `/${domain}?${categoryFilterName(domain, index)}=1`,
+            });
+        }
+    });
+    return links;
+}
+
+function metaFor(input: Parameters<typeof buildPageMeta>[0]): PageMeta {
+    return buildPageMeta(input);
+}
+
+function cardData() {
+    return tlList.map((config) => ({
+        id: config.id,
+        href: `/${config.id}`,
+        title: config.title,
+        shortLabel: config.shortLabel,
+        strands: config.strands.map((strand) => strand.label),
+        items: config.strands.length ? config.strands.map((strand) => strand.label) : config.topics,
+    }));
+}
 
 async function searchRender(query: string): Promise<string> {
     const q = query.trim();
-    const all = await getAcceptedSubmissions();
+    const tools = q ? await getAcceptedToolViews() : [];
     const needle = q.toLowerCase();
     const results = q
-        ? all.filter((s) =>
-              [s.techname, s.tl1_desc, s.tl2_desc, s.tl3_desc, s.tl4_desc, s.displaytext].some(
-                  (f) => String(f).toLowerCase().includes(needle)
-              )
-          )
+        ? tools.filter((tool) => {
+              if (tool.searchText.includes(needle)) return true;
+              return DOM_TAGS.some(
+                  (tag) => tool.tags[tag.col] && tag.label.toLowerCase().includes(needle)
+              );
+          })
         : [];
-
-    const domainTags = new Map<number, Record<string, boolean>>();
-    if (results.length > 0) {
-        for (const d of await mainDb.domains.findMany()) {
-            const { id, ...tags } = d as unknown as { id: number } & Record<string, boolean>;
-            domainTags.set(id, tags);
-        }
-    }
 
     return render("search", {
         heading: q ? `Results for: ${q}` : "Search Tech Tools",
@@ -92,67 +116,206 @@ async function searchRender(query: string): Promise<string> {
         resultCount: results.length,
         results: results.map((item) => ({
             ...item,
-            activeTags: DOM_TAGS.filter((dt) => (domainTags.get(item.id) ?? {})[dt.col]),
+            activeTags: DOM_TAGS.filter((tag) => item.tags[tag.col]),
         })),
+        meta: metaFor({
+            title: q ? `Results for ${q}` : "Search Tech Tools",
+            description:
+                "Search accepted teaching technology tools by name, description, strand or submitter.",
+            path: "/search",
+            robots: q ? "private" : "public",
+            jsonLd: [websiteLd()],
+        }),
     });
 }
 
-/** Absence or "1" means checked; explicit "0" means unchecked (legacy rule). */
-async function tlRender(tl: string, query: Record<string, string>): Promise<string | null> {
-    const config = tlConfigs[tl];
+async function tlRender(
+    tl: string,
+    query: Record<string, string>,
+    activeSlug?: string
+): Promise<{ html: string; meta: PageMeta } | null> {
+    const config = getTlConfig(tl);
     if (!config) return null;
-
-    const checked = config.strands.map((s) => query[s.checkboxName] !== "0");
-    const [subs, domains] = await Promise.all([
-        getAcceptedSubmissions(),
-        getDomainsByColumns(config.domainColumns),
-    ]);
-    const domainById = new Map<number, Record<string, unknown>>(
-        domains.map((d) => [d.id, d as unknown as Record<string, unknown>])
-    );
-
-    const filtered = subs
-        .filter((sub) => {
-            const entry = domainById.get(sub.id);
-            if (!entry) return false;
-            return config.strands.some(
-                (strand, i) => checked[i] && entry[strand.domainColumn] === true
-            );
-        })
-        .map((sub) => ({
-            id: sub.id,
-            techname: sub.techname,
-            link: sub.link,
-            displaytext: sub.displaytext,
-            desc: (sub as unknown as Record<string, string>)[`${tl}_desc`] ?? "",
-            tight: TIGHT_DESC.has(`${tl}:${sub.id}`),
-            tags: Object.fromEntries(
-                config.strands.map((s) => [
-                    s.domainColumn,
-                    (domainById.get(sub.id)?.[s.domainColumn] as boolean) === true,
-                ])
-            ),
-        }));
-
-    return render("tl", {
-        tl,
-        config,
-        checked,
-        filtered,
+    const activeStrand = activeSlug ? getStrand(tl, activeSlug) : null;
+    if (activeSlug && !activeStrand) return null;
+    const isWriteup = config.strands.length === 0;
+    const checked = config.strands.map((strand) => {
+        if (activeStrand) return strand.slug === activeStrand.slug;
+        return query[strand.checkboxName] !== "0";
     });
+    const selectedColumns = config.strands
+        .filter((_, index) => checked[index])
+        .map((strand) => strand.domainColumn);
+    const writeupStrands = isWriteup ? allStrands() : [];
+    const strandChecked = writeupStrands.map(
+        (strand) => query[strandFilterName(strand.domainColumn)] === "1"
+    );
+    const categoryGroups = isWriteup
+        ? categoryDomains.map((domain) => {
+              const labels = getTlConfig(domain)?.topics ?? [];
+              const selected = labels.map(
+                  (_, index) =>
+                      query[categoryFilterName(domain, index)] === "1" ||
+                      (domain === tl && query[legacyCategoryFilterName(index)] === "1")
+              );
+              return {
+                  domain,
+                  title: getTlConfig(domain)?.title ?? domain,
+                  labels,
+                  selected,
+              };
+          })
+        : [];
+    const selectedWriteupStrands = writeupStrands.filter((_, index) => strandChecked[index]);
+    const filtersActive = isWriteup
+        ? selectedWriteupStrands.length > 0 ||
+          categoryGroups.some((group) => group.selected.some(Boolean))
+        : checked.some((value) => !value);
+    const mask = getStrandMask(selectedColumns);
+    let tools = isWriteup ? await getAcceptedToolViews() : await getToolsByMask(mask);
+    const descriptionField = `${tl}_desc` as
+        "tl1_desc" | "tl2_desc" | "tl3_desc" | "tl4_desc" | "tl5_desc" | "tl6_desc";
+    if (isWriteup) {
+        tools = tools.filter((tool) => Boolean(tool[descriptionField]));
+        if (selectedWriteupStrands.length > 0) {
+            tools = tools.filter((tool) =>
+                selectedWriteupStrands.some((strand) => tool.tags[strand.domainColumn])
+            );
+        }
+        categoryGroups.forEach((group) => {
+            const selected = group.labels.filter((_, index) => group.selected[index]);
+            if (selected.length === 0) return;
+            const field = group.domain === "tl5" ? "tl5Categories" : "tl6Categories";
+            tools = tools.filter((tool) =>
+                selected.some((category) => tool[field].includes(category))
+            );
+        });
+    }
+    const filtered = tools.map((tool) => ({
+        id: tool.id,
+        techname: tool.techname,
+        link: tool.link,
+        displaytext: tool.displaytext,
+        desc: tool[descriptionField] ?? "",
+        updatedAt: tool.updatedAt,
+        path: tool.path,
+        resources: tool.resources,
+        tight: TIGHT_DESC.has(`${tl}:${tool.id}`),
+        tags: Object.fromEntries(
+            (isWriteup ? writeupStrands : config.strands).map((s) => [
+                s.domainColumn,
+                tool.tags[s.domainColumn],
+            ])
+        ),
+        categories: isWriteup
+            ? [
+                  ...categoryLinks(tool.tl5Categories, "tl5"),
+                  ...categoryLinks(tool.tl6Categories, "tl6"),
+              ]
+            : [],
+    }));
+    const tagOptions = isWriteup
+        ? writeupStrands.map((strand) => ({
+              label: strand.label,
+              domainColumn: strand.domainColumn,
+              cssClass: strand.cssClass,
+              href: `/${strand.tl}/${strand.slug}`,
+          }))
+        : config.strands.map((strand) => ({
+              label: strand.label,
+              domainColumn: strand.domainColumn,
+              cssClass: strand.cssClass,
+              href: `/${tl}/${strand.slug}`,
+          }));
+    const writeupFilters = isWriteup
+        ? {
+              strandGroups: tlList
+                  .filter((group) => group.strands.length > 0)
+                  .map((group) => ({
+                      title: group.title,
+                      options: group.strands.map((strand) => ({
+                          name: strandFilterName(strand.domainColumn),
+                          label: strand.label,
+                          cssClass: strand.cssClass,
+                          tooltip: strand.tooltip,
+                          checked: query[strandFilterName(strand.domainColumn)] === "1",
+                      })),
+                  })),
+              categoryGroups: categoryGroups.map((group) => ({
+                  domain: group.domain,
+                  title: group.title,
+                  options: group.labels.map((label, index) => ({
+                      name: categoryFilterName(group.domain, index),
+                      label,
+                      checked: group.selected[index],
+                  })),
+              })),
+          }
+        : null;
+    const strandLinks = config.strands.map((strand) => ({
+        label: strand.label,
+        href: `/${tl}/${strand.slug}`,
+    }));
+    const pageTitle = activeStrand ? `${activeStrand.label} | ${config.title}` : config.title;
+    const path = activeStrand ? `/${tl}/${activeStrand.slug}` : `/${tl}`;
+    const meta = metaFor({
+        title: pageTitle,
+        description: config.description,
+        path,
+        ogType: "website",
+        image: ogDomainPath(tl),
+        jsonLd: [
+            breadcrumbsLd([
+                { name: "Home", url: "/" },
+                { name: config.title, url: `/${tl}` },
+                ...(activeStrand ? [{ name: activeStrand.label, url: path }] : []),
+            ]),
+            collectionLd(
+                pageTitle,
+                config.description,
+                path,
+                strandLinks.map((link) => ({ name: link.label, url: link.href })),
+                filtered.map((tool) => ({ id: tool.id, techname: tool.techname }))
+            ),
+        ],
+    });
+    return {
+        html: render("tl", {
+            tl,
+            config,
+            checked,
+            filtered,
+            activeStrand,
+            strandLinks,
+            tagOptions,
+            writeupFilters,
+            filtersActive,
+            meta,
+        }),
+        meta,
+    };
 }
 
 // ---------------------------------------------------------------------------
-// System views. The 404 page is "smart": tools whose names share words with
-// the missed URL are suggested. Suggestions come from a snapshot of accepted
-// submissions, refreshed lazily (first seconds after boot show a plain 404).
+// System views
 // ---------------------------------------------------------------------------
+
 let toolIndex: Array<{ id: number; techname: string }> = [];
 
 function refreshToolIndex(): void {
-    void getAcceptedSubmissions().then((subs) => {
-        toolIndex = subs.map((s) => ({ id: s.id, techname: s.techname }));
-    });
+    void getAcceptedToolViews()
+        .then((tools) => {
+            toolIndex = tools.map((tool) => ({ id: tool.id, techname: tool.techname }));
+        })
+        .catch((error: unknown) => {
+            console.error(
+                JSON.stringify({
+                    level: "error",
+                    msg: "tool index refresh failed",
+                    reason: error instanceof Error ? error.message : String(error),
+                })
+            );
+        });
 }
 
 const notFoundPage = (url: string): string => {
@@ -164,24 +327,39 @@ const notFoundPage = (url: string): string => {
     const suggestions = words
         .map((w) => toolIndex.find((t) => t.techname.toLowerCase().includes(w)))
         .filter((t): t is { id: number; techname: string } => Boolean(t))
-        .slice(0, 5);
-    return render("not-found", { suggestions });
+        .slice(0, 5)
+        .map((tool) => ({ ...tool, path: toolPath(tool) }));
+    return render("not-found", {
+        suggestions,
+        meta: metaFor({
+            title: "Page not found",
+            description: "The requested page could not be found.",
+            path: url,
+            robots: "private",
+        }),
+    });
 };
 
-const errorPage = (ref: string, status: number, _path: string): string =>
+const errorPage = (ref: string, status: number, path: string): string =>
     render("error-page", {
         ref,
         status,
+        meta: metaFor({
+            title: status >= 500 ? "Something went wrong" : "Request could not be completed",
+            description: "The request could not be completed.",
+            path,
+            robots: "private",
+        }),
     });
 
 // ---------------------------------------------------------------------------
 // Application assembly
 // ---------------------------------------------------------------------------
+
 const app = new Application({
     notFoundPage,
     errorPage,
     isProd: env.isProd,
-    // Names referenced by route options {guard:'...'} resolve here.
     guards,
 });
 
@@ -190,26 +368,196 @@ app.get("/api/health", async (ctx) => {
     ctx.json({ status: "ok", time: new Date().toISOString() });
 });
 
-// Home page: cached as finished HTML in production (bust via
-// pageCache.bust(['home']) on admin writes). In development the cache is
-// bypassed entirely so every template save is visible on refresh - this is
-// what makes `npm run dev` behave like a hot-reloading bundler.
-const HTML_CACHE = env.isProd;
+app.get("/robots.txt", async (ctx) => {
+    ctx.res.setHeader("Cache-Control", "public, max-age=3600");
+    ctx.text(`User-agent: *\nAllow: /\nSitemap: ${env.siteOrigin}/sitemap.xml\n`);
+});
 
-function isWebSignedIn(ctx: Context): boolean {
-    return Boolean(webSessions.load(ctx)?.userId);
+app.get("/humans.txt", async (ctx) => {
+    ctx.res.setHeader("Cache-Control", "public, max-age=86400");
+    ctx.text(
+        [
+            "/* TEAM */",
+            "Creator: richie-rich90454",
+            "Site: BIBS-C Tech Tools",
+            "Location: BASIS International and Bilingual Schools China",
+            "",
+            "/* SITE */",
+            `Standards: ${env.siteOrigin}`,
+            "Stack: Node, EJS, SQLite",
+            "Languages: English",
+            "",
+            "A quiet shelf for the curious: the first tool is always the one that starts with I.",
+        ].join("\n")
+    );
+});
+
+function xmlEscape(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
 
-const TL_CARDS = Object.entries(tlConfigs).map(([id, c]) => ({
-    id,
-    href: "/" + id,
-    title: c.title,
-    strands: c.strands.map((s) => s.label),
-}));
+app.get("/sitemap.xml", async (ctx) => {
+    const tools = await getAcceptedToolViews();
+    const urls: string[] = [];
+    const add = (path: string, lastmod?: number) => {
+        urls.push(
+            `  <url><loc>${xmlEscape(absoluteUrl(path))}</loc>${
+                lastmod ? `<lastmod>${new Date(lastmod * 1000).toISOString()}</lastmod>` : ""
+            }</url>`
+        );
+    };
+    add("/");
+    for (const config of tlList) {
+        add(`/${config.id}`);
+        for (const strand of config.strands) add(`/${config.id}/${strand.slug}`);
+    }
+    add("/docs");
+    add("/web");
+    add("/web/plan");
+    for (const tool of tools) add(tool.path, tool.updatedAt);
+    ctx.res.setHeader("Cache-Control", "public, max-age=3600");
+    ctx.xml(
+        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`
+    );
+});
+
+app.get("/feed.xml", async (ctx) => {
+    const tools = (await getAcceptedToolViews()).slice(0, 50);
+    const items = tools.map((tool) => {
+        const description = String(tool.tl1_desc || tool.tl2_desc || tool.displaytext || "").slice(
+            0,
+            400
+        );
+        return [
+            "    <item>",
+            `      <title>${xmlEscape(tool.techname)}</title>`,
+            `      <link>${xmlEscape(absoluteUrl(tool.path))}</link>`,
+            `      <guid>${xmlEscape(absoluteUrl(tool.path))}</guid>`,
+            `      <pubDate>${new Date((tool.updatedAt || Date.now() / 1000) * 1000).toUTCString()}</pubDate>`,
+            `      <description>${xmlEscape(description)}</description>`,
+            "    </item>",
+        ].join("\n");
+    });
+    ctx.res.setHeader("Cache-Control", "public, max-age=3600");
+    ctx.xml(
+        `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>BIBS-C Tech Tools</title><link>${xmlEscape(
+            absoluteUrl("/")
+        )}</link><description>Recently documented teaching technology tools.</description>${items.join("")}</channel></rss>\n`
+    );
+});
+
+// Open Graph images. Filenames include updatedAt so edits invalidate naturally.
+async function sendPng(ctx: Context, path: string): Promise<void> {
+    if (!existsSync(path)) {
+        ctx.throw(404, "Image not found.");
+        return;
+    }
+    const stat = statSync(path);
+    ctx.res.setHeader("Content-Type", "image/png");
+    ctx.res.setHeader("Cache-Control", "public, max-age=86400");
+    ctx.res.setHeader("Content-Length", stat.size);
+    if (ctx.raw.headers["if-none-match"] === `"${stat.size}-${stat.mtimeMs}"`) {
+        ctx.res.statusCode = 304;
+        ctx.res.end();
+        return;
+    }
+    ctx.res.setHeader("ETag", `"${stat.size}-${stat.mtimeMs}"`);
+    if (ctx.method === "HEAD") {
+        ctx.res.end();
+        return;
+    }
+    const stream = createReadStream(path);
+    stream.on("error", () => {
+        if (!ctx.res.headersSent) {
+            ctx.res.statusCode = 404;
+            ctx.res.end("Not found");
+        } else {
+            ctx.res.destroy();
+        }
+    });
+    stream.pipe(ctx.res);
+}
+
+app.get("/og/site.png", async (ctx) => {
+    try {
+        await sendPng(ctx, await generateSiteOg());
+    } catch {
+        ctx.throw(503, "Preview image unavailable.");
+    }
+});
+
+app.get("/og/domain/:tl.png", async (ctx) => {
+    const tl = String(ctx.params["tl.png"] ?? "").replace(/\.png$/, "");
+    const config = getTlConfig(tl);
+    if (!config) {
+        ctx.throw(404, "Image not found.");
+        return;
+    }
+    try {
+        await sendPng(
+            ctx,
+            await generateDomainOg({
+                tl,
+                title: config.title,
+                description: config.description,
+            })
+        );
+    } catch {
+        ctx.throw(503, "Preview image unavailable.");
+    }
+});
+
+app.get("/og/tool/:id/:slug", async (ctx) => {
+    const id = Number(ctx.params.id);
+    const requested = String(ctx.params.slug ?? "").replace(/\.png$/, "");
+    const tool = await getToolViewById(id);
+    if (!tool || requested !== toolSlug(tool.techname, tool.id)) {
+        ctx.throw(404, "Image not found.");
+        return;
+    }
+    const config =
+        tlList.find((c) => Boolean(tool[`${c.id}_desc` as keyof typeof tool])) ?? tlList[0];
+    try {
+        await sendPng(
+            ctx,
+            await generateToolOg({
+                id: tool.id,
+                slug: toolSlug(tool.techname, tool.id),
+                name: tool.techname,
+                description:
+                    tool.tl1_desc ||
+                    tool.tl2_desc ||
+                    tool.displaytext ||
+                    "Teaching technology tool",
+                domainLabel: config.title,
+                updatedAt: tool.updatedAt,
+            })
+        );
+    } catch {
+        ctx.throw(503, "Preview image unavailable.");
+    }
+});
+
+// Home page: cached as finished HTML in production.
+const HTML_CACHE = env.isProd;
+
+const TL_CARDS = cardData();
 app.get("/", async (ctx) => {
+    const meta = metaFor({
+        title: "BIBS-C Tech Tools | Teaching and Learning Technology Directory",
+        description:
+            "A curated directory of teaching technology tools organized across six Teaching and Learning domains.",
+        path: "/",
+        image: ogSitePath(),
+        jsonLd: [websiteLd(), organizationLd()],
+    });
     const cached = HTML_CACHE
-        ? await pageCache.remember("home", async () => render("home", { cards: TL_CARDS }))
-        : render("home", { cards: TL_CARDS });
+        ? await pageCache.remember("home", async () => render("home", { cards: TL_CARDS, meta }))
+        : render("home", { cards: TL_CARDS, meta });
     ctx.htmlRaw(cached);
 });
 
@@ -218,11 +566,20 @@ app.get("/favicon.ico", async (ctx) => {
 });
 
 app.get("/uploads/:file", async (ctx) => {
-    if (!serveUpload(ctx, ctx.params.file)) ctx.throw(404, "Not found");
+    const file = ctx.params.file;
+    const id = Number(file.replace(/\.[a-z]+$/i, ""));
+    if (!Number.isFinite(id)) ctx.throw(404, "Not found");
+    const tool = await getToolViewById(id);
+    const session = mainSessions.load(ctx);
+    const adminCheck = isMainAdminSession(session);
+    if (!tool && !adminCheck) {
+        ctx.throw(404, "Not found");
+        return;
+    }
+    if (!serveUpload(ctx, file)) ctx.throw(404, "Not found");
 });
 
-// Maintenance gate for the IPstress subproject. Admin, auth and the webhook
-// stay reachable so the site can be recovered and payments reconciled.
+// Maintenance gate for the IPstress subproject.
 app.use(async (ctx, next) => {
     if (!ctx.path.startsWith("/web")) {
         await next();
@@ -232,8 +589,9 @@ app.use(async (ctx, next) => {
         ctx.path.startsWith("/web/maintenance") ||
         ctx.path.startsWith("/web/admin") ||
         ctx.path.startsWith("/web/login") ||
+        ctx.path === "/web/api/auth/login" ||
+        ctx.path === "/web/api/auth/logout" ||
         ctx.path.startsWith("/web/images/") ||
-        ctx.path.startsWith("/web/api/auth/") ||
         ctx.path.startsWith("/web/api/payments/stripe/webhook") ||
         ctx.path.startsWith("/web/api/admin/");
     if (exempt) {
@@ -251,40 +609,69 @@ app.use(async (ctx, next) => {
 
 registerMainSiteRoutes(app);
 registerAdminRoutes(app);
+registerAdminAccountRoutes(app);
 registerWebRoutes(app);
 registerWebAdminRoutes(app);
 registerPaymentRoutes(app);
 
 // Web public pages.
-// Maintenance gate: reads settings.maintaince flag.
-// Web user pages.
 app.get("/web/plan", async (ctx) => {
+    const user = await optionalWebUser(ctx);
     const plans = await webDb.plans.findMany({ orderBy: { price: "asc" } });
+    const visible =
+        user && Number(user.rank) >= 1 ? plans : plans.filter((plan) => Number(plan.private) !== 1);
+    const meta = metaFor({
+        title: "Plans | IPstress",
+        description: "Choose a stress testing plan with clear duration and concurrency limits.",
+        path: "/web/plan",
+        jsonLd: [websiteLd()],
+    });
     ctx.htmlRaw(
         render("web-plan", {
-            plans,
-            signedIn: isWebSignedIn(ctx),
+            plans: visible,
+            signedIn: Boolean(user),
             error: ctx.query.get("error") ?? "",
+            meta,
         })
     );
 });
+
 app.get("/web/tickets/new", async (ctx) => {
-    ctx.htmlRaw(render("web-tickets-new", { signedIn: isWebSignedIn(ctx) }));
+    const user = await optionalWebUser(ctx);
+    if (!user) {
+        ctx.redirect("/web/login?next=%2Fweb%2Ftickets%2Fnew", 303);
+        return;
+    }
+    ctx.htmlRaw(
+        render("web-tickets-new", {
+            signedIn: true,
+            meta: metaFor({
+                title: "New Ticket | IPstress",
+                path: "/web/tickets/new",
+                robots: "private",
+            }),
+        })
+    );
 });
+
 app.get("/web/giftcards", async (ctx) => {
+    const user = await optionalWebUser(ctx);
     ctx.htmlRaw(
         render("web-giftcards", {
-            signedIn: isWebSignedIn(ctx),
+            signedIn: Boolean(user),
             redeemed: ctx.query.get("redeemed") ?? "",
             error: ctx.query.get("error") ?? "",
+            meta: metaFor({
+                title: "Gift Cards | IPstress",
+                path: "/web/giftcards",
+                robots: "private",
+            }),
         })
     );
 });
+
 app.get("/web/affiliate", async (ctx) => {
-    const session = webSessions.load(ctx);
-    const user = session?.userId
-        ? await webDb.users.findUnique({ where: { ID: session.userId } })
-        : null;
+    const user = await optionalWebUser(ctx);
     const stats =
         user === null
             ? null
@@ -294,81 +681,236 @@ app.get("/web/affiliate", async (ctx) => {
                   referralCount: await webDb.users.count({ where: { referedBy: user.ID } }),
                   referralBalance: user.referralbalance,
               };
-    ctx.htmlRaw(render("web-affiliate", { signedIn: Boolean(user), stats }));
+    ctx.htmlRaw(
+        render("web-affiliate", {
+            signedIn: Boolean(user),
+            stats,
+            meta: metaFor({
+                title: "Affiliate | IPstress",
+                path: "/web/affiliate",
+                robots: "private",
+            }),
+        })
+    );
 });
+
 app.get("/web/wheel", async (ctx) => {
-    ctx.htmlRaw(render("web-wheel", { signedIn: isWebSignedIn(ctx) }));
+    const user = await optionalWebUser(ctx);
+    if (!user) {
+        ctx.redirect("/web/login?next=%2Fweb%2Fwheel", 303);
+        return;
+    }
+    ctx.htmlRaw(
+        render("web-wheel", {
+            signedIn: true,
+            meta: metaFor({
+                title: "Lucky Wheel | IPstress",
+                path: "/web/wheel",
+                robots: "private",
+            }),
+        })
+    );
 });
+
 app.get("/web/maintenance", async (ctx) => {
     const settings = await getWebSettings();
     ctx.htmlRaw(
         render("web-maintenance", {
             description: settings.description || "Premium IP stress testing service",
+            meta: metaFor({
+                title: "Maintenance | IPstress",
+                path: "/web/maintenance",
+                robots: "private",
+            }),
         })
     );
 });
+
 app.get("/web", async (ctx) => {
+    const meta = metaFor({
+        title: "IPstress | L4 and L7 Stress Testing",
+        description: "IP stress testing with clear concurrency, duration and support terms.",
+        path: "/web",
+        image: ogSitePath(),
+        jsonLd: [websiteLd()],
+    });
     const body = HTML_CACHE
         ? (pageCache.get("web-home") ??
-          (pageCache.set("web-home", render("web-landing", {})), pageCache.get("web-home")))
-        : render("web-landing", {});
+          (pageCache.set("web-home", render("web-landing", { meta })), pageCache.get("web-home")))
+        : render("web-landing", { meta });
     ctx.htmlRaw(body!);
 });
+
 app.get("/web/login", async (ctx) => {
-    ctx.htmlRaw(render("web-login", { error: ctx.query.get("error") ?? "" }));
-});
-app.get("/web/register", async (ctx) => {
-    ctx.htmlRaw(render("web-register", { ref: ctx.query.get("ref") ?? "" }));
+    ctx.htmlRaw(
+        render("web-login", {
+            error: ctx.query.get("error") ?? "",
+            next: ctx.query.get("next") ?? "",
+            meta: metaFor({ title: "Login | IPstress", path: "/web/login", robots: "private" }),
+        })
+    );
 });
 
-// Tool detail page: every TL strategy description for one tool, stacked.
-app.get("/docs", async (ctx) => {
-    ctx.htmlRaw(render("docs", {}));
+app.get("/web/register", async (ctx) => {
+    ctx.htmlRaw(
+        render("web-register", {
+            ref: ctx.query.get("ref") ?? "",
+            error: ctx.query.get("error") ?? "",
+            meta: metaFor({
+                title: "Register | IPstress",
+                path: "/web/register",
+                robots: "private",
+            }),
+        })
+    );
 });
-app.get("/tool/:id", async (ctx) => {
+
+app.get("/docs", async (ctx) => {
+    const meta = metaFor({
+        title: "Project Docs | BIBS-C Tech Tools",
+        description: "How the BIBS-C Tech Tools directory is built, deployed and maintained.",
+        path: "/docs",
+        jsonLd: [docsLd()],
+    });
+    const cached = HTML_CACHE
+        ? await pageCache.remember("docs", async () => render("docs", { meta }))
+        : render("docs", { meta });
+    ctx.htmlRaw(cached);
+});
+
+// Canonical tool URL, with old links permanently redirected.
+app.get("/tool/:id/:slug", async (ctx) => {
     const id = Number(ctx.params.id);
-    if (!Number.isFinite(id)) ctx.throw(404, "Not found");
-    const [subs, domains] = await Promise.all([
-        getAcceptedSubmissions(),
-        getDomainsByColumns(DOM_TAGS.map((t) => t.col)),
-    ]);
-    const tool = subs.find((s) => s.id === id);
+    const tool = await getToolViewById(id);
     if (!tool) {
         ctx.throw(404, "Tool not found.");
         return;
     }
-    const flags = (domains.find((d) => d.id === id) ?? {}) as unknown as Record<string, boolean>;
-    const strands = DOM_TAGS.filter((t) => flags[t.col]);
-    refreshToolIndex();
-    ctx.htmlRaw(render("tool", { tool, strands }));
+    const slug = toolSlug(tool.techname, tool.id);
+    if (String(ctx.params.slug) !== slug) {
+        ctx.redirect(toolPath(tool), 301);
+        return;
+    }
+    const configs = tlList;
+    const primaryConfig =
+        configs.find((config) => Boolean(tool[`${config.id}_desc` as keyof typeof tool])) ??
+        configs[0];
+    const tlSections = configs.map((config) => ({
+        id: config.id,
+        title: config.title,
+        shortLabel: config.shortLabel,
+        description: tool[`${config.id}_desc` as keyof typeof tool] as string,
+    }));
+    const strands = DOM_TAGS.filter((tag) => tool.tags[tag.col]);
+    const categories = [
+        ...categoryLinks(tool.tl5Categories, "tl5"),
+        ...categoryLinks(tool.tl6Categories, "tl6"),
+    ];
+    const resources = tool.resources;
+    const meta = metaFor({
+        title: `${tool.techname} | BIBS-C Tech Tools`,
+        description:
+            tool.tl1_desc ||
+            tool.tl2_desc ||
+            tool.tl3_desc ||
+            tool.displaytext ||
+            "Teaching technology tool.",
+        path: tool.path,
+        ogType: "article",
+        image: `${ogToolPath(tool)}?v=${tool.updatedAt}`,
+        jsonLd: [
+            breadcrumbsLd([
+                { name: "Home", url: "/" },
+                { name: "Search", url: "/search" },
+                { name: tool.techname, url: tool.path },
+            ]),
+            toolLd(tool, primaryConfig, `${ogToolPath(tool)}?v=${tool.updatedAt}`),
+        ],
+    });
+    const key = `tool:${tool.id}`;
+    const cached = HTML_CACHE
+        ? await pageCache.remember(key, async () =>
+              render("tool", { tool, strands, categories, tlSections, resources, meta })
+          )
+        : render("tool", { tool, strands, categories, tlSections, resources, meta });
+    ctx.htmlRaw(cached);
 });
 
-// Search: dynamic per query - never cached (result sets are personal to input).
+app.get("/tool/:id", async (ctx) => {
+    const id = Number(ctx.params.id);
+    const tool = await getToolViewById(id);
+    if (!tool) {
+        ctx.throw(404, "Tool not found.");
+        return;
+    }
+    ctx.redirect(toolPath(tool), 301);
+});
+
 app.get("/search", async (ctx) => {
-    const q = ctx.query.get("query") ?? "";
+    const q = (ctx.query.get("query") ?? "").slice(0, 200);
     ctx.htmlRaw(await searchRender(q));
 });
-// TL listing pages: cache key includes the filter state (every combination of
-// checked strands is its own shareable URL). Admin writes bust 'tl:*'.
+
+// Dedicated strand pages.
+app.get("/:tl/:strand", async (ctx) => {
+    const tl = ctx.params.tl;
+    const strand = ctx.params.strand;
+    const config = getTlConfig(tl);
+    if (!config) {
+        ctx.throw(404, "Page not found.");
+        return;
+    }
+    const rendered = await tlRender(tl, {}, strand);
+    if (!rendered) {
+        ctx.throw(404, "Page not found.");
+        return;
+    }
+    const key = `tl:${tl}:${strand}`;
+    const cached = HTML_CACHE
+        ? await pageCache.remember(key, async () => rendered.html)
+        : rendered.html;
+    ctx.htmlRaw(cached);
+});
+
+// TL listing pages.
 app.get("/:tl", async (ctx) => {
     const query: Record<string, string> = {};
     ctx.query.forEach((value, key) => {
         query[key] = value;
     });
-    // Cache key includes the checked/unchecked bit pattern of every strand.
-    let bits = "x";
-    const config = tlConfigs[ctx.params.tl];
-    if (config)
-        bits = config.strands.map((s) => (query[s.checkboxName] !== "0" ? "1" : "0")).join("");
-    const cacheKey = `tl:${ctx.params.tl}:${bits}`;
+    const config = getTlConfig(ctx.params.tl);
+    const bits = config
+        ? config.strands.length > 0
+            ? config.strands.map((s) => (query[s.checkboxName] !== "0" ? "1" : "0")).join("")
+            : [
+                  allStrands()
+                      .map((s) => (query[strandFilterName(s.domainColumn)] === "1" ? "1" : "0"))
+                      .join(""),
+                  categoryDomains
+                      .map((domain) => {
+                          const labels = getTlConfig(domain)?.topics ?? [];
+                          return labels
+                              .map((_, index) =>
+                                  query[categoryFilterName(domain, index)] === "1" ||
+                                  (domain === ctx.params.tl &&
+                                      query[legacyCategoryFilterName(index)] === "1")
+                                      ? "1"
+                                      : "0"
+                              )
+                              .join("");
+                      })
+                      .join(":"),
+              ].join(":")
+        : "x";
+    const cacheKey = `tl:${ctx.params.tl}:all:${bits}`;
     let body: string | undefined = HTML_CACHE ? pageCache.get(cacheKey) : undefined;
     if (body === undefined) {
         const rendered = await tlRender(ctx.params.tl, query);
-        if (rendered === null) {
+        if (!rendered) {
             ctx.throw(404, "Page not found.");
-            return; // unreachable - throw() ends the request; kept for type flow
+            return;
         }
-        body = rendered;
+        body = rendered.html;
         if (HTML_CACHE) pageCache.set(cacheKey, body);
     }
     ctx.htmlRaw(body);
@@ -378,6 +920,8 @@ app.get("/:tl", async (ctx) => {
 // Lifecycle
 // ---------------------------------------------------------------------------
 loadViews();
+setViewHelpers({ tlList, tlCards: TL_CARDS });
+
 async function boot(): Promise<void> {
     await app.listen(env.port);
     console.log(
@@ -394,7 +938,6 @@ async function boot(): Promise<void> {
 }
 
 boot().catch((err: Error) => {
-    // Listen failures (port busy) arrive here with a human-readable message.
     console.error(JSON.stringify({ level: "error", msg: "boot failed", reason: err.message }));
     process.exit(1);
 });

@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Login | IPstress', css: ['webtheme.css'] }) %>
+<%- include('partials/head', { title: 'Login | IPstress', css: ['web.css'] }) %>
 <%- include('partials/web-header') %>
 
 <div class="auth-wrapper d-flex no-block justify-content-center align-items-center position-relative">
@@ -8,7 +8,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h2 class="card-title text-center">IPstress</h2>
-                        <h3 class="card-title text-center">Login</h3>
+                        <h1 class="card-title text-center">Login</h1>
                         <% if (locals.error === 'invalid') { %>
                         <p class="alert alert-danger" role="alert">Invalid username or password.</p>
                         <% } else if (locals.error === 'rate') { %>
@@ -17,19 +17,20 @@
                         <p class="alert alert-danger" role="alert">This account has been banned.</p>
                         <% } %>
                         <form class="mt-4" method="post" action="/web/api/auth/login">
+                            <input type="hidden" name="next" value="<%= locals.next || '' %>"/>
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label class="text-white" for="username">Username</label>
                                         <input type="text" class="form-control" id="username" placeholder="enter your username"
-                                               required name="username"/>
+                                               required name="username" autocomplete="username"/>
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group">
                                         <label class="text-white" for="password">Password</label>
                                         <input type="password" class="form-control" id="password" placeholder="enter your password"
-                                               required name="password"/>
+                                               required name="password" autocomplete="current-password"/>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 text-center">

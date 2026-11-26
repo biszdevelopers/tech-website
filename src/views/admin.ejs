@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Admin Panel | BIBS-C Tech Tools', css: ['globals.css', 'admintable.css'], scripts: ['admin.js'] }) %>
+<%- include('partials/head', { title: 'Admin Panel | BIBS-C Tech Tools', robots: 'noindex,nofollow', css: ['site.css', 'forms.css', 'admin.css'], scripts: ['admin.js'] }) %>
 <%- include('partials/navbar') %>
 <div id="adminTopbar"><h1 id="admin-heading">Admin Panel</h1></div>
 <div id="adminNav">
@@ -7,12 +7,18 @@
         <li><a href="/admin#submissions">All Submissions</a></li>
         <li><a href="/admin/new">New Tool</a></li>
         <li><a href="/admin/import">Import CSV</a></li>
-        <li><a href="/api/auth/logout">Logout</a></li>
+        <li><a href="/admin/export.csv">Export CSV</a></li>
+        <li><a href="/admin/account">Account</a></li>
+        <li>
+            <form method="post" action="/api/auth/logout" class="logout-form">
+                <button type="submit">Logout</button>
+            </form>
+        </li>
     </ul>
 </div>
 <section id="submissions" class="section-anchor">
     <form method="get" action="/admin" class="admin-filters">
-        <input type="search" name="q" value="<%= q %>" placeholder="Search name, link, display"/>
+        <input type="search" name="q" value="<%= q %>" placeholder="Search name, link, description, contact"/>
         <select name="status">
             <option value="all"<%- status === 'all' ? ' selected' : '' %>>All</option>
             <option value="pending"<%- status === 'pending' ? ' selected' : '' %>>Pending</option>
@@ -25,27 +31,41 @@
         <table class="AdminTable_table__3iS2Y">
             <thead>
                 <tr>
-                    <th class="admin-col-id">ID</th><th class="admin-col-name">Name</th><th class="admin-col-link">Link</th><th class="admin-col-display">Display</th><th class="admin-col-desc">TL1</th>
-                    <th class="admin-col-desc">TL2</th><th class="admin-col-desc">TL3</th><th class="admin-col-desc">TL4</th><th class="AdminTable_status admin-col-status">Status</th><th class="admin-col-actions">Actions</th>
+                    <th class="admin-col-id">ID</th>
+                    <th class="admin-col-name">Name</th>
+                    <th class="admin-col-link">Link</th>
+                    <th class="admin-col-display">Display</th>
+                    <% descriptionColumns.forEach(function (column) { %>
+                    <th class="admin-col-desc"><%= column.label %></th>
+                    <% }) %>
+                    <th class="AdminTable_status admin-col-status">Status</th>
+                    <th class="admin-col-contact">Submitter</th>
+                    <th class="admin-col-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
+                <% if (subs.length === 0) { %>
+                    <tr><td colspan="<%= 7 + descriptionColumns.length %>" class="admin-empty">No submissions match this filter.</td></tr>
+                <% } %>
                 <% subs.forEach(function (sub) { %>
                     <tr>
                         <td class="AdminTable_mono__EqBH0"><%= sub.id %></td>
                         <td class="AdminTable_name__ZKSIb"><%= sub.techname %></td>
                         <td><a href="<%= sub.link %>" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j"><%= sub.link %></a></td>
                         <td><%= sub.displaytext %></td>
-                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl1_desc).slice(0, 90) %></span></td>
-                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl2_desc).slice(0, 90) %></span></td>
-                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl3_desc).slice(0, 90) %></span></td>
-                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub.tl4_desc).slice(0, 90) %></span></td>
+                        <% descriptionColumns.forEach(function (column) { %>
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"><%= String(sub[column.field] || '').slice(0, 90) %></span></td>
+                        <% }) %>
                         <td class="AdminTable_status">
                             <% if (sub.accepted) { %>
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
                             <% } else { %>
                                 <span class="AdminTable_badgePending__XpYWw">Pending</span>
                             <% } %>
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span><%= sub.username || '-' %></span>
+                            <% if (sub.contact) { %><br/><span class="admin-subtle"><%= sub.contact %></span><% } %>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
                             <% if (sub.accepted) { %>
@@ -61,7 +81,6 @@
             </tbody>
         </table>
     </div>
-    <% var pages = Math.max(1, Math.ceil(total / perPage)); %>
     <% if (pages > 1) { %>
     <nav class="admin-pager" aria-label="Pagination">
         <% for (var p = 1; p <= pages; p += 1) { %>

@@ -1,8 +1,8 @@
-<%- include('partials/head', { title: 'Affiliate | IPstress', css: ['webtheme.css'] }) %>
+<%- include('partials/head', { title: 'Affiliate | IPstress', css: ['web.css'] }) %>
 <%- include('partials/web-header') %>
 <div class="page-breadcrumb">
     <div class="d-flex align-items-center">
-        <h4 class="page-title text-truncate text-white font-weight-medium mb-0"> Affiliate </h4>
+        <h1 class="page-title text-truncate text-white font-weight-medium mb-0"> Affiliate </h1>
         <div class="ml-auto">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb m-0 p-0">
@@ -33,7 +33,7 @@
                                 </tr>
                                 <tr>
                                     <td>Referral balance</td>
-                                    <td><%= stats.referralBalance %>&#165;</td>
+                                    <td>$<%= Number(stats.referralBalance || 0).toFixed(2) %></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -50,9 +50,9 @@
                     <h4 class="card-title">How it works</h4>
                     <div class="mt-4 activity">
                         <p class="text-muted">Share your referral link with other operators.
-                            Signups from it are counted below.</p>
+                            You earn 10% of every paid plan purchased by a user who signed up with it.</p>
                         <p class="text-muted mb-0">Payouts are arranged through support. Open a
-                            ticket with your payout method and address.</p>
+                            ticket with your payout method and address to request a payout.</p>
                     </div>
                 </div>
             </div>

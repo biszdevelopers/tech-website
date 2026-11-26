@@ -3,96 +3,149 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Request Failed | BIBS-C Tech Tools</title>
-    
-    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
-    
-    <link rel="stylesheet" href="/css/globals.css?v=9baaf329e2d162d8" />
-    
-    
+
+    <title>Login | IPstress</title>
+    <meta name="description" content="A curated catalog of teaching technology tools, organized by domain and strand." />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href="http://localhost:3280/web/login" />
+    <link rel="icon" href="/images/favicon.png?v=eccb1a320ddd684d" />
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Login | IPstress" />
+    <meta property="og:description" content="A curated catalog of teaching technology tools, organized by domain and strand." />
+    <meta property="og:url" content="http://localhost:3280/web/login" />
+    <meta property="og:image" content="http://localhost:3280/images/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Login | IPstress" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Login | IPstress" />
+    <meta name="twitter:description" content="A curated catalog of teaching technology tools, organized by domain and strand." />
+    <meta name="twitter:image" content="http://localhost:3280/images/og-default.png" />
+    <meta name="twitter:image:alt" content="Login | IPstress" />
+
+
+    <link rel="stylesheet" href="/css/tokens.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/web.css?v=eccb1a320ddd684d" />
+
+
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
-    <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
-    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
-    <![endif]-->
-    
-    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
-    
-<meta name="csrf-token" content="08e27cfab113f25aa8166e4123ea1ced2baef5171850189bd1afae5222b276fc"/></head>
+    <script src="/js/legacy/theme-boot.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=eccb1a320ddd684d"></script>
+
+    <script type="module" src="/js/modern/theme.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/theme.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/img-fallback.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/scroll-top.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/extras.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/extras.js?v=eccb1a320ddd684d" defer></script>
+
+<meta name="csrf-token" content="1795616569412.0150b5d6b8edf363be43a3e07ddbf86a.d04055b6ad05ae9881b15712d95a5cc54d98ffb3043024fe6a6761452278fa6f"/></head>
 <body>
 
-<div id="cover">
-    <div id="topbar">
-        <h1>BIBS-C Tech Tools</h1>
-        <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
-                aria-pressed="false" title="Toggle dark mode (Alt+T)">
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="4"></circle>
-                <line x1="12" y1="2" x2="12" y2="5"></line>
-                <line x1="12" y1="19" x2="12" y2="22"></line>
-                <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"></line>
-                <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"></line>
-                <line x1="2" y1="12" x2="5" y2="12"></line>
-                <line x1="19" y1="12" x2="22" y2="12"></line>
-                <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"></line>
-                <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"></line>
-            </svg>
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
-            </svg>
-        </button>
+<header class="web-header">
+    <div class="web-header__inner">
+        <a class="web-header__brand" aria-label="IPstress — home" href="/web">
+            <span class="web-header__mark" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"></path>
+                </svg>
+            </span>
+            <span class="web-header__name">IPstress</span>
+        </a>
+        <nav class="web-header__nav" aria-label="Primary">
+            <ul>
+                <li><a href="/web">Home</a></li>
+                <li><a href="/web#about">About</a></li>
+                <li><a href="/web/plan">Plans</a></li>
+                <li><a href="/web#faq">FAQ</a></li>
+            </ul>
+        </nav>
+        <div class="web-header__cta">
+            <button id="theme-toggle" class="web-theme-toggle" type="button" aria-label="Toggle dark mode"
+                    aria-pressed="false" title="Toggle dark mode (Alt+T)">
+                <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <line x1="12" y1="2" x2="12" y2="5"></line>
+                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                    <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"></line>
+                    <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"></line>
+                    <line x1="2" y1="12" x2="5" y2="12"></line>
+                    <line x1="19" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"></line>
+                    <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"></line>
+                </svg>
+                <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+                </svg>
+            </button>
+
+            <a class="web-header__btn web-header__btn--ghost" href="/web/register">Register</a>
+
+        </div>
     </div>
-    <nav id="navbar" aria-label="Primary">
-        <ul id="nav">
-            <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-            <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
-        </ul>
-    </nav>
+</header>
+
+
+<div class="auth-wrapper d-flex no-block justify-content-center align-items-center position-relative">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="p-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center">IPstress</h2>
+                        <h1 class="card-title text-center">Login</h1>
+
+                        <form class="mt-4" method="post" action="/web/api/auth/login"><input type="hidden" name="_csrf" value="1795616569412.0150b5d6b8edf363be43a3e07ddbf86a.d04055b6ad05ae9881b15712d95a5cc54d98ffb3043024fe6a6761452278fa6f"/>
+                            <input type="hidden" name="next" value="/web/tickets"/>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="text-white" for="username">Username</label>
+                                        <input type="text" class="form-control" id="username" placeholder="enter your username"
+                                               required name="username" autocomplete="username"/>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="text-white" for="password">Password</label>
+                                        <input type="password" class="form-control" id="password" placeholder="enter your password"
+                                               required name="password" autocomplete="current-password"/>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-block btn-primary" name="doLogin"> Sign In </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-12 text-center mt-3">
+                    Don&#39;t have an account? <a href="/web/register" class="text-primary">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-
-<div id="wrap">
-    <section class="notice-page">
-        <p class="notice-page__code">401</p>
-        <h1>Access denied</h1>
-        <p>You do not have access to that page.</p>
-        <p class="notice-page__ref">Reference: <code>ff9a4f68</code></p>
-        <p class="notice-page__actions">
-            <a class="notice-page__btn" href="/">Home</a>
-            
-        </p>
-    </section>
-</div>
-
-<footer id="footer" data-built-by="richie-rich90454">
-    <p id="footer-nav">
-        <a href="/tl1">Knowing (TL1)</a>
-        <a href="/tl2">Strategies (TL2)</a>
-        <a href="/tl3">Evidence (TL3)</a>
-        <a href="/tl4">Crafting (TL4)</a>
-        <a href="/search">Search</a>
-        <a href="/submission">Submit a Tool</a>
-        <a href="/docs">Docs</a>
-    </p>
-    <p id="footer-copy">
-        <b>&copy; 2026 BIBS-C Tech Tools</b>
-    </p>
-</footer>
 
 </body>
 </html>

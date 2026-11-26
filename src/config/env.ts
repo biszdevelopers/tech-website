@@ -39,6 +39,9 @@ function requiredString(name: string, minLength = 1): string {
             `Missing environment variable ${name}${suffix}. Generate with: openssl rand -base64 32`
         );
     }
+    if (isProd && /change-me|example|placeholder|test-secret/i.test(value)) {
+        throw new Error(`${name} still contains a placeholder value. Generate a real secret.`);
+    }
     return value;
 }
 
@@ -69,6 +72,71 @@ function requiredInProd(name: string): string {
     return `http://localhost:${port}`;
 }
 
+/** Parsed once: every URL/origin comparison uses the same canonical value. */
+function parseSiteOrigin(): { value: string; https: boolean } {
+    const raw = requiredInProd("SITE_ORIGIN").replace(/\/+$/, "");
+    let url: URL;
+    try {
+        url = new URL(raw);
+    } catch {
+        throw new Error(`SITE_ORIGIN must be an absolute URL, got "${raw}".`);
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error(`SITE_ORIGIN must use http or https, got "${raw}".`);
+    }
+    if (isProd && url.protocol !== "https:") {
+        console.warn(
+            "WARNING: SITE_ORIGIN is HTTP in production. Cookies will not be Secure and Stripe checkout should not be used."
+        );
+    }
+    if (url.pathname !== "/" || url.search || url.hash) {
+        throw new Error(`SITE_ORIGIN must be an origin only (no path/query), got "${raw}".`);
+    }
+    return { value: url.origin, https: url.protocol === "https:" };
+}
+
+const site = parseSiteOrigin();
+const tlsCert = process.env.TLS_CERT?.trim() || "";
+const tlsKey = process.env.TLS_KEY?.trim() || "";
+if (Boolean(tlsCert) !== Boolean(tlsKey)) {
+    throw new Error("TLS_CERT and TLS_KEY must be set together (or both left empty).");
+}
+const settingsKey = process.env.SETTINGS_KEY?.trim() || "";
+if (settingsKey && Buffer.from(settingsKey, "base64").length !== 32) {
+    throw new Error("SETTINGS_KEY must be a base64-encoded 32-byte key.");
+}
+if (isProd && site.https && !tlsCert && process.env.TRUST_PROXY !== "true") {
+    throw new Error(
+        "SITE_ORIGIN is https but the app has no TLS certificate and TRUST_PROXY is false. " +
+            "Set TRUST_PROXY=true when nginx or another proxy terminates TLS, or provide TLS_CERT/TLS_KEY."
+    );
+}
+if (isProd && !settingsKey) {
+    console.warn(
+        "WARNING: SETTINGS_KEY is not set. Stripe secrets will be stored unencrypted in SQLite."
+    );
+}
+
+function adminUsername(): string {
+    const value = requiredString("ADMIN_USERNAME", 3).trim();
+    if (!/^[A-Za-z0-9._-]{3,20}$/.test(value)) {
+        throw new Error(
+            "ADMIN_USERNAME must be 3-20 characters using letters, digits, dot, dash or underscore."
+        );
+    }
+    return value;
+}
+
+function adminPassword(): string {
+    return requiredString("ADMIN_PASSWORD", 10);
+}
+
+const adminUser = adminUsername();
+const adminPass = adminPassword();
+if (isProd && (adminPass.length < 12 || /^(admin|password|changeme|letmein)/i.test(adminPass))) {
+    console.warn("WARNING: ADMIN_PASSWORD is weak. Use 16+ random characters in .env and restart.");
+}
+
 export const env = Object.freeze({
     isProd,
     port,
@@ -78,12 +146,17 @@ export const env = Object.freeze({
      * Canonical public origin. Redirects, Stripe URLs and CSRF checks use this
      * instead of the attacker-controlled Host header.
      */
-    siteOrigin: requiredInProd("SITE_ORIGIN").replace(/\/$/, ""),
+    siteOrigin: site.value,
+    /** True only when the public site is served over TLS. */
+    isHttps: site.https,
     /** Trust X-Forwarded-For only when explicitly deployed behind a proxy. */
     trustProxy: process.env.TRUST_PROXY === "true",
 
     sessionSecretMain: requiredString("SESSION_SECRET", 32),
     sessionSecretWeb: requiredString("SESSION_SECRET_WEB", 32),
+    /** Directory operator credentials. Read from .env at boot, never stored in SQLite. */
+    adminUsername: adminUser,
+    adminPassword: adminPass,
     /** Cookie lifetime in seconds - parity with the previous site (30 min). */
     sessionTtlSeconds: optionalNumber("SESSION_TTL_SECONDS", 1800),
 
@@ -91,9 +164,9 @@ export const env = Object.freeze({
     uploadsDir: process.env.UPLOADS_DIR?.trim() || "var/uploads",
 
     /** Optional in-process TLS. Leave both empty when a proxy terminates TLS. */
-    tlsCert: process.env.TLS_CERT?.trim() || "",
-    tlsKey: process.env.TLS_KEY?.trim() || "",
+    tlsCert,
+    tlsKey,
 
     /** Optional 32-byte base64 key for encrypting secrets stored in SQLite. */
-    settingsKey: process.env.SETTINGS_KEY?.trim() || "",
+    settingsKey,
 });

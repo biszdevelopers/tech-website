@@ -1,16 +1,18 @@
 // Single import surface for TL configuration.
-// Re-exports from src/lib/tl-config.ts so feature code only depends on @/config/tl.
+import { tlConfigs } from "../lib/tl-config";
 
-import { tlConfigs, type TLConfig } from "../lib/tl-config";
-
-export { tlConfigs, type TLConfig, type StrandConfig } from "../lib/tl-config";
-
-export function getTlConfig(id: string): TLConfig | null {
-    return tlConfigs[id] ?? null;
-}
+export {
+    tlConfigs,
+    tlFields,
+    tlList,
+    getTlConfig,
+    getStrand,
+    type TLConfig,
+    type StrandConfig,
+} from "../lib/tl-config";
 
 export function isValidTl(id: string): boolean {
-    return id in tlConfigs;
+    return Object.prototype.hasOwnProperty.call(tlConfigs, id);
 }
 
 export type TlKey = keyof typeof tlConfigs;

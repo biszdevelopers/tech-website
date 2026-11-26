@@ -3,41 +3,69 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Admin Panel | BIBS-C Tech Tools</title>
-    
-    <link rel="icon" href="/images/favicon.png?v=9baaf329e2d162d8" />
-    
-    <link rel="stylesheet" href="/css/globals.css?v=9baaf329e2d162d8" />
-    
-    <link rel="stylesheet" href="/css/admintable.css?v=9baaf329e2d162d8" />
-    
-    
+    <meta name="description" content="Teaching technology tools for BASIS International and Bilingual Schools China." />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+
+    <link rel="icon" href="/images/favicon.png?v=eccb1a320ddd684d" />
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Admin Panel | BIBS-C Tech Tools" />
+    <meta property="og:description" content="Teaching technology tools for BASIS International and Bilingual Schools China." />
+
+    <meta property="og:image" content="/images/og-default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Admin Panel | BIBS-C Tech Tools" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Admin Panel | BIBS-C Tech Tools" />
+    <meta name="twitter:description" content="Teaching technology tools for BASIS International and Bilingual Schools China." />
+    <meta name="twitter:image" content="/images/og-default.png" />
+    <meta name="twitter:image:alt" content="Admin Panel | BIBS-C Tech Tools" />
+
+
+    <link rel="stylesheet" href="/css/tokens.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/site.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/forms.css?v=eccb1a320ddd684d" />
+
+    <link rel="stylesheet" href="/css/admin.css?v=eccb1a320ddd684d" />
+
+
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="/js/legacy/theme-boot.js?v=9baaf329e2d162d8"></script>
-    <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=9baaf329e2d162d8"></script>
-    <script src="/js/legacy/ie11.js?v=9baaf329e2d162d8"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=9baaf329e2d162d8" />
-    <![endif]-->
-    
-    <script type="module" src="/js/modern/theme.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/theme.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/img-fallback.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/img-fallback.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/scroll-top.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/scroll-top.js?v=9baaf329e2d162d8" defer></script>
-    
-    <script type="module" src="/js/modern/admin.js?v=9baaf329e2d162d8"></script>
-    <script nomodule src="/js/legacy/admin.js?v=9baaf329e2d162d8" defer></script>
-    
-<meta name="csrf-token" content="9fdd21d9919e61638503c23825bbdd9133301608ef9448f10a877fb66b694c54"/></head>
+    <script src="/js/legacy/theme-boot.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=eccb1a320ddd684d"></script>
+
+    <script type="module" src="/js/modern/theme.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/theme.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/img-fallback.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/img-fallback.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/scroll-top.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/scroll-top.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/extras.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/extras.js?v=eccb1a320ddd684d" defer></script>
+
+    <script type="module" src="/js/modern/admin.js?v=eccb1a320ddd684d"></script>
+    <script nomodule src="/js/legacy/admin.js?v=eccb1a320ddd684d" defer></script>
+
+<meta name="csrf-token" content="1795616569423.650d8f884841fe874016657fb73bb5a0.19fa4ef241f5457fceda93a915b67af6f3130baa437c09522bad0b318654b8d8"/></head>
 <body>
 
 <div id="cover">
     <div id="topbar">
-        <h1>BIBS-C Tech Tools</h1>
+        <p class="site-brand">BIBS-C Tech Tools</p>
         <button id="theme-toggle" type="button" aria-label="Toggle dark mode"
                 aria-pressed="false" title="Toggle dark mode (Alt+T)">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -61,10 +89,19 @@
     <nav id="navbar" aria-label="Primary">
         <ul id="nav">
             <li><a href="/#front"><span>Home</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl1"><span>Knowing (TL1)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl2"><span>Strategies (TL2)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl3"><span>Evidence (TL3)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/tl4"><span>Crafting (TL4)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
+            <li><a href="/tl5"><span>Growth (TL5)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
+            <li><a href="/tl6"><span>Positivity (TL6)</span><span class="nav-underline" aria-hidden="true"></span></a></li>
+
             <li><a href="/search"><span>Search</span><span class="nav-underline" aria-hidden="true"></span></a></li>
         </ul>
     </nav>
@@ -77,12 +114,18 @@
         <li><a href="/admin#submissions">All Submissions</a></li>
         <li><a href="/admin/new">New Tool</a></li>
         <li><a href="/admin/import">Import CSV</a></li>
-        <li><a href="/api/auth/logout">Logout</a></li>
+        <li><a href="/admin/export.csv">Export CSV</a></li>
+        <li><a href="/admin/account">Account</a></li>
+        <li>
+            <form method="post" action="/api/auth/logout" class="logout-form"><input type="hidden" name="_csrf" value="1795616569423.650d8f884841fe874016657fb73bb5a0.19fa4ef241f5457fceda93a915b67af6f3130baa437c09522bad0b318654b8d8"/>
+                <button type="submit">Logout</button>
+            </form>
+        </li>
     </ul>
 </div>
 <section id="submissions" class="section-anchor">
-    <form method="get" action="/admin" class="admin-filters"><input type="hidden" name="_csrf" value="9fdd21d9919e61638503c23825bbdd9133301608ef9448f10a877fb66b694c54"/>
-        <input aria-label="Search name, link, display" type="search" name="q" value="" placeholder="Search name, link, display"/>
+    <form method="get" action="/admin" class="admin-filters">
+        <input aria-label="Search name, link, description, contact" type="search" name="q" value="" placeholder="Search name, link, description, contact"/>
         <select aria-label="status" name="status">
             <option value="all" selected>All</option>
             <option value="pending">Pending</option>
@@ -95,546 +138,863 @@
         <table class="AdminTable_table__3iS2Y">
             <thead>
                 <tr>
-                    <th class="admin-col-id">ID</th><th class="admin-col-name">Name</th><th class="admin-col-link">Link</th><th class="admin-col-display">Display</th><th class="admin-col-desc">TL1</th>
-                    <th class="admin-col-desc">TL2</th><th class="admin-col-desc">TL3</th><th class="admin-col-desc">TL4</th><th class="AdminTable_status admin-col-status">Status</th><th class="admin-col-actions">Actions</th>
+                    <th class="admin-col-id">ID</th>
+                    <th class="admin-col-name">Name</th>
+                    <th class="admin-col-link">Link</th>
+                    <th class="admin-col-display">Display</th>
+
+                    <th class="admin-col-desc">TL1: Knowing Our Students</th>
+
+                    <th class="admin-col-desc">TL2: Strategies for Learning</th>
+
+                    <th class="admin-col-desc">TL3: Evidence of Learning</th>
+
+                    <th class="admin-col-desc">TL4: Crafting the Curriculum</th>
+
+                    <th class="admin-col-desc">TL5: Professional Growth</th>
+
+                    <th class="admin-col-desc">TL6: Contribution to Workplace Positivity</th>
+
+                    <th class="AdminTable_status admin-col-status">Status</th>
+                    <th class="admin-col-contact">Submitter</th>
+                    <th class="admin-col-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                
+
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">23</td>
                         <td class="AdminTable_name__ZKSIb">QUICKTIME</td>
                         <td><a href="https://blog.hubspot.com/marketing/how-to-record-your-screen" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://blog.hubspot.com/marketing/how-to-record-your-screen</a></td>
                         <td>Screen Recording Tutorial</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use QuickTime to record your comments as you look at student work and then give that recor</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use QuickTime to record your comments as you look at student work and then give that recor</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="23" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="23" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="23" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">22</td>
                         <td class="AdminTable_name__ZKSIb">QUIZIZZ</td>
                         <td><a href="https://www.youtube.com/watch?v=3pQZTmQJ-rY&amp;list=PLlrFn9RR_0qBaXjB4TK-WDxSAQ3RwKinY" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.youtube.com/watch?v=3pQZTmQJ-rY&amp;list=PLlrFn9RR_0qBaXjB4TK-WDxSAQ3RwKinY</a></td>
                         <td>Video Tutorial</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Quizizz is a learning platform that uses gamification to make content engaging. Participan</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Quizizz is a learning platform that uses gamification to make content engaging. Participan</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Quizizz is a learning platform that uses gamification to make content engaging. Participan</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="22" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="22" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="22" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">21</td>
                         <td class="AdminTable_name__ZKSIb">QUIZLET</td>
                         <td><a href="https://www.youtube.com/watch?v=Rc9Gw5UwMlg&amp;list=PLjvTuBcskqZHHHsuYfgJq1BY98gTOaw5N" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.youtube.com/watch?v=Rc9Gw5UwMlg&amp;list=PLjvTuBcskqZHHHsuYfgJq1BY98gTOaw5N</a></td>
                         <td>Video Tutorial</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Quizlet is a study aid in app form. In essence, it&#39;s a flashcard app with smart features, </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="21" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="21" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="21" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">20</td>
                         <td class="AdminTable_name__ZKSIb">AP CLASSROOM</td>
                         <td><a href="https://resources.finalsite.net/images/v1573782882/fcis/tbodtjv8wpxbqqpjdbd5/2019-20ChangestoAP-APathtoSuccessforAllStudents_Maloney-Zeigler.pdf" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://resources.finalsite.net/images/v1573782882/fcis/tbodtjv8wpxbqqpjdbd5/2019-20ChangestoAP-APathtoSuccessforAllStudents_Maloney-Zeigler.pdf</a></td>
                         <td>Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">AP Classroom is an online resource for students enrolled in AP courses taught by authorize</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">AP Classroom is an online resource for students enrolled in AP courses taught by authorize</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="20" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="20" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="20" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">19</td>
                         <td class="AdminTable_name__ZKSIb">FORMS</td>
                         <td><a href="https://support.microsoft.com/en-us/office/create-a-new-form-or-quiz-3c39c220-e30e-401d-bb6f-c1861d5aea01" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://support.microsoft.com/en-us/office/create-a-new-form-or-quiz-3c39c220-e30e-401d-bb6f-c1861d5aea01</a></td>
                         <td>Video Tutorial</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Microsoft Forms can create surveys, quizzes, and polls, invite others to respond to it usi</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Microsoft Forms can create surveys, quizzes, and polls, invite others to respond to it usi</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="19" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="19" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="19" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">18</td>
                         <td class="AdminTable_name__ZKSIb">KAHOOT</td>
                         <td><a href="https://kahoot.com/files/2019/08/Getting_started_with_Kahoot_08_2019.pdf" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://kahoot.com/files/2019/08/Getting_started_with_Kahoot_08_2019.pdf</a></td>
                         <td>Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Kahoot! is a game-based learning platform. &quot;Kahoots&quot; are multiple-choice quizzes that can </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Kahoot! is a game-based learning platform. &quot;Kahoots&quot; are multiple-choice quizzes that can </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Kahoot! is a game-based learning platform. Its learning games, &quot;kahoots&quot;, are user-generat</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="18" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="18" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="18" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">17</td>
                         <td class="AdminTable_name__ZKSIb">GRADECAM</td>
                         <td><a href="https://support.gradecam.com/training-guides/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://support.gradecam.com/training-guides/</a></td>
                         <td>Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">GradeCam allows teachers to use their device&#39;s camera to instantly scan and grade multiple</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="17" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="17" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="17" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">16</td>
                         <td class="AdminTable_name__ZKSIb">TEAMS</td>
                         <td><a href="https://support.microsoft.com/en-au/topic/get-started-in-your-class-team-6b5fd708-35b9-4caf-b66e-d8f2468e4fd5" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://support.microsoft.com/en-au/topic/get-started-in-your-class-team-6b5fd708-35b9-4caf-b66e-d8f2468e4fd5</a></td>
                         <td>Getting Started</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Teams is a collaborative workspace within Microsoft 365/Office 365. It can be used to buil</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Group work can be facilitated by using the Channel feature in Microsoft Teams. As part of </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">In the online discussion, or when using the other tools, how will you give opportunities f</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Students can present in Teams, using PowerPoint live! With your expectations made clear ab</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use Teams channels and shared files for collaborative planning, peer feedback and professi</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use Teams chat and meetings to keep communication respectful and inclusive, share resource</span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="16" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="16" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="16" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">15</td>
                         <td class="AdminTable_name__ZKSIb">PADLET</td>
                         <td><a href="https://www.pdst.ie/sites/default/files/Padlet%20Instructions.pdf" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.pdst.ie/sites/default/files/Padlet%20Instructions.pdf</a></td>
                         <td>Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Padlet is a digital tool that can help teachers and students by offering a single place fo</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Padlet is an extremely easy-to-use tool that allows learners to collaborate online or to w</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Padlet is an extremely easy-to-use tool that allows learners to collaborate online or to w</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Open a shared staff Padlet for celebrations, questions and ideas so every colleague has an</span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="15" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="15" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="15" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">14</td>
                         <td class="AdminTable_name__ZKSIb">SEESAW</td>
                         <td><a href="https://drive.google.com/file/d/1eHKhpkn8ufcPSXCyMCCdnThH1F10k9k4/view" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://drive.google.com/file/d/1eHKhpkn8ufcPSXCyMCCdnThH1F10k9k4/view</a></td>
                         <td>Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Seesaw is a student-driven digital portfolio that inspires your students to do their best </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Group Assignments can be created in Seesaw.</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Seesaw is a digital platform that allows students to complete and share classroom work wit</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use Seesaw family communication tools to share positive updates and keep families included</span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="14" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="14" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="14" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">13</td>
                         <td class="AdminTable_name__ZKSIb">YOUTUBE</td>
                         <td><a href="https://youtube.com/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://youtube.com/</a></td>
                         <td>Official Website</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Students can create their own YouTube channel and do live streams or record presentations </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">YouTube is a popular video sharing website where registered users can upload and share vid</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Students can create their own YouTube channel and do live streams or record presentations </span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="13" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="13" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="13" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">12</td>
                         <td class="AdminTable_name__ZKSIb">POWER POINT</td>
                         <td><a href="https://support.microsoft.com/en-us/office/what-is-powerpoint-5f9cc860-d199-4d85-ad1b-4b74018acf5b?ranMID=43674&amp;ranEAID=rl2xnKiLcHs&amp;ranSiteID=rl2xnKiLcHs-Od75YNxPfLChhWjzzLQbHw&amp;epi=rl2xnKiLcHs-Od75YNxPfLChhWjzzLQbHw&amp;irgwc=1&amp;OCID=AID2200057_aff_7795_1243925&amp;tduid=%28ir__gp1xxk2piokf6ht02y9ji6fzte2xv3pj6dbkaekp00%29%287795%29%281243925%29%28rl2xnKiLcHs-Od75YNxPfLChhWjzzLQbHw%29%28%29&amp;irclickid=_gp1xxk2piokf6ht02y9ji6fzte2xv3pj6dbkaekp00" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://support.microsoft.com/en-us/office/what-is-powerpoint-5f9cc860-d199-4d85-ad1b-4b74018acf5b?ranMID=43674&amp;ranEAID=rl2xnKiLcHs&amp;ranSiteID=rl2xnKiLcHs-Od75YNxPfLChhWjzzLQbHw&amp;epi=rl2xnKiLcHs-Od75YNxPfLChhWjzzLQbHw&amp;irgwc=1&amp;OCID=AID2200057_aff_7795_1243925&amp;tduid=%28ir__gp1xxk2piokf6ht02y9ji6fzte2xv3pj6dbkaekp00%29%287795%29%281243925%29%28rl2xnKiLcHs-Od75YNxPfLChhWjzzLQbHw%29%28%29&amp;irclickid=_gp1xxk2piokf6ht02y9ji6fzte2xv3pj6dbkaekp00</a></td>
                         <td>Video Tutorial</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">PowerPoint is a classic for presenting both in class and online. Asking students to presen</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">​PowerPoint ( also known as PPT or PP) is a presentation program. Students can use it to p</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">PowerPoint is a classic for presenting both in class and online. When using this tool, ens</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="12" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="12" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="12" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">11</td>
                         <td class="AdminTable_name__ZKSIb">ONENOTE</td>
                         <td><a href="https://support.microsoft.com/en-us/office/add-a-onenote-notebook-to-teams-0ec78cc3-ba3b-4279-a88e-aa40af9865c2" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://support.microsoft.com/en-us/office/add-a-onenote-notebook-to-teams-0ec78cc3-ba3b-4279-a88e-aa40af9865c2</a></td>
                         <td>OneNote with Teams</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">OneNote, an electronic notebook that is part of the Microsoft Teams package, is a perfect </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="11" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="11" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="11" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">10</td>
                         <td class="AdminTable_name__ZKSIb">CLASS DOJO</td>
                         <td><a href="https://www.classdojo.com/resources/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.classdojo.com/resources/</a></td>
                         <td>Class Dojo Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Class DoJo has many features, but for this domain, it enables teachers to record feedback </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Class Dojo is an online behavior management system intended to foster positive student beh</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use Class Dojo points and parent updates to reinforce positive behavior and build a consis</span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="10" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="10" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="10" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">9</td>
                         <td class="AdminTable_name__ZKSIb">GIMKIT</td>
                         <td><a href="https://teachers.tech/how-to-use-gimkit/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://teachers.tech/how-to-use-gimkit/</a></td>
                         <td>Manual - 6 minute read</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">​Gimkit is a classroom game-show platform where students compete by answering questions on</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="9" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="9" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="9" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">8</td>
                         <td class="AdminTable_name__ZKSIb">BRITANNICA</td>
                         <td><a href="https://kids.britannica.com/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://kids.britannica.com/</a></td>
                         <td>Link</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">From Britannica, an online encyclopedia resource for kids in grades K-12 with safe, fact-c</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="8" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="8" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="8" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">7</td>
                         <td class="AdminTable_name__ZKSIb">OXFORD LEARNER&#39;S DICTIONARY</td>
                         <td><a href="https://www.oxfordlearnersdictionaries.com/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.oxfordlearnersdictionaries.com/</a></td>
                         <td>Link</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">The Oxford Learner&#39;s Dictionary of Academic English (OLDAE) focuses on words and phrases u</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="7" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="7" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="7" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">6</td>
                         <td class="AdminTable_name__ZKSIb">NEARPOD</td>
                         <td><a href="https://nearpod.com/blog/beginners-guide-to-nearpod/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://nearpod.com/blog/beginners-guide-to-nearpod/</a></td>
                         <td>Manual by Nearpod. Short read, with quick steps to get you started</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Nearpod is a website that lets teachers create slide-based learning resources that are int</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Nearpod is an online product that allows teachers and students to use a slide-based tool t</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Nearpod is an online product that allows teachers and students to use a slide-based tool t</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Adapt ready-made Nearpod lessons and share what works in department meetings, using studen</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="6" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="6" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="6" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">5</td>
                         <td class="AdminTable_name__ZKSIb">ZHUMU</td>
                         <td><a href="https://www.zhumu.com/" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.zhumu.com/</a></td>
                         <td>Website for download</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Zoom suspended direct-sale in China. They have shifted to a partner-only model, and Zhumu </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Zoom suspended direct-sale in China. They have shifted to a partner-only model, and Zhumu </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="5" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="5" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="5" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">4</td>
                         <td class="AdminTable_name__ZKSIb">ZOOM</td>
                         <td><a href="https://www.youtube.com/watch?v=6KwrsIBjtkY&amp;list=PLUoKm_hdjVWa15hhrfqwzOxAQj8MRvMvY&amp;index=18" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.youtube.com/watch?v=6KwrsIBjtkY&amp;list=PLUoKm_hdjVWa15hhrfqwzOxAQj8MRvMvY&amp;index=18</a></td>
                         <td>2-minute video on how to setup breakout rooms, Educational focus, not business</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Use Zoom breakout rooms to adapt teaching to meet students&#39; needs.  Meet with students in </span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Group work can be facilitated by using the breakout rooms feature in Zoom. (Please note: Z</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="4" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="4" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="4" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">3</td>
                         <td class="AdminTable_name__ZKSIb">PHET</td>
                         <td><a href="https://www.youtube.com/watch?v=8EQIF1HAWw8" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.youtube.com/watch?v=8EQIF1HAWw8</a></td>
                         <td>Video Tutorial</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">PhET provides free, fun, interactive, research-based science and mathematics simulations f</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">PhET provides free, fun, interactive, research-based science and mathematics simulations f</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="3" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="3" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="3" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">2</td>
                         <td class="AdminTable_name__ZKSIb">WEEBLY</td>
                         <td><a href="https://www.memphis.edu/lead/pdfs/weebly-guide.pdf" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://www.memphis.edu/lead/pdfs/weebly-guide.pdf</a></td>
                         <td>Manual</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Weebly is a free, easy-to-use website builder. It lets you create and publish attractive s</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Weebly is a free, easy-to-use website builder. It lets you create and publish attractive s</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">Publish a professional portfolio or class site, then use feedback and reflection to refine</span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="2" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="2" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="2" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
                     <tr>
                         <td class="AdminTable_mono__EqBH0">1</td>
                         <td class="AdminTable_name__ZKSIb">IXL</td>
                         <td><a href="https://uk.ixl.com/resources/videos" target="_blank" rel="noreferrer" class="AdminTable_link__lOs5j">https://uk.ixl.com/resources/videos</a></td>
                         <td>Videos - from IXL</td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">This goal-based learning system intelligently learns in what areas a student is struggling</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp">IXL is a targeted learning tool. It offers experiences for students, tailored to their age</span></td>
+
                         <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
+                        <td class="AdminTable_desc__CgL_8"><span class="admin-clamp"></span></td>
+
                         <td class="AdminTable_status">
-                            
+
                                 <span class="AdminTable_badgeOk__o19q_">Accepted</span>
-                            
+
+                        </td>
+                        <td class="AdminTable_contact">
+                            <span>seed</span>
+                            <br/><span class="admin-subtle">seed@bibs-c.local</span>
                         </td>
                         <td class="AdminTable_actions__k8lIU">
-                            
+
                                 <button type="button" data-action="/api/admin/reject" data-id="1" class="AdminTable_btnReject__w9wZ7">Reject</button>
-                            
+
                             <button type="button" data-edit="1" class="AdminTable_btnEdit__zHqfB">Edit</button>
                             <button type="button" data-action="/api/admin/delete" data-id="1" class="AdminTable_btnDelete__KFKXJ">Delete</button>
                         </td>
                     </tr>
-                
+
             </tbody>
         </table>
     </div>
-    
-    
+
 </section>
 </body>
 </html>

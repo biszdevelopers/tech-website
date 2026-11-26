@@ -22,13 +22,25 @@
 
 import { readFileSync } from "node:fs";
 
+try {
+    process.loadEnvFile();
+} catch {
+    /* real env wins */
+}
 const BASE = process.env.BASE ?? "http://localhost:3000";
+const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || "admin12345";
+const WEB_ADMIN_USER = process.env.WEB_ADMIN_USERNAME || "admin";
+const WEB_ADMIN_PASS = process.env.WEB_ADMIN_PASSWORD || "admin12345";
 const MANIFEST = [
     ["index.html", "/"],
     ["tl1.html", "/tl1"],
     ["tl2.html", "/tl2"],
     ["tl3.html", "/tl3"],
     ["tl4.html", "/tl4"],
+    ["tl5.html", "/tl5"],
+    ["tl6.html", "/tl6"],
+    ["tl1-relationships.html", "/tl1/relationships"],
     ["search.html", "/search"],
     ["login.html", "/login"],
     ["submission.html", "/submission"],
@@ -71,14 +83,27 @@ const MANIFEST = [
 
 async function cookieFor(kind) {
     if (!kind) return "";
-    const path = kind === "main" ? "/api/auth/login" : "/web/api/auth/login";
-    const res = await fetch(BASE + path, {
+    const pagePath = kind === "main" ? "/login" : "/web/login";
+    const loginPath = kind === "main" ? "/api/auth/login" : "/web/api/auth/login";
+    const username = kind === "main" ? ADMIN_USER : WEB_ADMIN_USER;
+    const password = kind === "main" ? ADMIN_PASS : WEB_ADMIN_PASS;
+    const page = await fetch(BASE + pagePath);
+    const html = await page.text();
+    const token = (html.match(/name="csrf-token" content="([^"]+)"/) ?? [])[1] ?? "";
+    const cookies = page.headers.getSetCookie?.() ?? [];
+    const res = await fetch(BASE + loginPath, {
         method: "POST",
         redirect: "manual",
-        headers: { Origin: BASE, "Content-Type": "application/x-www-form-urlencoded" },
-        body: "username=admin&password=admin123",
+        headers: {
+            Origin: BASE,
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie: cookies.map((c) => c.split(";")[0]).join("; "),
+        },
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&_csrf=${encodeURIComponent(token)}`,
     });
-    return (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+    return [...cookies, ...(res.headers.getSetCookie?.() ?? [])]
+        .map((c) => c.split(";")[0])
+        .join("; ");
 }
 
 function bodyOf(html) {

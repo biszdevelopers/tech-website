@@ -65,7 +65,27 @@ export async function withErrorBoundary(
         }
         const status = err instanceof HttpError ? err.status : 500;
         const ref = randomBytes(4).toString("hex");
-        const isApi = ctx.path.startsWith("/api/") || ctx.path.startsWith("/web/api/");
+        const accept = String(ctx.raw.headers.accept ?? "");
+        // Browser form navigations advertise text/html; XHR/fetch/curl send
+        // */* or application/json. The path alone is not enough: admin and
+        // registration forms post to /api/* and must still get an HTML page.
+        const isApi =
+            !accept.includes("text/html") &&
+            (ctx.path.startsWith("/api/") || ctx.path.startsWith("/web/api/"));
+
+        // Web pages get a login bounce instead of the main-site error page.
+        if (!isApi && ctx.path.startsWith("/web/")) {
+            const next = encodeURIComponent(ctx.path + (ctx.url.search || ""));
+            if (status === 401) {
+                ctx.redirect("/web/login?next=" + next, 303);
+                return;
+            }
+            if (status === 403 && /banned/i.test(err instanceof Error ? err.message : "")) {
+                ctx.redirect("/web/login?error=banned", 303);
+                return;
+            }
+        }
+
         if (status >= 500) {
             logEvent("error", {
                 ref,

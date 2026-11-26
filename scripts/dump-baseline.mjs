@@ -1,17 +1,38 @@
 // Dumps every GET page of the RUNNING legacy Next.js server into tests/baseline/.
 // Usage: BASE=http://localhost:3000 node scripts/dump-baseline.mjs
 import { mkdirSync, writeFileSync } from "node:fs";
+try {
+    process.loadEnvFile();
+} catch {
+    /* real env wins */
+}
 const BASE = process.env.BASE ?? "http://localhost:3000";
+const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || "admin12345";
 mkdirSync("tests/baseline", { recursive: true });
 
 async function jar(loginPath, body) {
+    const pagePath = loginPath.startsWith("/web/") ? "/web/login" : "/login";
+    const page = await fetch(BASE + pagePath);
+    const html = await page.text();
+    const token = (html.match(/name="csrf-token" content="([^"]+)"/) ?? [])[1] ?? "";
+    const cookies = page.headers.getSetCookie?.() ?? [];
     const res = await fetch(BASE + loginPath, {
         method: "POST",
         redirect: "manual",
-        headers: { Origin: BASE, "Content-Type": "application/x-www-form-urlencoded" },
-        body,
+        headers: {
+            Origin: BASE,
+            "Content-Type": "application/x-www-form-urlencoded",
+            Cookie: cookies.map((c) => c.split(";")[0]).join("; "),
+        },
+        body: `${body}&_csrf=${encodeURIComponent(token)}`,
     });
-    return (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+    if (![302, 303, 307, 308].includes(res.status)) {
+        fail.push(`${loginPath} -> ${res.status}`);
+    }
+    return [...cookies, ...(res.headers.getSetCookie?.() ?? [])]
+        .map((c) => c.split(";")[0])
+        .join("; ");
 }
 
 const anonRoutes = [
@@ -20,6 +41,9 @@ const anonRoutes = [
     ["tl2.html", "/tl2"],
     ["tl3.html", "/tl3"],
     ["tl4.html", "/tl4"],
+    ["tl5.html", "/tl5"],
+    ["tl6.html", "/tl6"],
+    ["tl1-relationships.html", "/tl1/relationships"],
     ["search.html", "/search"],
     ["login.html", "/login"],
     ["submission.html", "/submission"],
@@ -41,14 +65,17 @@ for (const [name, route] of anonRoutes) {
     try {
         const res = await fetch(BASE + route);
         const text = await res.text();
-        writeFileSync(`tests/baseline/${name}`, text);
+        if (res.status === 200) writeFileSync(`tests/baseline/${name}`, text);
         res.status === 200 ? ok++ : fail.push(`${route} -> ${res.status}`);
     } catch (e) {
         fail.push(`${route} -> ${e.message}`);
     }
 }
 
-const mainCookie = await jar("/api/auth/login", "username=admin&password=admin123");
+const mainCookie = await jar(
+    "/api/auth/login",
+    `username=${encodeURIComponent(ADMIN_USER)}&password=${encodeURIComponent(ADMIN_PASS)}`
+);
 for (const [name, route] of [
     ["admin.html", "/admin"],
     ["admin-edit-1.html", "/admin/edit/1"],
@@ -56,14 +83,14 @@ for (const [name, route] of [
     try {
         const res = await fetch(BASE + route, { headers: { Cookie: mainCookie } });
         const text = await res.text();
-        writeFileSync(`tests/baseline/${name}`, text);
+        if (res.status === 200) writeFileSync(`tests/baseline/${name}`, text);
         res.status === 200 ? ok++ : fail.push(`${route} -> ${res.status}`);
     } catch (e) {
         fail.push(`${route} -> ${e.message}`);
     }
 }
 
-const webCookie = await jar("/web/api/auth/login", "username=admin&password=admin123");
+const webCookie = await jar("/web/api/auth/login", "username=admin&password=admin12345");
 const webRoutes = [
     ["web-dashboard.html", "/web/dashboard"],
     ["web-hub.html", "/web/hub"],
@@ -87,7 +114,7 @@ for (const [name, route] of webRoutes) {
     try {
         const res = await fetch(BASE + route, { headers: { Cookie: webCookie } });
         const text = await res.text();
-        writeFileSync(`tests/baseline/${name}`, text);
+        if (res.status === 200) writeFileSync(`tests/baseline/${name}`, text);
         res.status === 200 ? ok++ : fail.push(`${route} -> ${res.status} (cookie:${!!webCookie})`);
     } catch (e) {
         fail.push(`${route} -> ${e.message}`);

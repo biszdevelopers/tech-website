@@ -1,16 +1,11 @@
-try {
-    process.loadEnvFile();
-} catch {
-    /* real environment wins */
-}
+import "./load-env";
 import bcrypt from "bcryptjs";
-import { mainDb } from "../src/lib/db/main";
 import { webDb } from "../src/lib/db/web";
 
-// Creates, rotates or renames the operator credentials for BOTH subprojects.
-// Re-running after `db:init` is supported: the existing account is updated in
-// place (session ids survive), so the username and password can change at any
-// time. Usage:
+// Configures the IPstress web administrator. The tech-directory operator is
+// read directly from ADMIN_USERNAME/ADMIN_PASSWORD in .env at startup, so no
+// database row is written for it.
+// Usage:
 //   ADMIN_USERNAME=admin ADMIN_PASSWORD=<min 10 chars> pnpm run setup
 
 async function main(): Promise<void> {
@@ -32,21 +27,23 @@ async function main(): Promise<void> {
 
     const hash = await bcrypt.hash(password, 12);
 
-    const loginRows = await mainDb.login.findMany();
-    const named = loginRows.find((row) => row.User === username);
-    if (named) {
-        await mainDb.login.update({ where: { User: named.User }, data: { PW: hash } });
-    } else if (loginRows.length > 0) {
-        await mainDb.login.update({
-            where: { User: loginRows[0].User },
-            data: { User: username, PW: hash },
-        });
-    } else {
-        await mainDb.login.create({ data: { User: username, PW: hash } });
+    const webUsers = await webDb.users.findMany();
+    const namedAdmin = webUsers.find(
+        (row) =>
+            Number(row.rank) >= 1 && String(row.username).toLowerCase() === username.toLowerCase()
+    );
+    const namedUser = namedAdmin
+        ? null
+        : webUsers.find((row) => String(row.username).toLowerCase() === username.toLowerCase());
+    if (namedUser && process.env.ADMIN_FORCE_PROMOTE !== "1") {
+        console.error(
+            `"${username}" belongs to a normal user. Set ADMIN_FORCE_PROMOTE=1 to promote it, or choose another username.`
+        );
+        process.exit(1);
     }
-
     const webUser =
-        (await webDb.users.findFirst({ where: { username } })) ??
+        namedAdmin ??
+        namedUser ??
         (await webDb.users.findFirst({
             where: { rank: { gte: 1 } },
             orderBy: { ID: "asc" },
@@ -58,6 +55,7 @@ async function main(): Promise<void> {
                 username,
                 password: hash,
                 rank: Math.max(1, Number(webUser.rank)),
+                sessionVersion: Number(webUser.sessionVersion) + 1,
             },
         });
     } else {
@@ -75,12 +73,15 @@ async function main(): Promise<void> {
                 activity: 0,
                 twoauth: 0,
                 referedBy: 0,
+                sessionVersion: 0,
             },
         });
     }
 
-    console.log(`Operator credentials set for "${username}" in both databases.`);
-    await mainDb.$disconnect();
+    console.log(`IPstress web administrator set for "${username}".`);
+    console.log(
+        "The tech-directory operator uses ADMIN_USERNAME/ADMIN_PASSWORD from .env; restart to apply changes."
+    );
     await webDb.$disconnect();
 }
 

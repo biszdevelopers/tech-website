@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><%= title %></title>
-    <% if (locals.description) { %>
-    <meta name="description" content="<%= description %>" />
-    <% } %>
+    <% var m = locals.meta || {}; var pageTitle = m.title || locals.title || 'BIBS-C Tech Tools'; var pageDescription = m.description || locals.description || 'Teaching technology tools for BASIS International and Bilingual Schools China.'; var canonical = m.canonical || ''; var robots = m.robots || locals.robots || 'index, follow, max-image-preview:large'; var ogImage = m.image || locals.image || '/images/og-default.png'; var ogType = m.ogType || 'website'; %>
+    <title><%= pageTitle %></title>
+    <meta name="description" content="<%= pageDescription %>" />
+    <meta name="robots" content="<%= robots %>" />
+    <meta name="author" content="richie-rich90454" />
+    <meta name="theme-color" content="#1a237e" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080c1b" media="(prefers-color-scheme: dark)" />
+    <% if (canonical) { %><link rel="canonical" href="<%= canonical %>" /><% } %>
     <link rel="icon" href="/images/favicon.png?v=<%= v %>" />
-    <% (locals.css || ['globals.css']).forEach(function (file) { %>
+    <link rel="alternate" type="application/rss+xml" title="BIBS-C Tech Tools" href="/feed.xml" />
+    <meta property="og:site_name" content="BIBS-C Tech Tools" />
+    <meta property="og:type" content="<%= ogType %>" />
+    <meta property="og:title" content="<%= pageTitle %>" />
+    <meta property="og:description" content="<%= pageDescription %>" />
+    <% if (canonical) { %><meta property="og:url" content="<%= canonical %>" /><% } %>
+    <meta property="og:image" content="<%= ogImage %>" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="<%= pageTitle %>" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="<%= pageTitle %>" />
+    <meta name="twitter:description" content="<%= pageDescription %>" />
+    <meta name="twitter:image" content="<%= ogImage %>" />
+    <meta name="twitter:image:alt" content="<%= pageTitle %>" />
+    <% (m.jsonLd || []).forEach(function (node) { %>
+    <script type="application/ld+json" nonce="__CSP_NONCE__"><%- JSON.stringify(node).replace(/</g, '\\u003c') %></script>
+    <% }) %>
+    <% var cssFiles = ['tokens.css'].concat(locals.css || ['site.css']); cssFiles.forEach(function (file) { %>
     <link rel="stylesheet" href="/css/<%= file %>?v=<%= v %>" />
     <% }) %>
-    <% var allScripts = ['theme.js', 'img-fallback.js', 'scroll-top.js'].concat(locals.scripts || []); %>
+    <% var allScripts = ['theme.js', 'img-fallback.js', 'scroll-top.js', 'extras.js'].concat(locals.scripts || []); %>
     <link rel="preload" href="/fonts/noto-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
     <script src="/js/legacy/theme-boot.js?v=<%= v %>"></script>
-    <!--[if IE]>
-    <script src="/js/vendor/ie11-custom-properties.js?v=<%= v %>"></script>
-    <script src="/js/legacy/ie11.js?v=<%= v %>"></script>
-    <link rel="stylesheet" href="/css/ie.css?v=<%= v %>" />
-    <![endif]-->
+    <script nomodule src="/js/vendor/ie11-custom-properties.js?v=<%= v %>"></script>
+    <script nomodule src="/js/legacy/ie11.js?v=<%= v %>"></script>
+    <script nomodule src="/js/legacy/ie-detect.js?v=<%= v %>"></script>
     <% allScripts.forEach(function (file) { %>
     <script type="module" src="/js/modern/<%= file %>?v=<%= v %>"></script>
     <script nomodule src="/js/legacy/<%= file %>?v=<%= v %>" defer></script>

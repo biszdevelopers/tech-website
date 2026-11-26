@@ -23,7 +23,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
-ReadWritePaths=/opt/tech-website/prisma /opt/tech-website/var
+ReadWritePaths=/opt/tech-website/data /opt/tech-website/var
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+<%- include('partials/head', { title: 'Operator Account | BIBS-C Tech Tools', robots: 'noindex,nofollow', css: ['site.css', 'forms.css', 'admin.css'] }) %>
+<%- include('partials/navbar') %>
+<div id="adminTopbar"><h1>Operator Account</h1></div>
+<div id="adminNav">
+    <ul>
+        <li><a href="/admin">&#8592; Back to Admin</a></li>
+        <li><form class="logout-form" method="post" action="/api/auth/logout"><button type="submit">Log out</button></form></li>
+    </ul>
+</div>
+<div id="wrap">
+    <p class="signed-in">Signed in as <b><%= username %></b>.</p>
+
+    <h2>Change the operator credentials</h2>
+    <p>The directory administrator reads <code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code>
+        from <code>.env</code> at startup. These values are never stored in the database.</p>
+    <ol>
+        <li>Open <code>.env</code>.</li>
+        <li>Change <code>ADMIN_USERNAME</code> or <code>ADMIN_PASSWORD</code>.</li>
+        <li>Restart the server with <code>pnpm run start</code>.</li>
+    </ol>
+    <p>Restarting with a different password invalidates every existing admin session.</p>
+</div>
+</body>
+</html>
