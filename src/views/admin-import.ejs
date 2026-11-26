@@ -11,12 +11,15 @@
     <form id="form" method="post" action="/api/admin/import">
         <p class="form-hint">
             Paste CSV with a header row. Required columns: <code>name,link,display</code>.
-            Optional: <code>id,tl1,tl2,tl3,tl4,tl5,tl6,username,contact,accepted,resources</code>
+            Optional: <code>id,tl1,tl2,tl3,tl4,tl5,tl6,tl5_categories,tl6_categories,username,contact,accepted,resources</code>
             plus the strand columns
             (<code>r,tp,mt,ar,u,mdl,ra,rotech,ls,roththink,eost,ef,rte,dloi,raaoc</code>).
             Resources use one <code>Label | https://...</code> per line inside the cell.
             Only columns present in the header are changed. Use <code>1</code> for true flags.
         </p>
+        <p><a class="submit-link" href="/sample-submissions.csv" download>Download sample CSV</a>
+            <span class="admin-subtle">The sample uses the public schema; <code>id</code> and <code>accepted</code>
+                are optional admin-only additions.</span></p>
         <label class="field"><span>CSV data</span>
             <textarea class="l csv-input" name="csv" required placeholder="name,link,display,tl1,tl2,tl3,tl4,tl5,tl6,accepted"></textarea>
         </label>

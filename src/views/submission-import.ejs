@@ -1,0 +1,79 @@
+<%- include('partials/head', { title: 'Bulk Submit Tools | BIBS-C Tech Tools', description: 'Import several teaching technology tools from a CSV file.', robots: 'noindex,nofollow', css: ['site.css', 'forms.css'], scripts: ['bulk-submit.js'], meta: locals.meta }) %>
+<%- include('partials/navbar') %>
+
+<div id="subhead">
+    <h1 id="bulk-heading">Bulk Submit Tools</h1>
+    <p class="tl-description">Import several tools from a CSV file. The CSV is read in your browser; the raw file is
+        never uploaded. Only the parsed entries are sent to the server for review.</p>
+    <p class="jump-menu">Jump to: <a href="#bulk-file">CSV</a> | <a href="#bulk-schema">Schema</a> |
+        <a href="#bulk-preview-heading">Preview</a> | <a href="/submission">Single submission</a> |
+        <a href="/">Home</a></p>
+</div>
+
+<div id="bar">&nbsp;</div>
+
+<div id="all">
+    <div id="form-wrap">
+        <form id="form" novalidate>
+        <p class="form-hint">Each imported tool is submitted for review. An administrator still approves it before it
+            appears in the directory.</p>
+
+        <h2 id="bulk-file">1. Choose a CSV</h2>
+        <label class="field"><span>CSV file (read locally in your browser)</span>
+            <input type="file" id="bulk-csv-file" accept=".csv,text/csv"/>
+        </label>
+        <p class="form-hint">You can also paste CSV data here:</p>
+        <label class="field"><span>CSV data</span>
+            <textarea id="bulk-csv-text" class="l csv-input" rows="8" placeholder="name,link,display&#10;Example Tool,https://example.com,Example"></textarea>
+        </label>
+
+        <h2>2. Screenshots (optional)</h2>
+        <p class="form-hint">CSV cannot carry images. Select PNG, JPEG or WebP files here and match them to a
+            <code>screenshot</code> filename in the CSV. Files that match are uploaded after the entries are created.</p>
+        <label class="field"><span>Screenshots</span>
+            <input type="file" id="bulk-images" accept="image/png,image/jpeg,image/webp" multiple/>
+        </label>
+
+        <h2 id="bulk-schema">CSV schema</h2>
+        <p><a class="submit-link" href="/sample-submissions.csv" download>Download sample CSV</a></p>
+        <div class="bulk-schema-wrap">
+            <table class="bulk-schema">
+                <thead><tr><th>Column</th><th>Required</th><th>Format</th></tr></thead>
+                <tbody>
+                    <tr><td><code>name</code></td><td>Yes</td><td>Tool name, up to 160 characters.</td></tr>
+                    <tr><td><code>link</code></td><td>Yes</td><td>Full <code>https://</code> or <code>http://</code> URL.</td></tr>
+                    <tr><td><code>display</code></td><td>Yes</td><td>Link text, up to 200 characters.</td></tr>
+                    <tr><td><code>tl1</code> ... <code>tl6</code></td><td>No</td><td>Description or write-up for that domain. TL5 and TL6 are the write-up fields.</td></tr>
+                    <tr><td><code>r, tp, mt, ar, u, mdl, ra, rotech, ls, rothhink, eost, ef, rte, dloi, raaoc</code></td><td>No</td><td>Strand flags. Use <code>1</code> for true and <code>0</code> or blank for false.</td></tr>
+                    <tr><td><code>tl5_categories</code></td><td>No</td><td>Comma-separated TL5 categories: Self-reflection, Growth goals, Professional development, Adaptability, Ethical practice.</td></tr>
+                    <tr><td><code>tl6_categories</code></td><td>No</td><td>Comma-separated TL6 categories: Professional responsibilities, Judgment and integrity, Communication, Collegiality.</td></tr>
+                    <tr><td><code>resources</code></td><td>No</td><td>One resource per line inside the quoted cell. Each resource must use: <code>Label | https://...</code></td></tr>
+                    <tr><td><code>username</code>, <code>contact</code></td><td>No</td><td>Your name and contact email.</td></tr>
+                    <tr><td><code>screenshot</code></td><td>No</td><td>Filename of a PNG/JPEG/WebP selected above, for example <code>example-tool.png</code>.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="form-hint">Quote any cell that contains a comma, a newline or a double quote. In a quoted resource cell,
+            put one <code>Label | https://...</code> resource per line.</p>
+
+        <h2 id="bulk-preview-heading">3. Preview and submit</h2>
+        <p id="bulk-summary" class="bulk-summary"></p>
+        <div id="bulk-errors" class="bulk-errors" role="alert"></div>
+        <div id="bulk-preview" class="bulk-preview"></div>
+        <button type="button" id="bulk-submit" class="submit-btn" disabled>Submit entries for review</button>
+        <p id="bulk-status" class="bulk-status" role="status"></p>
+        <div id="bulk-upload"></div>
+
+        <noscript>
+            <p class="form-error">Bulk import needs JavaScript because the CSV is parsed in your browser.
+                Use the <a href="/submission">single submission form</a> instead.</p>
+        </noscript>
+
+        <p><a href="/submission">Back to the single submission form</a></p>
+        </form>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+</body>
+</html>

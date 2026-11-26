@@ -974,6 +974,10 @@ a.tlx:focus-visible .tlx__strands li::before {
     padding-bottom: var(--space-4);
 }
 
+#subhead .filters--writeup {
+    display: block;
+}
+
 .filter-group {
     margin: 0 0 var(--space-4);
     padding: 0;

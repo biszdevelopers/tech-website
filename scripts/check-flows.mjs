@@ -249,15 +249,40 @@ async function main() {
         "tl5 exposes strand and category filters",
         tl5Page.html.includes("filters--writeup") && tl5Page.html.includes("Category")
     );
-    check("tl5 category matches", (await page("/tl5?cat_1=1")).html.includes("Flow Temp Tool"));
+    check(
+        "tl5 shows both TL5 and TL6 category groups",
+        tl5Page.html.includes('name="cat_tl5_1"') &&
+            tl5Page.html.includes('name="cat_tl6_1"') &&
+            tl5Page.html.includes("Professional Growth") &&
+            tl5Page.html.includes("Contribution to Workplace Positivity")
+    );
+    check("tl5 category matches", (await page("/tl5?cat_tl5_1=1")).html.includes("Flow Temp Tool"));
     check(
         "tl5 category excludes other topics",
-        !(await page("/tl5?cat_2=1")).html.includes("Flow Temp Tool")
+        !(await page("/tl5?cat_tl5_2=1")).html.includes("Flow Temp Tool")
+    );
+    check(
+        "tl5 TL6 category excludes uncategorized tools",
+        !(await page("/tl5?cat_tl6_1=1")).html.includes("Flow Temp Tool")
+    );
+    check(
+        "legacy category links still work",
+        (await page("/tl5?cat_1=1")).html.includes("Flow Temp Tool")
     );
     check("tl5 strand matches", (await page("/tl5?st_R=1")).html.includes("Flow Temp Tool"));
     check(
         "tl5 strand excludes other strands",
         !(await page("/tl5?st_TP=1")).html.includes("Flow Temp Tool")
+    );
+    const tl6Page = await page("/tl6");
+    check(
+        "tl6 shows both category groups",
+        tl6Page.html.includes('name="cat_tl5_1"') && tl6Page.html.includes('name="cat_tl6_1"')
+    );
+    const editPage = await page(`/admin/edit/${pending.id}`, mainAdmin.cookie);
+    check(
+        "admin edit keeps the Label | URL resource format",
+        editPage.html.includes("Manual | https://example.com/flow-manual")
     );
     const sitemapAccepted = await fetch(`${BASE}/sitemap.xml`).then((r) => r.text());
     check("sitemap lists the accepted tool", sitemapAccepted.includes(`/tool/${pending.id}/`));
@@ -270,6 +295,10 @@ async function main() {
     const csvBody = await csv.text();
     check("CSV export", csv.status === 200 && csvBody.includes("Flow Temp Tool"));
     check("CSV has resources column", csvBody.split(/\r?\n/)[0].includes("resources"));
+    check(
+        "CSV keeps the Label | URL resource format",
+        csvBody.includes("Manual | https://example.com/flow-manual")
+    );
     check("CSV no-store", csv.headers.get("cache-control") === "private, no-store");
 
     const badOrigin = await fetch(`${BASE}/api/admin/reject`, {
@@ -305,6 +334,140 @@ async function main() {
         "delete removes resources",
         !mainDb.prepare("select 1 from resources where submissionId = ?").get(pending.id)
     );
+
+    const bulkPage = await page("/submission/import");
+    check(
+        "bulk import page renders",
+        bulkPage.response.status === 200 && bulkPage.html.includes("/sample-submissions.csv")
+    );
+    const sample = await fetch(`${BASE}/sample-submissions.csv`);
+    const sampleText = await sample.text();
+    check(
+        "sample CSV downloads as CSV",
+        sample.status === 200 &&
+            String(sample.headers.get("content-type") ?? "").includes("text/csv")
+    );
+    check("sample CSV resource format", sampleText.includes(" | https://"));
+
+    const bulkEntries = [
+        {
+            techname: "Bulk Alpha",
+            link: "https://example.com/bulk-alpha",
+            displaytext: "Bulk Alpha",
+            tl1_desc: "Bulk alpha description.",
+            R: "true",
+            tl5_categories: "Self-reflection",
+            resources: "Manual | https://example.com/bulk-alpha-manual",
+        },
+        {
+            techname: "Bulk Beta",
+            link: "https://example.com/bulk-beta",
+            displaytext: "Bulk Beta",
+            tl6_desc: "Bulk beta write-up.",
+            tl6_categories: "Communication, Collegiality",
+        },
+    ];
+    const bulk = await fetch(`${BASE}/api/submission/bulk`, {
+        method: "POST",
+        headers: {
+            Origin: BASE,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "x-csrf-token": token(bulkPage.html),
+            cookie: cookies(bulkPage.response).join("; "),
+        },
+        body: JSON.stringify({ entries: bulkEntries }),
+    });
+    const bulkJson = await bulk.json();
+    check(
+        "bulk import accepted",
+        bulk.status === 200 && bulkJson.imported === 2 && Array.isArray(bulkJson.ids),
+        String(bulk.status)
+    );
+    const bulkRows = mainDb
+        .prepare(
+            "select id, techname, tl5_tags, tl6_tags, accepted from submission where techname in ('Bulk Alpha', 'Bulk Beta') order by id"
+        )
+        .all();
+    check(
+        "bulk rows are pending",
+        bulkRows.length === 2 && bulkRows.every((row) => row.accepted === 0)
+    );
+    check("bulk TL5 categories stored", bulkRows[0]?.tl5_tags === "Self-reflection");
+    check("bulk TL6 categories stored", bulkRows[1]?.tl6_tags === "Communication, Collegiality");
+    check(
+        "bulk resources stored",
+        Boolean(
+            bulkRows[0] &&
+            mainDb
+                .prepare("select 1 from resources where submissionId = ? and label = ?")
+                .get(bulkRows[0].id, "Manual")
+        )
+    );
+
+    const firstBulkId =
+        Array.isArray(bulkJson.ids) && bulkJson.ids.length > 0 ? bulkJson.ids[0] : 0;
+    const shotForm = new FormData();
+    shotForm.set("_csrf", token(bulkPage.html));
+    shotForm.set("token", bulkJson.token);
+    shotForm.set("id", String(firstBulkId));
+    shotForm.set("screenshot", new Blob([png], { type: "image/png" }), "bulk.png");
+    const shot = await fetch(`${BASE}/api/submission/screenshot`, {
+        method: "POST",
+        redirect: "manual",
+        headers: { Origin: BASE, Accept: "text/html" },
+        body: shotForm,
+    });
+    check("bulk screenshot upload", shot.status === 200, String(shot.status));
+    check(
+        "bulk pending image is private",
+        (await fetch(`${BASE}/uploads/${firstBulkId}`)).status === 404
+    );
+    check(
+        "bulk pending image visible to admin",
+        (
+            await fetch(`${BASE}/uploads/${firstBulkId}`, {
+                headers: { cookie: mainAdmin.cookie },
+            })
+        ).status === 200
+    );
+
+    const badTokenForm = new FormData();
+    badTokenForm.set("_csrf", token(bulkPage.html));
+    badTokenForm.set("token", "b".repeat(64));
+    badTokenForm.set("id", String(firstBulkId));
+    badTokenForm.set("screenshot", new Blob([png], { type: "image/png" }), "bad.png");
+    check(
+        "bulk screenshot rejects a bad token",
+        (
+            await fetch(`${BASE}/api/submission/screenshot`, {
+                method: "POST",
+                redirect: "manual",
+                headers: { Origin: BASE, Accept: "text/html" },
+                body: badTokenForm,
+            })
+        ).status === 403
+    );
+
+    const manyEntries = Array.from({ length: 30 }, (_, index) => ({
+        techname: `Bulk Limit ${index}`,
+        link: `https://example.com/bulk-limit-${index}`,
+        displaytext: "Bulk Limit",
+        tl1_desc: "Bulk limit description.",
+        R: "true",
+    }));
+    const limited = await fetch(`${BASE}/api/submission/bulk`, {
+        method: "POST",
+        headers: {
+            Origin: BASE,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "x-csrf-token": token(bulkPage.html),
+        },
+        body: JSON.stringify({ entries: manyEntries }),
+    });
+    check("bulk rate limit counts entries", limited.status === 429, String(limited.status));
+
     mainDb.close();
 
     const seo = await fetch(`${BASE}/sitemap.xml`).then((r) => r.text());

@@ -15,7 +15,12 @@ import { createCsrfToken, verifyCsrfToken } from "../lib/csrf";
 const CSRF_COOKIE = env.isHttps ? "__Host-csrf" : "csrf";
 const CSRF_HEADER = "x-csrf-token";
 const CSRF_EXEMPT = new Set(["/web/api/payments/stripe/webhook"]);
-const MULTIPART_PATHS = new Set(["/api/submission", "/api/admin/create", "/api/admin/screenshot"]);
+const MULTIPART_PATHS = new Set([
+    "/api/submission",
+    "/api/submission/screenshot",
+    "/api/admin/create",
+    "/api/admin/screenshot",
+]);
 const ASSET_PREFIXES = [
     "/js/",
     "/css/",

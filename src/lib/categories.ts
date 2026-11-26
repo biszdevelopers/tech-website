@@ -2,6 +2,8 @@ import { getTlConfig } from "./tl-config";
 
 export type CategoryDomain = "tl5" | "tl6";
 
+export const categoryDomains: CategoryDomain[] = ["tl5", "tl6"];
+
 export function categoryLabels(domain: CategoryDomain): string[] {
     return getTlConfig(domain)?.topics ?? [];
 }
@@ -10,7 +12,12 @@ export function categoryFieldName(domain: CategoryDomain, index: number): string
     return `${domain}_c${index + 1}`;
 }
 
-export function categoryFilterName(index: number): string {
+export function categoryFilterName(domain: CategoryDomain, index: number): string {
+    return `cat_${domain}_${index + 1}`;
+}
+
+/** Kept so old links written before the TL5/TL6 split still filter the page. */
+export function legacyCategoryFilterName(index: number): string {
     return `cat_${index + 1}`;
 }
 

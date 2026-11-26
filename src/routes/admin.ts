@@ -27,6 +27,7 @@ import { withLock } from "../lib/lock";
 import { parseResourceLines, formatResourceLines } from "../lib/resources";
 import { submissionSchema } from "../lib/validations/submission";
 import { strandColumnNames, tlList, getTlConfig } from "../lib/tl-config";
+import { atLeastOneFlag, domainFlagsFromFields } from "../lib/domain-flags";
 import {
     categoryFieldName,
     categoryLabels,
@@ -68,19 +69,6 @@ function categoryGroupsFor(tags: { tl5_tags?: string; tl6_tags?: string } = {}):
             })),
         };
     });
-}
-
-function domainDataFromFields(fields: Record<string, unknown>): Record<string, boolean> {
-    const flags: Record<string, boolean> = {};
-    for (const field of DOMAIN_FIELDS) {
-        const value = fields[field];
-        flags[field] = value === true || value === "on" || value === "true" || value === "1";
-    }
-    return flags;
-}
-
-function atLeastOneFlag(flags: Record<string, boolean>): boolean {
-    return Object.values(flags).some(Boolean);
 }
 
 function cell(row: string[], index: number): string {
@@ -306,7 +294,7 @@ export function registerAdminRoutes(app: Application): void {
             if (!isHttpUrl(data.link)) throw new HttpError(400, "Link must be http(s).");
             const resources = parseResourceLines(data.resources ?? "");
             if (!resources.ok) throw new HttpError(400, resources.error);
-            const flags = domainDataFromFields(fields);
+            const flags = domainFlagsFromFields(fields);
             if (
                 !atLeastOneFlag(flags) &&
                 !(data.tl5_desc ?? "").trim() &&
@@ -599,7 +587,7 @@ export function registerAdminRoutes(app: Application): void {
             const data = parsed.data;
             const resources = parseResourceLines(data.resources ?? "");
             if (!resources.ok) throw new HttpError(400, resources.error);
-            const flags = domainDataFromFields(body);
+            const flags = domainFlagsFromFields(body);
             if (
                 !atLeastOneFlag(flags) &&
                 !(data.tl5_desc ?? "").trim() &&

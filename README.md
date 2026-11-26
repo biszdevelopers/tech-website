@@ -63,7 +63,7 @@ database that had no web admin yet. `pnpm run setup` configures that web admin
 from `ADMIN_USERNAME`/`ADMIN_PASSWORD`; it does not write the directory
 operator to SQLite.
 
-The directory covers six Teaching and Learning domains (TL1-TL6). Tools have strand tags for TL1-TL4, write-ups for all six, and optional resource links.
+The directory covers six Teaching and Learning domains (TL1-TL6). Tools have strand tags for TL1-TL4, write-ups for all six, and optional resource links. Bulk submissions use `/submission/import`: the CSV is parsed in the browser, the entries are rate-limited by row count, and screenshots are uploaded separately. A sample file is served at `/sample-submissions.csv`.
 
 The operator portals (`/login` and `/web/admin/*`) are intentionally unlinked.
 Public pages and the user dashboard show no admin entry point, and

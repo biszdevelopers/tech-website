@@ -68,8 +68,10 @@
         </fieldset>
         <fieldset class="filter-group">
             <legend>Category</legend>
+            <% writeupFilters.categoryGroups.forEach(function (group) { %>
+            <p class="filter-group__label"><%= group.title %></p>
             <div class="filter-chips">
-                <% writeupFilters.categories.forEach(function (option) { %>
+                <% group.options.forEach(function (option) { %>
                 <label class="label">
                     <input type="hidden" name="<%= option.name %>" value="0"/>
                     <span class="cat"><%= option.label %>
@@ -78,6 +80,7 @@
                 </label>
                 <% }) %>
             </div>
+            <% }) %>
         </fieldset>
         <div class="filter-actions">
             <button type="submit" class="filter-apply">Apply filters</button>
@@ -98,10 +101,10 @@
         <% if (filtered.length === 0) { %>
         <div class="empty-state">
             <h2>No tools here yet.</h2>
-            <% if (config.strands.length === 0) { %>
-            <p>This domain is ready for write-ups. Add them in the admin panel or submit a tool with a <%= config.shortLabel %> description.</p>
+            <% if (locals.filtersActive) { %>
+            <p>No accepted tools match the selected filters. Try <a href="/<%= tl %>">resetting the filters</a>.</p>
             <% } else { %>
-            <p>No accepted tools match the selected strands. Try <a href="/<%= tl %>">resetting the filters</a>.</p>
+            <p>This domain is ready for write-ups. Add them in the admin panel or submit a tool with a <%= config.shortLabel %> description.</p>
             <% } %>
         </div>
         <% } else { filtered.forEach(function (tool) { %>
@@ -112,10 +115,8 @@
                 <% tagOptions.forEach(function (tag) { if (tool.tags[tag.domainColumn]) { %>
                 <a href="<%= tag.href %>"><span class="<%= tag.cssClass %>"><%= tag.label %></span></a>
                 <% } }) %>
-                <% tool.categories.forEach(function (category) { var categoryIndex = config.topics.indexOf(category); %>
-                <% if (categoryIndex >= 0) { %>
-                <a href="/<%= tl %>?cat_<%= categoryIndex + 1 %>=1"><span class="cat"><%= category %></span></a>
-                <% } %>
+                <% tool.categories.forEach(function (category) { %>
+                <a href="<%= category.href %>"><span class="cat"><%= category.label %></span></a>
                 <% }) %>
             </div>
             <div class="info">

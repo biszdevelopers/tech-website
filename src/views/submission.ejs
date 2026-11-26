@@ -18,6 +18,8 @@
     <% if (locals.error) { %>
     <p class="form-error" role="alert"><%= locals.error %></p>
     <% } %>
+    <p class="form-hint">Submitting several tools? <a href="/submission/import">Import a CSV in your browser</a>.
+        A sample file is available there.</p>
     <% var v = locals.values || {}; %>
     <form id="form" action="/api/submission" enctype="multipart/form-data" method="post">
         <input type="hidden" name="website" value=""/>
@@ -56,7 +58,7 @@
         <% }) %>
 
         <h2 id="resources">Additional resources (optional):</h2>
-        <label class="field"><span>One per line: Label | https://...</span>
+        <label class="field"><span>One per line. Each resource must use: Label | https://...</span>
             <textarea name="resources" class="l" rows="4" maxlength="20000" placeholder="Manual | https://example.com/guide"><%= v.resources || '' %></textarea>
         </label>
 

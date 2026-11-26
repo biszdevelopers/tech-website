@@ -27,7 +27,7 @@
                 <a href="/<%= t.tl %>/<%= t.slug %>"><span class="<%= t.css %>"><%= t.label %></span></a>
                 <% }) %>
                 <% categories.forEach(function (category) { %>
-                <a href="/<%= category.domain %>?cat_<%= category.index + 1 %>=1"><span class="cat"><%= category.label %></span></a>
+                <a href="<%= category.href %>"><span class="cat"><%= category.label %></span></a>
                 <% }) %>
             </div>
             <div class="info">

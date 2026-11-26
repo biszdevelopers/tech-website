@@ -61,6 +61,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
             },
         ],
         writeupFilters: null,
+        filtersActive: false,
         filtered: [
             {
                 id: 1,
@@ -109,6 +110,7 @@ const SAMPLES: Record<string, Record<string, unknown>> = {
     },
     login: {},
     submission: {},
+    "submission-import": {},
     admin: {
         q: "",
         status: "all",

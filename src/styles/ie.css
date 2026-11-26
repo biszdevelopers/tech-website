@@ -134,6 +134,9 @@ h6,
 .filters--writeup {
     display: block;
 }
+#subhead .filters--writeup {
+    display: block;
+}
 .filter-group {
     margin-bottom: 16px;
 }

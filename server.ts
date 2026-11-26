@@ -26,7 +26,12 @@ import { getWebSettings } from "./src/lib/web-settings";
 import { mainDb } from "./src/lib/db/main";
 import { webDb } from "./src/lib/db/web";
 import { toolPath, toolSlug } from "./src/lib/tool-path";
-import { categoryFilterName } from "./src/lib/categories";
+import {
+    categoryDomains,
+    categoryFilterName,
+    legacyCategoryFilterName,
+    type CategoryDomain,
+} from "./src/lib/categories";
 import {
     absoluteUrl,
     breadcrumbsLd,
@@ -58,6 +63,24 @@ const DOM_TAGS = tlList.flatMap((config) =>
 );
 
 const TIGHT_DESC = new Set(["tl2:14", "tl2:21", "tl3:20", "tl3:21"]);
+
+function categoryLinks(
+    labels: string[],
+    domain: CategoryDomain
+): Array<{ label: string; href: string }> {
+    const options = getTlConfig(domain)?.topics ?? [];
+    const links: Array<{ label: string; href: string }> = [];
+    labels.forEach((label) => {
+        const index = options.indexOf(label);
+        if (index >= 0) {
+            links.push({
+                label,
+                href: `/${domain}?${categoryFilterName(domain, index)}=1`,
+            });
+        }
+    });
+    return links;
+}
 
 function metaFor(input: Parameters<typeof buildPageMeta>[0]): PageMeta {
     return buildPageMeta(input);
@@ -127,12 +150,27 @@ async function tlRender(
     const strandChecked = writeupStrands.map(
         (strand) => query[strandFilterName(strand.domainColumn)] === "1"
     );
-    const categoryOptions = isWriteup ? config.topics : [];
-    const categoryChecked = categoryOptions.map(
-        (_, index) => query[categoryFilterName(index)] === "1"
-    );
+    const categoryGroups = isWriteup
+        ? categoryDomains.map((domain) => {
+              const labels = getTlConfig(domain)?.topics ?? [];
+              const selected = labels.map(
+                  (_, index) =>
+                      query[categoryFilterName(domain, index)] === "1" ||
+                      (domain === tl && query[legacyCategoryFilterName(index)] === "1")
+              );
+              return {
+                  domain,
+                  title: getTlConfig(domain)?.title ?? domain,
+                  labels,
+                  selected,
+              };
+          })
+        : [];
     const selectedWriteupStrands = writeupStrands.filter((_, index) => strandChecked[index]);
-    const selectedCategories = categoryOptions.filter((_, index) => categoryChecked[index]);
+    const filtersActive = isWriteup
+        ? selectedWriteupStrands.length > 0 ||
+          categoryGroups.some((group) => group.selected.some(Boolean))
+        : checked.some((value) => !value);
     const mask = getStrandMask(selectedColumns);
     let tools = isWriteup ? await getAcceptedToolViews() : await getToolsByMask(mask);
     const descriptionField = `${tl}_desc` as
@@ -144,13 +182,14 @@ async function tlRender(
                 selectedWriteupStrands.some((strand) => tool.tags[strand.domainColumn])
             );
         }
-        if (selectedCategories.length > 0) {
+        categoryGroups.forEach((group) => {
+            const selected = group.labels.filter((_, index) => group.selected[index]);
+            if (selected.length === 0) return;
+            const field = group.domain === "tl5" ? "tl5Categories" : "tl6Categories";
             tools = tools.filter((tool) =>
-                selectedCategories.some((category) =>
-                    (tl === "tl5" ? tool.tl5Categories : tool.tl6Categories).includes(category)
-                )
+                selected.some((category) => tool[field].includes(category))
             );
-        }
+        });
     }
     const filtered = tools.map((tool) => ({
         id: tool.id,
@@ -168,7 +207,12 @@ async function tlRender(
                 tool.tags[s.domainColumn],
             ])
         ),
-        categories: isWriteup ? (tl === "tl5" ? tool.tl5Categories : tool.tl6Categories) : [],
+        categories: isWriteup
+            ? [
+                  ...categoryLinks(tool.tl5Categories, "tl5"),
+                  ...categoryLinks(tool.tl6Categories, "tl6"),
+              ]
+            : [],
     }));
     const tagOptions = isWriteup
         ? writeupStrands.map((strand) => ({
@@ -197,10 +241,14 @@ async function tlRender(
                           checked: query[strandFilterName(strand.domainColumn)] === "1",
                       })),
                   })),
-              categories: categoryOptions.map((label, index) => ({
-                  name: categoryFilterName(index),
-                  label,
-                  checked: categoryChecked[index],
+              categoryGroups: categoryGroups.map((group) => ({
+                  domain: group.domain,
+                  title: group.title,
+                  options: group.labels.map((label, index) => ({
+                      name: categoryFilterName(group.domain, index),
+                      label,
+                      checked: group.selected[index],
+                  })),
               })),
           }
         : null;
@@ -241,6 +289,7 @@ async function tlRender(
             strandLinks,
             tagOptions,
             writeupFilters,
+            filtersActive,
             meta,
         }),
         meta,
@@ -754,8 +803,8 @@ app.get("/tool/:id/:slug", async (ctx) => {
     }));
     const strands = DOM_TAGS.filter((tag) => tool.tags[tag.col]);
     const categories = [
-        ...tool.tl5Categories.map((label, index) => ({ domain: "tl5", label, index })),
-        ...tool.tl6Categories.map((label, index) => ({ domain: "tl6", label, index })),
+        ...categoryLinks(tool.tl5Categories, "tl5"),
+        ...categoryLinks(tool.tl6Categories, "tl6"),
     ];
     const resources = tool.resources;
     const meta = metaFor({
@@ -837,9 +886,20 @@ app.get("/:tl", async (ctx) => {
                   allStrands()
                       .map((s) => (query[strandFilterName(s.domainColumn)] === "1" ? "1" : "0"))
                       .join(""),
-                  config.topics
-                      .map((_, index) => (query[categoryFilterName(index)] === "1" ? "1" : "0"))
-                      .join(""),
+                  categoryDomains
+                      .map((domain) => {
+                          const labels = getTlConfig(domain)?.topics ?? [];
+                          return labels
+                              .map((_, index) =>
+                                  query[categoryFilterName(domain, index)] === "1" ||
+                                  (domain === ctx.params.tl &&
+                                      query[legacyCategoryFilterName(index)] === "1")
+                                      ? "1"
+                                      : "0"
+                              )
+                              .join("");
+                      })
+                      .join(":"),
               ].join(":")
         : "x";
     const cacheKey = `tl:${ctx.params.tl}:all:${bits}`;
