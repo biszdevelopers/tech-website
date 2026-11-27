@@ -101,6 +101,7 @@ const sitePort = Number(siteUrl.port || (siteUrl.protocol === "https:" ? 443 : 8
 if (
     (siteUrl.hostname === "localhost" ||
         siteUrl.hostname === "127.0.0.1" ||
+        siteUrl.hostname === "::1" ||
         siteUrl.hostname === "[::1]") &&
     sitePort !== port
 ) {
