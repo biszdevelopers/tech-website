@@ -9,7 +9,15 @@
  * server integration is still in progress.
  */
 
-const BASE = (process.env.BASE || "http://localhost:3000").replace(/\/+$/, "");
+try {
+    process.loadEnvFile();
+} catch {
+    /* real env wins */
+}
+const BASE = (process.env.BASE || `http://localhost:${process.env.PORT || 3000}`).replace(
+    /\/+$/,
+    ""
+);
 const REQUEST_TIMEOUT_MS = 15_000;
 
 const PUBLIC_PAGES = [

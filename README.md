@@ -45,7 +45,10 @@ pnpm run setup        # set the IPstress web admin from ADMIN_USERNAME/ADMIN_PAS
 
 Copy `.env.example` to `.env`. **`SESSION_SECRET`, `SESSION_SECRET_WEB` and
 `SITE_ORIGIN` are required in production**; the app refuses to boot without
-them. Set `TRUST_PROXY=true` when a trusted reverse proxy supplies
+them. `PORT` sets the listening port (default `3000`). When no proxy is in front,
+keep `SITE_ORIGIN` on the same port, for example `PORT=4000` and
+`SITE_ORIGIN=http://localhost:4000`; behind a proxy, `PORT` is the internal port
+and `SITE_ORIGIN` is the public HTTPS origin. Set `TRUST_PROXY=true` when a trusted reverse proxy supplies
 `X-Forwarded-For`/`X-Forwarded-Proto`; it is required when HTTPS is terminated before Node. Set `SETTINGS_KEY` (32-byte base64) to encrypt payment
 secrets stored in SQLite. `FEATURE_*` flags disable payments, the wheel,
 affiliate, gift cards or the IPstress hub without a code change.

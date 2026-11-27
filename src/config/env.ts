@@ -96,6 +96,19 @@ function parseSiteOrigin(): { value: string; https: boolean } {
 }
 
 const site = parseSiteOrigin();
+const siteUrl = new URL(site.value);
+const sitePort = Number(siteUrl.port || (siteUrl.protocol === "https:" ? 443 : 80));
+if (
+    (siteUrl.hostname === "localhost" ||
+        siteUrl.hostname === "127.0.0.1" ||
+        siteUrl.hostname === "[::1]") &&
+    sitePort !== port
+) {
+    console.warn(
+        `WARNING: SITE_ORIGIN uses port ${sitePort} but PORT is ${port}. ` +
+            "Cookies, CSRF checks and redirects will use the wrong origin."
+    );
+}
 const tlsCert = process.env.TLS_CERT?.trim() || "";
 const tlsKey = process.env.TLS_KEY?.trim() || "";
 if (Boolean(tlsCert) !== Boolean(tlsKey)) {

@@ -1,12 +1,12 @@
 // Production smoke test. Run against a booted server:
 //   BASE=https://example.com SMOKE_ADMIN_PASSWORD=... node scripts/smoke.mjs
 // Exits non-zero if any check fails.
-const BASE = process.env.BASE || "http://localhost:3000";
 try {
     process.loadEnvFile();
 } catch {
     /* real env wins */
 }
+const BASE = process.env.BASE || `http://localhost:${process.env.PORT || 3000}`;
 const USER = process.env.SMOKE_ADMIN_USERNAME || process.env.ADMIN_USERNAME || "admin";
 const PASSWORD = process.env.SMOKE_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
 

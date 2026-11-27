@@ -6,7 +6,7 @@ try {
 } catch {
     /* real env wins */
 }
-const BASE = process.env.BASE ?? "http://localhost:3000";
+const BASE = process.env.BASE ?? `http://localhost:${process.env.PORT || 3000}`;
 const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASS = process.env.ADMIN_PASSWORD || "admin12345";
 mkdirSync("tests/baseline", { recursive: true });
