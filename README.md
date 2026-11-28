@@ -183,17 +183,33 @@ passes, Cloudflare cannot reach the origin:
 Diagnose on the server:
 
 ```bash
-ss -ltnp | grep 19198                 # must be 0.0.0.0:19198, not 127.0.0.1
-curl -v --max-time 15 https://tech.biszweb.club/api/health
+ss -ltnp | grep 19198                 # 0.0.0.0 is IPv4-only; :: is dual-stack
 sudo ufw status verbose               # allow 19198 from Cloudflare
+curl -v --max-time 60 https://tech.biszweb.club/api/health
 dig +short A tech.biszweb.club
 dig +short AAAA tech.biszweb.club
 ```
 
+Test the origin port from another machine or network:
+
+```bash
+curl -v --max-time 10 http://208.109.228.92:19198/api/health
+```
+
+- If that times out, the firewall or bind address is wrong. Allow 19198 in
+  UFW and any cloud firewall/NAT.
+- If it returns 200 but the public URL times out, Cloudflare is not reaching
+  the origin. Check the Origin Rule, the proxied DNS record, and the origin
+  A/AAAA values.
+- If `ss` shows only `0.0.0.0:19198` and Cloudflare's origin record has an
+  AAAA, either remove the AAAA or set `HOST=::` in `.env` and restart so Node
+  listens on IPv6 too.
+- A 15-second curl can time out before Cloudflare returns its 522/524 error.
+  Use `--max-time 60` to see the real Cloudflare status.
+
 The `curl -v` response identifies the failure: `521/522/523/524` means the
 origin port or firewall is wrong; `525/526` means the Cloudflare SSL/TLS mode
-does not match the origin; a bare timeout often means the DNS record is not
-proxied or the port is firewalled.
+does not match the origin.
 
 Alternatives:
 

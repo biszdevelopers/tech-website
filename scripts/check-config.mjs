@@ -150,6 +150,7 @@ console.log("==> Configuration");
 console.log(`NODE_ENV       ${process.env.NODE_ENV || "production (default)"}`);
 console.log(`PORT           ${rawPort} (internal listener)`);
 console.log(`PUBLIC_PORT    ${rawPublicPort} (browser/Cloudflare)`);
+console.log(`HOST           ${process.env.HOST || "0.0.0.0"}`);
 console.log(`SITE_ORIGIN    ${rawOrigin || "(missing)"}`);
 console.log(`TRUST_PROXY    ${trustProxy}`);
 console.log(`TLS            ${hasTls ? "configured" : "not configured"}`);
@@ -201,14 +202,14 @@ if (!configOnly) {
 
     if (checkPublic && origin) {
         const publicUrl = new URL("/api/health", origin);
-        const publicResult = await checkHealth(publicUrl, false, 12000);
+        const publicResult = await checkHealth(publicUrl, false, 30000);
         if (publicResult.ok) console.log(`PASS  public health ${publicUrl.href}`);
         else {
             console.error(`FAIL  public health ${publicUrl.href} (${publicResult.detail})`);
             if (/timeout|ECONN|ENOTFOUND|EAI_AGAIN/.test(publicResult.detail)) {
                 console.error(
                     "      Cloudflare could not reach the origin. Check the origin firewall, " +
-                        "the Origin Rule destination port, the origin A/AAAA record, and SSL/TLS mode."
+                        "the Origin Rule destination port, the origin A/AAAA record, IPv4/IPv6 binding, and SSL/TLS mode."
                 );
             } else if (/HTTP 52[1-4]/.test(publicResult.detail)) {
                 console.error(
