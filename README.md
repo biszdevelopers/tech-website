@@ -159,20 +159,50 @@ TLS for `https://tech.biszweb.club/`:
 ### Cloudflare directly in front
 
 Cloudflare is itself a proxy, so set `TRUST_PROXY=true` even though there is no
-nginx. Standard Cloudflare proxy origins use ports `80`, `443`, `8080`, `8443`,
-`2052`, `2053`, `2082`, `2083`, `2086`, `2087`, `2095`, `2096` or `8880`.
-Port `19198` is not a standard Cloudflare origin port.
+nginx. Cloudflare Origin Rules can set the destination port to any value from
+1 to 65535, so `PORT=19198` is valid when an active Origin Rule targets 19198.
+The DNS record must be proxied (orange cloud); Origin Rules do not apply to
+DNS-only records.
 
-- HTTP origin on port 80: `PORT=80`, `PUBLIC_PORT=443`,
-  `TRUST_PROXY=true`, empty `TLS_CERT`/`TLS_KEY`. Set Cloudflare SSL/TLS mode to
-  Flexible. The systemd unit grants `CAP_NET_BIND_SERVICE` so a non-root service
-  can bind 80.
-- HTTPS origin on port 443: `PORT=443`, `PUBLIC_PORT=443`,
-  `TRUST_PROXY=true`, and `TLS_CERT`/`TLS_KEY` pointing at a Cloudflare Origin
-  Certificate. Use Full or Full (strict) mode.
-- Keep `PORT=19198`: use a Cloudflare Tunnel to `http://127.0.0.1:19198`, or a
-  supported Origin Rule/port forward from 443 to 19198. Just changing
-  `PUBLIC_PORT` does not make Cloudflare reach 19198.
+If `pnpm run check:config -- --public` times out while the local health check
+passes, Cloudflare cannot reach the origin:
+
+1. Confirm the DNS record is Proxied. A proxied `dig` returns Cloudflare IPs,
+   not your server's IP.
+2. Confirm the Origin Rule is enabled and matches `tech.biszweb.club`, with
+   destination port `19198`.
+3. Check Cloudflare SSL/TLS mode. An HTTP origin on 19198 needs **Flexible**.
+   Full or Full (strict) makes Cloudflare attempt HTTPS to a plain-HTTP app and
+   stalls. For Full (strict), install a Cloudflare Origin Certificate and set
+   `TLS_CERT`/`TLS_KEY`.
+4. Allow inbound TCP 19198 from Cloudflare IP ranges in UFW, the cloud
+   provider firewall, and any NAT.
+5. Check for a stale AAAA record. If the server has no working IPv6 address,
+   remove it.
+
+Diagnose on the server:
+
+```bash
+ss -ltnp | grep 19198                 # must be 0.0.0.0:19198, not 127.0.0.1
+curl -v --max-time 15 https://tech.biszweb.club/api/health
+sudo ufw status verbose               # allow 19198 from Cloudflare
+dig +short A tech.biszweb.club
+dig +short AAAA tech.biszweb.club
+```
+
+The `curl -v` response identifies the failure: `521/522/523/524` means the
+origin port or firewall is wrong; `525/526` means the Cloudflare SSL/TLS mode
+does not match the origin; a bare timeout often means the DNS record is not
+proxied or the port is firewalled.
+
+Alternatives:
+
+- Cloudflare Tunnel to `http://127.0.0.1:19198` avoids inbound ports and
+  certificates entirely.
+- An HTTPS origin on 19198 with a Cloudflare Origin Certificate plus Full
+  (strict) is the most secure direct setup.
+- Port 80 with `CAP_NET_BIND_SERVICE` and Flexible mode also works.
+
 - Restrict the origin firewall to Cloudflare IP ranges. If `TRUST_PROXY=true`
   but the origin is publicly reachable, clients can spoof
   `X-Forwarded-For` and bypass IP rate limits.

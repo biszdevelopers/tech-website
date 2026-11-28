@@ -98,8 +98,8 @@ if (origin?.protocol === "https:" && !hasTls && trustProxy) {
     ]);
     if (!cloudflarePorts.has(port)) {
         warnings.push(
-            `PORT ${port} is not a standard Cloudflare proxy origin port. ` +
-                "Use 80/443/8080/8443 or a Cloudflare Tunnel, Origin Rule or port forward."
+            `PORT ${port} is not a default Cloudflare origin port. It can work through an active ` +
+                `Origin Rule (destination ports may be 1-65535); verify the rule and allow TCP ${port} from Cloudflare.`
         );
     }
 }
@@ -163,16 +163,25 @@ if (errors.length > 0) {
     process.exit(1);
 }
 
-function checkHealth(url, allowSelfSigned) {
+function checkHealth(url, allowSelfSigned, timeoutMs = 5000) {
     return new Promise((resolve) => {
         const lib = url.protocol === "https:" ? https : http;
-        const req = lib.get(url, { rejectUnauthorized: !allowSelfSigned, timeout: 5000 }, (res) => {
-            res.resume();
-            resolve({ ok: res.statusCode === 200, detail: `HTTP ${res.statusCode}` });
-        });
+        const req = lib.get(
+            url,
+            { rejectUnauthorized: !allowSelfSigned, timeout: timeoutMs },
+            (res) => {
+                res.resume();
+                const server = res.headers.server ? ` ${res.headers.server}` : "";
+                const ray = res.headers["cf-ray"] ? ` cf-ray ${res.headers["cf-ray"]}` : "";
+                resolve({
+                    ok: res.statusCode === 200,
+                    detail: `HTTP ${res.statusCode}${server}${ray}`,
+                });
+            }
+        );
         req.on("timeout", () => {
             req.destroy();
-            resolve({ ok: false, detail: "timeout" });
+            resolve({ ok: false, detail: `timeout after ${timeoutMs}ms` });
         });
         req.on("error", (error) => resolve({ ok: false, detail: error.message }));
     });
@@ -192,20 +201,47 @@ if (!configOnly) {
 
     if (checkPublic && origin) {
         const publicUrl = new URL("/api/health", origin);
-        const publicResult = await checkHealth(publicUrl, false);
+        const publicResult = await checkHealth(publicUrl, false, 12000);
         if (publicResult.ok) console.log(`PASS  public health ${publicUrl.href}`);
-        else console.error(`FAIL  public health ${publicUrl.href} (${publicResult.detail})`);
+        else {
+            console.error(`FAIL  public health ${publicUrl.href} (${publicResult.detail})`);
+            if (/timeout|ECONN|ENOTFOUND|EAI_AGAIN/.test(publicResult.detail)) {
+                console.error(
+                    "      Cloudflare could not reach the origin. Check the origin firewall, " +
+                        "the Origin Rule destination port, the origin A/AAAA record, and SSL/TLS mode."
+                );
+            } else if (/HTTP 52[1-4]/.test(publicResult.detail)) {
+                console.error(
+                    "      Cloudflare reached its edge but not the origin. Open the app port to " +
+                        "Cloudflare and verify the Origin Rule destination port."
+                );
+            } else if (/HTTP 52[5-6]/.test(publicResult.detail)) {
+                console.error(
+                    "      TLS handshake failed between Cloudflare and the origin. For an HTTP " +
+                        "origin set SSL/TLS mode to Flexible; otherwise install a Cloudflare Origin Certificate."
+                );
+            } else if (/HTTP 403/.test(publicResult.detail)) {
+                console.error("      Cloudflare or a WAF rule blocked the health request.");
+            }
+        }
     }
 
     if (origin) {
-        console.log("\n==> Reverse proxy checklist");
-        console.log(`proxy_pass http://127.0.0.1:${port};`);
-        console.log("proxy_set_header Host $host;");
-        console.log("proxy_set_header X-Forwarded-Proto $scheme;");
-        console.log("proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;");
-        console.log("TRUST_PROXY=true when nginx, Cloudflare or a hosting panel terminates TLS.");
+        console.log("\n==> Origin checklist");
+        console.log(`App origin: http://127.0.0.1:${port}`);
+        console.log(`Cloudflare public port: ${publicPort}`);
         console.log(
-            "Reload nginx after changing the port: sudo nginx -t && sudo systemctl reload nginx"
+            `Origin Rule destination port must be ${port}; Cloudflare's built-in origin ports are 80/443/8080/8443 and their alternates.`
+        );
+        console.log(
+            `Allow inbound TCP ${port} from Cloudflare IP ranges (or use a Cloudflare Tunnel).`
+        );
+        console.log(
+            "Set Cloudflare SSL/TLS mode to match the origin: Flexible for HTTP, Full (strict) for HTTPS."
+        );
+        console.log("Optional nginx proxy_pass (if used): http://127.0.0.1:" + port + ";");
+        console.log(
+            "Optional nginx headers: Host $host, X-Forwarded-Proto $scheme, X-Forwarded-For $proxy_add_x_forwarded_for."
         );
     }
 }
