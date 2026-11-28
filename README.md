@@ -30,6 +30,7 @@ pnpm run check:views  # render every EJS view with sample data
 pnpm run check:full   # check + tests + views + hot reload
 pnpm run check:flows  # end-to-end flows on a throwaway database copy
 pnpm run check:seo    # metadata, sitemap, feed and social previews
+pnpm run check:config # deployment config + local health preflight
 pnpm run check:contrast
 pnpm run format       # prettier (EJS templates are excluded)
 pnpm run format:check
@@ -128,5 +129,58 @@ values at boot and is not written to either database.
 The app works standalone with `pnpm start` (production mode, in-process
 compression, caching and security headers). `pnpm start` works with either HTTP or HTTPS
 `SITE_ORIGIN`. Use HTTPS for any deployment that handles real accounts or payments. Nginx is optional; if used, set
-`TRUST_PROXY=true`, forward only `X-Forwarded-For $remote_addr`, and do not
-double-compress. Backups live under `backups/<timestamp>/` on the server.
+`TRUST_PROXY=true`, point `proxy_pass` at the `PORT` value in `.env`, forward
+`X-Forwarded-Proto` and `X-Forwarded-For`, and do not double-compress. Backups
+live under `backups/<timestamp>/` on the server.
+
+`PORT` is the internal listener. `PUBLIC_PORT` is the browser/Cloudflare port
+and must match the port in `SITE_ORIGIN`; it defaults to that port. Behind a
+proxy they differ naturally: `PORT=19198`, `PUBLIC_PORT=443`,
+`SITE_ORIGIN=https://tech.biszweb.club`.
+
+### Running without nginx
+
+`pnpm start` can be the only Node process, but something must still terminate
+TLS for `https://tech.biszweb.club/`:
+
+- Cloudflare Tunnel, hosting panel or Caddy: set `TRUST_PROXY=true`, keep
+  `TLS_CERT`/`TLS_KEY` empty, and point the tunnel/panel at
+  `127.0.0.1:${PORT}`. `PUBLIC_PORT=443` and `SITE_ORIGIN` stay on the public
+  HTTPS origin.
+- Direct Node HTTPS: set `TLS_CERT` and `TLS_KEY` to the certificate and key
+  file paths. Use `PORT=443` with `PUBLIC_PORT=443`,
+  `SITE_ORIGIN=https://tech.biszweb.club`, or include the same non-standard
+  port in `PORT`, `PUBLIC_PORT` and `SITE_ORIGIN`
+  (`https://tech.biszweb.club:19198`). Binding 443 needs root or
+  `CAP_NET_BIND_SERVICE`; the systemd unit grants that capability.
+- No proxy and no certificate: HTTPS on 443 cannot reach port 19198. Use an
+  HTTP origin on that port, or add a TLS terminator.
+
+### Cloudflare directly in front
+
+Cloudflare is itself a proxy, so set `TRUST_PROXY=true` even though there is no
+nginx. Standard Cloudflare proxy origins use ports `80`, `443`, `8080`, `8443`,
+`2052`, `2053`, `2082`, `2083`, `2086`, `2087`, `2095`, `2096` or `8880`.
+Port `19198` is not a standard Cloudflare origin port.
+
+- HTTP origin on port 80: `PORT=80`, `PUBLIC_PORT=443`,
+  `TRUST_PROXY=true`, empty `TLS_CERT`/`TLS_KEY`. Set Cloudflare SSL/TLS mode to
+  Flexible. The systemd unit grants `CAP_NET_BIND_SERVICE` so a non-root service
+  can bind 80.
+- HTTPS origin on port 443: `PORT=443`, `PUBLIC_PORT=443`,
+  `TRUST_PROXY=true`, and `TLS_CERT`/`TLS_KEY` pointing at a Cloudflare Origin
+  Certificate. Use Full or Full (strict) mode.
+- Keep `PORT=19198`: use a Cloudflare Tunnel to `http://127.0.0.1:19198`, or a
+  supported Origin Rule/port forward from 443 to 19198. Just changing
+  `PUBLIC_PORT` does not make Cloudflare reach 19198.
+- Restrict the origin firewall to Cloudflare IP ranges. If `TRUST_PROXY=true`
+  but the origin is publicly reachable, clients can spoof
+  `X-Forwarded-For` and bypass IP rate limits.
+
+Run the preflight before starting:
+
+```bash
+pnpm run check:config -- --config-only
+pnpm run check:config                 # also checks local /api/health
+pnpm run check:config -- --public     # also checks the public origin
+```

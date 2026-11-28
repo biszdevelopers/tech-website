@@ -94,6 +94,9 @@ if [ "$FRESH" = "1" ]; then
     pnpm run setup
 fi
 
+echo "==> Checking deployment configuration"
+pnpm run check:config -- --config-only
+
 echo "==> Building (previous dist kept for rollback)"
 rm -rf dist.prev
 if [ -d dist ]; then mv dist dist.prev; fi

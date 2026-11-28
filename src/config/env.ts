@@ -97,17 +97,28 @@ function parseSiteOrigin(): { value: string; https: boolean } {
 
 const site = parseSiteOrigin();
 const siteUrl = new URL(site.value);
-const sitePort = Number(siteUrl.port || (siteUrl.protocol === "https:" ? 443 : 80));
+const originPort = Number(siteUrl.port || (siteUrl.protocol === "https:" ? 443 : 80));
+const publicPortRaw = process.env.PUBLIC_PORT?.trim();
+const publicPort = publicPortRaw ? Number(publicPortRaw) : originPort;
+if (!Number.isSafeInteger(publicPort) || publicPort < 1 || publicPort > 65535) {
+    throw new Error(`PUBLIC_PORT must be an integer from 1 to 65535, got "${publicPortRaw}".`);
+}
+if (publicPort !== originPort) {
+    throw new Error(
+        `PUBLIC_PORT is ${publicPort} but SITE_ORIGIN uses ${originPort}. ` +
+            "Use the same public port in both settings."
+    );
+}
 if (
     (siteUrl.hostname === "localhost" ||
         siteUrl.hostname === "127.0.0.1" ||
         siteUrl.hostname === "::1" ||
         siteUrl.hostname === "[::1]") &&
-    sitePort !== port
+    port !== publicPort
 ) {
     console.warn(
-        `WARNING: SITE_ORIGIN uses port ${sitePort} but PORT is ${port}. ` +
-            "Cookies, CSRF checks and redirects will use the wrong origin."
+        `WARNING: PORT is ${port} but the local SITE_ORIGIN uses ${publicPort}. ` +
+            "Add a local proxy/port forward or keep them on the same port."
     );
 }
 const tlsCert = process.env.TLS_CERT?.trim() || "";
@@ -122,7 +133,8 @@ if (settingsKey && Buffer.from(settingsKey, "base64").length !== 32) {
 if (isProd && site.https && !tlsCert && process.env.TRUST_PROXY !== "true") {
     throw new Error(
         "SITE_ORIGIN is https but the app has no TLS certificate and TRUST_PROXY is false. " +
-            "Set TRUST_PROXY=true when nginx or another proxy terminates TLS, or provide TLS_CERT/TLS_KEY."
+            "Set TRUST_PROXY=true in .env when nginx, Cloudflare, or your hosting panel terminates TLS, " +
+            "or provide TLS_CERT/TLS_KEY."
     );
 }
 if (isProd && !settingsKey) {
@@ -154,6 +166,8 @@ if (isProd && (adminPass.length < 12 || /^(admin|password|changeme|letmein)/i.te
 export const env = Object.freeze({
     isProd,
     port,
+    /** Public browser/Cloudflare port; PORT is the internal listener. */
+    publicPort,
     host: process.env.HOST?.trim() || "0.0.0.0",
 
     /**

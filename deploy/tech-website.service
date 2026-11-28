@@ -24,6 +24,9 @@ PrivateTmp=true
 ProtectSystem=full
 ProtectHome=read-only
 ReadWritePaths=/opt/tech-website/data /opt/tech-website/var
+# Allow a non-root service to bind 80/443 when Cloudflare connects directly.
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy=multi-user.target
